@@ -7,12 +7,9 @@ public class Queen extends AbstractPiece {
     }
 
     @Override
-    public boolean isValidMove(int fromX, int fromY, int toX, int toY) {
-        return false;
-    }
-
-    @Override
-    public boolean movePiece(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
-        return false;
+    public boolean isValidMove(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
+        return (super.validDiagonalMove(fromX, fromY, toX, toY)
+                || super.validInlineMove(fromX, fromY, toX, toY))
+                && super.validLineMove(board, fromX, fromY, toX, toY, 8);
     }
 }

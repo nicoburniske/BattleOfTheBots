@@ -6,12 +6,7 @@ public class Knight extends AbstractPiece {
     }
 
     @Override
-    public boolean isValidMove(int fromX, int fromY, int toX, int toY) {
-        return false;
-    }
-
-    @Override
-    public boolean movePiece(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
+    public boolean isValidMove(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
         return false;
     }
 }

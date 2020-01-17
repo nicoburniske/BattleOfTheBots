@@ -43,17 +43,15 @@ public class ChessBoard {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
+        for (int i = 7; i > -1; i--) {
+            for (int j = 7; j > -1; j--) {
                 IPiece current = board[i][j];
                 if (current == null)
                     sb.append("X ");
                 else {
                     sb.append(current.getIsBlack() ? "B" : "W");
                 }
-                if (current instanceof Horse) {
-                    sb.append("H");
-                } else if (current instanceof King) {
+                if (current instanceof King) {
                     sb.append("K");
                 } else if (current instanceof Knight) {
                     sb.append("N");
@@ -70,40 +68,21 @@ public class ChessBoard {
             }
             sb.append("\n");
         }
-        System.out.println(this.board[0][5].getClass() + " " + this.board[0][5].getIsBlack());
         return sb.toString();
     }
 
     // Private Methods
     private IPiece[][] generateChessBoard() {
-        IPiece[][] newBoard = new IPiece[8][8];
-        IPiece curr;
-        // starting from lower left corner (white side)
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
-                // empty slots
-                if (row > 1 && row < 6) newBoard[row][col] = null;
-
-                // pawns
-                if (row == 1) newBoard[row][col] = this.addPiece(new Pawn(true));
-                else if (row == 6) newBoard[row][col] = this.addPiece(new Pawn(false));
-
-                    // white pieces
-                else if ((row == 0) && (col == 0 || col == 7)) newBoard[row][col] = this.addPiece(new Castle(true));
-                else if ((row == 0) && (col == 1 || col == 6)) newBoard[row][col] = this.addPiece(new Horse(true));
-                else if ((row == 0) && (col == 2 || col == 5)) newBoard[row][col] = this.addPiece(new Bishop(true));
-                else if (row == 0 && col == 3) newBoard[row][col] = this.addPiece(new Queen(true));
-                else if (row == 0 && col == 4) newBoard[row][col] = this.addPiece(new King(true));
-
-                    // black pieces
-                else if ((row == 7) && (col == 0 || col == 7)) newBoard[row][col] = this.addPiece(new Castle(false));
-                else if ((row == 7) && (col == 1 || col == 6)) newBoard[row][col] = this.addPiece(new Horse(false));
-                else if ((row == 7) && (col == 2 || col == 5)) newBoard[row][col] = this.addPiece(new Bishop(false));
-                else if (row == 7 && col == 3) newBoard[row][col] = this.addPiece(new Queen(false));
-                else if (row == 7 && col == 4) newBoard[row][col] = this.addPiece(new King(false));
-            }
-        }
-        System.out.println(newBoard[0][2] + " " + newBoard[0][2].getIsBlack());
+        IPiece[][] newBoard = {
+                {new Castle(false), new Knight(false), new Bishop(false), new Queen(false), new King(false), new Bishop(false), new Knight(false), new Castle(false)},
+                {new Pawn(false), new Pawn(false), new Pawn(false), new Pawn(false), new Pawn(false), new Pawn(false), new Pawn(false), new Pawn(false)},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {new Pawn(true), new Pawn(true), new Pawn(true), new Pawn(true), new Pawn(true), new Pawn(true), new Pawn(true), new Pawn(true)},
+                {new Castle(true), new Knight(true), new Bishop(true), new Queen(true), new King(true), new Bishop(true), new Knight(true), new Castle(true)},
+        };
         return newBoard;
     }
 
@@ -120,6 +99,8 @@ public class ChessBoard {
             throw new IllegalArgumentException("Coordinate outside of board");
         } else if (tempFrom == null) {
             throw new IllegalArgumentException("Must move a piece");
+        } else if (fromX == toX && fromY == toY) {
+            throw new IllegalArgumentException("Cannot move to same space");
         } else if (tempFrom.getIsBlack() && this.whiteTurn || !tempFrom.getIsBlack() && !this.whiteTurn) {
             throw new IllegalArgumentException("Other player's move");
         } else if (tempFrom.getIsBlack() && tempTo.getIsBlack() || !(tempFrom.getIsBlack() || tempTo.getIsBlack())) {
