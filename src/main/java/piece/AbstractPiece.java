@@ -7,14 +7,22 @@ import java.util.List;
 
 public abstract class AbstractPiece implements IPiece {
     private int x, y;
-    private boolean isBlack;
+    private boolean isBlack, isFirstMove;
 
     AbstractPiece(int x, int y, boolean isBlack) {
-        this.isBlack = isBlack;
-        this.x = x;
-        this.y = y;
+        this(x, y, isBlack, true);
     }
 
+    AbstractPiece(int x, int y, boolean isBlack, boolean isFirstMove) {
+        this.x = x;
+        this.y = y;
+        this.isBlack = isBlack;
+        this.isFirstMove = isFirstMove;
+    }
+
+    /*
+    GETTERS
+     */
     public boolean getIsBlack() {
         return this.isBlack;
     }
@@ -27,10 +35,15 @@ public abstract class AbstractPiece implements IPiece {
         return this.y;
     }
 
+    public boolean getIsFirstMove() {
+        return this.isFirstMove;
+    }
+
     public boolean movePiece(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
         if (this.isValidMove(board, fromX, fromY, toX, toY)) {
             this.x = toX;
             this.y = toY;
+            this.isFirstMove = false;
             return true;
         } else {
             return false;
@@ -78,7 +91,7 @@ public abstract class AbstractPiece implements IPiece {
                 && (maxDistance == 1 || this.notObstructed(board, fromX, fromY, toX, toY));
     }
 
-    private boolean notObstructed(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
+    protected boolean notObstructed(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
         for (Coord c : calculatePointsBetween(fromX, fromY, toX, toY)) {
             if (board[c.getX()][c.getY()] != null) return false;
         }

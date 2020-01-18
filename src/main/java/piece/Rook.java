@@ -1,13 +1,19 @@
 package piece;
 
-public class Castle extends AbstractPiece {
+public class Rook extends AbstractPiece {
 
-    public Castle(int x, int y, boolean isBlack) {
+    boolean isFirstMove;
+
+    public Rook(int x, int y, boolean isBlack) {
         super(x, y, isBlack);
     }
 
+    public Rook(int x, int y, boolean isBlack, boolean isFirstMove) {
+        super(x, y, isBlack, isFirstMove);
+    }
+
     public IPiece copy() {
-        return new Castle(super.getX(), super.getY(),super.getIsBlack());
+        return new Rook(super.getX(), super.getY(), super.getIsBlack());
     }
 
     @Override
@@ -20,5 +26,6 @@ public class Castle extends AbstractPiece {
     public String toString() {
         return super.toString() + "C";
     }
+
 
 }

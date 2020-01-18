@@ -34,8 +34,9 @@ public class ChessBoard {
 
     public boolean playGame(int fromX, int fromY, int toX, int toY) {
         if (this.isValidMove(fromX, fromY, toX, toY)) {
-            IPiece tempFrom = this.board[fromX][fromY];
-            this.board[toX][toY] = tempFrom;
+            IPiece movedPiece = this.board[fromX][fromY];
+            this.removePiece(this.board[toX][toY]);
+            this.board[toX][toY] = movedPiece;
             this.board[fromX][fromY] = null;
             this.nextTurn();
             this.recordHistory();
@@ -82,14 +83,14 @@ public class ChessBoard {
     private IPiece[][] generateChessBoard() {
         IPiece[][] newBoard =
                 {
-                        {this.addPiece(new Castle(0, 0, false)), this.addPiece(new Pawn(0, 1, false)), null, null, null, null, this.addPiece(new Pawn(0, 6, true)), this.addPiece(new Castle(0, 7, true))},
+                        {this.addPiece(new Rook(0, 0, false)), this.addPiece(new Pawn(0, 1, false)), null, null, null, null, this.addPiece(new Pawn(0, 6, true)), this.addPiece(new Rook(0, 7, true))},
                         {this.addPiece(new Knight(1, 0, false)), this.addPiece(new Pawn(1, 1, false)), null, null, null, null, this.addPiece(new Pawn(1, 6, true)), this.addPiece(new Knight(1, 7, true))},
                         {this.addPiece(new Bishop(2, 0, false)), this.addPiece(new Pawn(2, 1, false)), null, null, null, null, this.addPiece(new Pawn(2, 6, true)), this.addPiece(new Bishop(2, 7, true))},
                         {this.addPiece(new Queen(3, 0, false)), this.addPiece(new Pawn(3, 1, false)), null, null, null, null, this.addPiece(new Pawn(3, 6, true)), this.addPiece(new Queen(3, 7, true))},
                         {this.addPiece(new King(4, 0, false)), this.addPiece(new Pawn(4, 1, false)), null, null, null, null, this.addPiece(new Pawn(4, 6, true)), this.addPiece(new King(4, 7, true))},
                         {this.addPiece(new Bishop(5, 0, false)), this.addPiece(new Pawn(5, 1, false)), null, null, null, null, this.addPiece(new Pawn(5, 6, true)), this.addPiece(new Bishop(5, 7, true))},
                         {this.addPiece(new Knight(6, 0, false)), this.addPiece(new Pawn(6, 1, false)), null, null, null, null, this.addPiece(new Pawn(6, 6, true)), this.addPiece(new Knight(6, 7, true))},
-                        {this.addPiece(new Castle(7, 0, false)), this.addPiece(new Pawn(7, 1, false)), null, null, null, null, this.addPiece(new Pawn(7, 6, true)), this.addPiece(new Castle(7, 7, true))}
+                        {this.addPiece(new Rook(7, 0, false)), this.addPiece(new Pawn(7, 1, false)), null, null, null, null, this.addPiece(new Pawn(7, 6, true)), this.addPiece(new Rook(7, 7, true))}
                 };
         return newBoard;
     }
@@ -147,5 +148,11 @@ public class ChessBoard {
 
     private void recordHistory() {
         this.history.add(this.getBoard());
+    }
+
+    private void removePiece(IPiece p) {
+        if (p != null) {
+            (p.getIsBlack() ? this.blackPieces : this.whitePieces).remove(p);
+        }
     }
 }

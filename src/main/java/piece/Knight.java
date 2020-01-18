@@ -5,6 +5,10 @@ public class Knight extends AbstractPiece {
         super(x, y, isBlack);
     }
 
+    public Knight(int x, int y, boolean isBlack, boolean firstMove) {
+        super(x, y, isBlack, firstMove);
+    }
+
     public IPiece copy() {
         return new Knight(super.getX(), super.getY(),super.getIsBlack());
     }

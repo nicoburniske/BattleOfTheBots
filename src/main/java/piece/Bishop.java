@@ -6,8 +6,8 @@ public class Bishop extends AbstractPiece {
         super(x, y, isBlack);
     }
 
-    public Bishop(Bishop piece) {
-        super(piece.getX(), piece.getY(), piece.getIsBlack());
+    public Bishop(int x, int y, boolean isBlack, boolean firstMove) {
+        super(x, y, isBlack, firstMove);
     }
 
     public IPiece copy() {
