@@ -34,8 +34,11 @@ public class ChessBoard {
             IPiece tempFrom = this.board[fromX][fromY];
             this.board[toX][toY] = tempFrom;
             this.board[fromX][fromY] = null;
+            this.nextTurn();
+            return true;
+        } else {
+            return false;
         }
-        return true;
     }
 
     public boolean isWhiteTurn() {
@@ -70,10 +73,6 @@ public class ChessBoard {
             sb.append("\n");
         }
         return sb.toString();
-    }
-
-    public IPiece pieceAt(int x, int y) {
-        return this.board[x][y];
     }
 
     // Private Methods
@@ -135,6 +134,10 @@ public class ChessBoard {
 
     private boolean coordInsideBoard(int x, int y) {
         return (x > -1 && x < 8) && (y > -1 && y < 8);
+    }
+
+    private void nextTurn() {
+        this.whiteTurn = !this.whiteTurn;
     }
 }
 
