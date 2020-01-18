@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractPiece implements IPiece {
+    private int x, y;
     private boolean isBlack;
 
     AbstractPiece(boolean isBlack) {

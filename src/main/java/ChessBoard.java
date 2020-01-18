@@ -33,6 +33,7 @@ public class ChessBoard {
         if (this.isValidMove(fromX, fromY, toX, toY)) {
             IPiece tempFrom = this.board[fromX][fromY];
             this.board[toX][toY] = tempFrom;
+            this.board[fromX][fromY] = null;
         }
         return true;
     }
@@ -45,7 +46,7 @@ public class ChessBoard {
         StringBuilder sb = new StringBuilder();
         for (int i = 7; i > -1; i--) {
             for (int j = 7; j > -1; j--) {
-                IPiece current = board[i][j];
+                IPiece current = board[j][i];
                 if (current == null)
                     sb.append("X ");
                 else {
@@ -71,17 +72,21 @@ public class ChessBoard {
         return sb.toString();
     }
 
+    public IPiece pieceAt(int x, int y) {
+        return this.board[x][y];
+    }
+
     // Private Methods
     private IPiece[][] generateChessBoard() {
         IPiece[][] newBoard = {
-                {new Castle(false), new Knight(false), new Bishop(false), new Queen(false), new King(false), new Bishop(false), new Knight(false), new Castle(false)},
-                {new Pawn(false), new Pawn(false), new Pawn(false), new Pawn(false), new Pawn(false), new Pawn(false), new Pawn(false), new Pawn(false)},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {new Pawn(true), new Pawn(true), new Pawn(true), new Pawn(true), new Pawn(true), new Pawn(true), new Pawn(true), new Pawn(true)},
-                {new Castle(true), new Knight(true), new Bishop(true), new Queen(true), new King(true), new Bishop(true), new Knight(true), new Castle(true)},
+                {new Castle(false), new Pawn(false), null, null, null, null, new Pawn(true), new Castle(true)},
+                {new Knight(false), new Pawn(false), null, null, null, null, new Pawn(true), new Knight(true)},
+                {new Bishop(false), new Pawn(false), null, null, null, null, new Pawn(true), new Bishop(true)},
+                {new King(false), new Pawn(false), null, null, null, null, new Pawn(true), new King(true)},
+                {new Queen(false), new Pawn(false), null, null, null, null, new Pawn(true), new Queen(true)},
+                {new Bishop(false), new Pawn(false), null, null, null, null, new Pawn(true), new Bishop(true)},
+                {new Knight(false), new Pawn(false), null, null, null, null, new Pawn(true), new Knight(true)},
+                {new Castle(false), new Pawn(false), null, null, null, null, new Pawn(true), new Castle(true)}
         };
         return newBoard;
     }
@@ -92,23 +97,40 @@ public class ChessBoard {
         return piece;
     }
 
+    /**
+     * Makes sure:
+     * - Both coordinates are inside board.
+     * - From coordinate contains a piece.
+     * - Coordinates are not the same.
+     * - It is the correct player's turn.
+     * - Not moving to a space occupied by space of same color.
+     * - Delegates to individual piece logic.
+     *
+     * @param fromX
+     * @param fromY
+     * @param toX
+     * @param toY
+     * @return
+     */
     private boolean isValidMove(int fromX, int fromY, int toX, int toY) {
-        IPiece tempFrom = this.board[fromX][fromY];
-        IPiece tempTo = this.board[toX][toY];
         if (!coordInsideBoard(fromX, fromY) || !coordInsideBoard(toX, toY)) {
             throw new IllegalArgumentException("Coordinate outside of board");
-        } else if (tempFrom == null) {
-            throw new IllegalArgumentException("Must move a piece");
-        } else if (fromX == toX && fromY == toY) {
-            throw new IllegalArgumentException("Cannot move to same space");
-        } else if (tempFrom.getIsBlack() && this.whiteTurn || !tempFrom.getIsBlack() && !this.whiteTurn) {
-            throw new IllegalArgumentException("Other player's move");
-        } else if (tempFrom.getIsBlack() && tempTo.getIsBlack() || !(tempFrom.getIsBlack() || tempTo.getIsBlack())) {
-            throw new IllegalArgumentException("Cannot move to square occupied by piece of same color");
-        } else if (!tempFrom.movePiece(this.board, fromX, fromY, toX, toY)) {
-            throw new IllegalArgumentException("Invalid move");
+        } else {
+            IPiece from = this.board[fromX][fromY];
+            IPiece to = this.board[toX][toY];
+            if (from == null) {
+                throw new IllegalArgumentException("Must move a piece");
+            } else if (fromX == toX && fromY == toY) {
+                throw new IllegalArgumentException("Cannot move to same space");
+            } else if (from.getIsBlack() && this.whiteTurn || !from.getIsBlack() && !this.whiteTurn) {
+                throw new IllegalArgumentException("Other player's move");
+            } else if (to != null && (from.getIsBlack() && to.getIsBlack() || !(from.getIsBlack() || to.getIsBlack()))) {
+                throw new IllegalArgumentException("Cannot move to square occupied by piece of same color");
+            } else if (!from.movePiece(this.board, fromX, fromY, toX, toY)) {
+                throw new IllegalArgumentException("Invalid move");
+            }
+            return true;
         }
-        return true;
     }
 
     private boolean coordInsideBoard(int x, int y) {
