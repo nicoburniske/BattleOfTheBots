@@ -2,8 +2,12 @@ package piece;
 
 public class Castle extends AbstractPiece {
 
-    public Castle(boolean isBlack) {
-        super(isBlack);
+    public Castle(int x, int y, boolean isBlack) {
+        super(x, y, isBlack);
+    }
+
+    public IPiece copy() {
+        return new Castle(super.getX(), super.getY(),super.getIsBlack());
     }
 
     @Override
@@ -11,6 +15,7 @@ public class Castle extends AbstractPiece {
         return super.validInlineMove(fromX, fromY, toX, toY)
                 || super.validLineMove(board, fromX, fromY, toX, toY, 8);
     }
+
     @Override
     public String toString() {
         return super.toString() + "C";

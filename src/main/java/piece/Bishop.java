@@ -2,8 +2,16 @@ package piece;
 
 public class Bishop extends AbstractPiece {
 
-    public Bishop(boolean isBlack) {
-        super(isBlack);
+    public Bishop(int x, int y, boolean isBlack) {
+        super(x, y, isBlack);
+    }
+
+    public Bishop(Bishop piece) {
+        super(piece.getX(), piece.getY(), piece.getIsBlack());
+    }
+
+    public IPiece copy() {
+        return new Queen(super.getX(), super.getY(),super.getIsBlack());
     }
 
     @Override

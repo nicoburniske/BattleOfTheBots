@@ -1,8 +1,13 @@
 package piece;
 
 public class King extends AbstractPiece {
-    public King(boolean isBlack) {
-        super(isBlack);
+
+    public King(int x, int y, boolean isBlack) {
+        super(x, y, isBlack);
+    }
+
+    public IPiece copy() {
+        return new King(super.getX(), super.getY(),super.getIsBlack());
     }
 
     @Override
@@ -11,6 +16,7 @@ public class King extends AbstractPiece {
                 || super.validInlineMove(fromX, fromY, toX, toY))
                 && super.validLineMove(board, fromX, fromY, toX, toY, 1);
     }
+
     @Override
     public String toString() {
         return super.toString() + "K";

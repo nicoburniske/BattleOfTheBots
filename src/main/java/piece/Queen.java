@@ -2,8 +2,8 @@ package piece;
 
 public class Queen extends AbstractPiece {
 
-    public Queen(boolean isBlack) {
-        super(isBlack);
+    public Queen(int x, int y, boolean isBlack) {
+        super(x, y, isBlack);
     }
 
     @Override
@@ -11,6 +11,10 @@ public class Queen extends AbstractPiece {
         return (super.validDiagonalMove(fromX, fromY, toX, toY)
                 || super.validInlineMove(fromX, fromY, toX, toY))
                 && super.validLineMove(board, fromX, fromY, toX, toY, 8);
+    }
+
+    public IPiece copy() {
+        return new Queen(super.getX(), super.getY(),super.getIsBlack());
     }
 
     @Override

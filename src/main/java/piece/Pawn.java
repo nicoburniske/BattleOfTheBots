@@ -3,9 +3,17 @@ package piece;
 public class Pawn extends AbstractPiece {
     private boolean firstMove;
 
-    public Pawn(boolean isBlack) {
-        super(isBlack);
-        firstMove = true;
+    public Pawn(int x, int y, boolean isBlack) {
+        this(x, y, isBlack,true);
+    }
+
+    public Pawn(int x, int y, boolean isBlack, boolean firstMove) {
+        super(x, y, isBlack);
+        this.firstMove = true;
+    }
+
+    public IPiece copy() {
+        return new Pawn(super.getX(), super.getY(),super.getIsBlack());
     }
 
     @Override
@@ -25,6 +33,10 @@ public class Pawn extends AbstractPiece {
     @Override
     public String toString() {
         return super.toString() + "P";
+    }
+
+    public boolean getIsFirstMove(){
+        return this.firstMove;
     }
 
     private boolean isValidPawnMove(int fromX, int fromY, int toX, int toY, int direction, IPiece to) {

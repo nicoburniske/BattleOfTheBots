@@ -38,6 +38,7 @@ public class ChessBoard {
             this.board[toX][toY] = tempFrom;
             this.board[fromX][fromY] = null;
             this.nextTurn();
+            this.recordHistory();
             return true;
         } else {
             return false;
@@ -65,18 +66,30 @@ public class ChessBoard {
         return sb.toString();
     }
 
+    public IPiece[][] getBoard() {
+        IPiece[][] newBoard = new IPiece[8][8];
+
+        for (IPiece p : this.whitePieces) {
+            newBoard[p.getX()][p.getY()] = p.copy();
+        }
+        for (IPiece p : this.blackPieces) {
+            newBoard[p.getX()][p.getY()] = p.copy();
+        }
+        return newBoard;
+    }
+
     // Private Methods
     private IPiece[][] generateChessBoard() {
         IPiece[][] newBoard =
                 {
-                        {this.addPiece(new Castle(false)),this.addPiece(new Pawn(false)), null, null, null, null, this.addPiece(new Pawn(true)), this.addPiece(new Castle(true))},
-                        {this.addPiece(new Knight(false)), this.addPiece(new Pawn(false)), null, null, null, null, this.addPiece(new Pawn(true)), this.addPiece(new Knight(true))},
-                        {this.addPiece(new Bishop(false)), this.addPiece(new Pawn(false)), null, null, null, null, this.addPiece(new Pawn(true)), this.addPiece(new Bishop(true))},
-                        {this.addPiece(new Queen(false)), this.addPiece(new Pawn(false)), null, null, null, null, this.addPiece(new Pawn(true)), this.addPiece(new Queen(true))},
-                        {this.addPiece(new King(false)), this.addPiece(new Pawn(false)), null, null, null, null, this.addPiece(new Pawn(true)), this.addPiece(new King(true))},
-                        {this.addPiece(new Bishop(false)), this.addPiece(new Pawn(false)), null, null, null, null, this.addPiece(new Pawn(true)), this.addPiece(new Bishop(true))},
-                        {this.addPiece(new Knight(false)), this.addPiece(new Pawn(false)), null, null, null, null, this.addPiece(new Pawn(true)), this.addPiece(new Knight(true))},
-                        {this.addPiece(new Castle(false)), this.addPiece(new Pawn(false)), null, null, null, null, this.addPiece(new Pawn(true)), this.addPiece(new Castle(true))}
+                        {this.addPiece(new Castle(0, 0, false)), this.addPiece(new Pawn(0, 1, false)), null, null, null, null, this.addPiece(new Pawn(0, 6, true)), this.addPiece(new Castle(0, 7, true))},
+                        {this.addPiece(new Knight(1, 0, false)), this.addPiece(new Pawn(1, 1, false)), null, null, null, null, this.addPiece(new Pawn(1, 6, true)), this.addPiece(new Knight(1, 7, true))},
+                        {this.addPiece(new Bishop(2, 0, false)), this.addPiece(new Pawn(2, 1, false)), null, null, null, null, this.addPiece(new Pawn(2, 6, true)), this.addPiece(new Bishop(2, 7, true))},
+                        {this.addPiece(new Queen(3, 0, false)), this.addPiece(new Pawn(3, 1, false)), null, null, null, null, this.addPiece(new Pawn(3, 6, true)), this.addPiece(new Queen(3, 7, true))},
+                        {this.addPiece(new King(4, 0, false)), this.addPiece(new Pawn(4, 1, false)), null, null, null, null, this.addPiece(new Pawn(4, 6, true)), this.addPiece(new King(4, 7, true))},
+                        {this.addPiece(new Bishop(5, 0, false)), this.addPiece(new Pawn(5, 1, false)), null, null, null, null, this.addPiece(new Pawn(5, 6, true)), this.addPiece(new Bishop(5, 7, true))},
+                        {this.addPiece(new Knight(6, 0, false)), this.addPiece(new Pawn(6, 1, false)), null, null, null, null, this.addPiece(new Pawn(6, 6, true)), this.addPiece(new Knight(6, 7, true))},
+                        {this.addPiece(new Castle(7, 0, false)), this.addPiece(new Pawn(7, 1, false)), null, null, null, null, this.addPiece(new Pawn(7, 6, true)), this.addPiece(new Castle(7, 7, true))}
                 };
         return newBoard;
     }
@@ -131,18 +144,8 @@ public class ChessBoard {
         this.whiteTurn = !this.whiteTurn;
         this.movesSoFar++;
     }
+
+    private void recordHistory() {
+        this.history.add(this.getBoard());
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
