@@ -9,6 +9,7 @@ public class ChessBoard {
     private List<IPiece> blackPieces;
     private boolean whiteTurn;
     private List<IPiece[][]> history;
+    private int movesSoFar;
 
     public ChessBoard() {
         this.whitePieces = new ArrayList<>();
@@ -16,6 +17,7 @@ public class ChessBoard {
         this.board = generateChessBoard();
         this.whiteTurn = true;
         this.history = new ArrayList<>();
+        movesSoFar = 0;
     }
 
     public ChessBoard(IPiece[][] board, boolean whiteTurn) {
@@ -27,6 +29,7 @@ public class ChessBoard {
         this.board = board;
         this.whiteTurn = whiteTurn;
         this.history = new ArrayList<>();
+        movesSoFar = 0;
     }
 
     public boolean playGame(int fromX, int fromY, int toX, int toY) {
@@ -48,25 +51,12 @@ public class ChessBoard {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (int i = 7; i > -1; i--) {
-            for (int j = 7; j > -1; j--) {
+            for (int j = 0; j < 8; j++) {
                 IPiece current = board[j][i];
                 if (current == null)
                     sb.append("X ");
                 else {
-                    sb.append(current.getIsBlack() ? "B" : "W");
-                }
-                if (current instanceof King) {
-                    sb.append("K");
-                } else if (current instanceof Knight) {
-                    sb.append("N");
-                } else if (current instanceof Pawn) {
-                    sb.append("P");
-                } else if (current instanceof Castle) {
-                    sb.append("C");
-                } else if (current instanceof Bishop) {
-                    sb.append("B");
-                } else if (current instanceof Queen) {
-                    sb.append("Q");
+                    sb.append(current.toString());
                 }
                 sb.append(" ");
             }
@@ -77,16 +67,17 @@ public class ChessBoard {
 
     // Private Methods
     private IPiece[][] generateChessBoard() {
-        IPiece[][] newBoard = {
-                {new Castle(false), new Pawn(false), null, null, null, null, new Pawn(true), new Castle(true)},
-                {new Knight(false), new Pawn(false), null, null, null, null, new Pawn(true), new Knight(true)},
-                {new Bishop(false), new Pawn(false), null, null, null, null, new Pawn(true), new Bishop(true)},
-                {new King(false), new Pawn(false), null, null, null, null, new Pawn(true), new King(true)},
-                {new Queen(false), new Pawn(false), null, null, null, null, new Pawn(true), new Queen(true)},
-                {new Bishop(false), new Pawn(false), null, null, null, null, new Pawn(true), new Bishop(true)},
-                {new Knight(false), new Pawn(false), null, null, null, null, new Pawn(true), new Knight(true)},
-                {new Castle(false), new Pawn(false), null, null, null, null, new Pawn(true), new Castle(true)}
-        };
+        IPiece[][] newBoard =
+                {
+                        {new Castle(false), new Pawn(false), null, null, null, null, new Pawn(true), new Castle(true)},
+                        {new Knight(false), new Pawn(false), null, null, null, null, new Pawn(true), new Knight(true)},
+                        {new Bishop(false), new Pawn(false), null, null, null, null, new Pawn(true), new Bishop(true)},
+                        {new Queen(false), new Pawn(false), null, null, null, null, new Pawn(true), new Queen(true)},
+                        {new King(false), new Pawn(false), null, null, null, null, new Pawn(true), new King(true)},
+                        {new Bishop(false), new Pawn(false), null, null, null, null, new Pawn(true), new Bishop(true)},
+                        {new Knight(false), new Pawn(false), null, null, null, null, new Pawn(true), new Knight(true)},
+                        {new Castle(false), new Pawn(false), null, null, null, null, new Pawn(true), new Castle(true)}
+                };
         return newBoard;
     }
 
@@ -138,6 +129,7 @@ public class ChessBoard {
 
     private void nextTurn() {
         this.whiteTurn = !this.whiteTurn;
+        this.movesSoFar++;
     }
 }
 

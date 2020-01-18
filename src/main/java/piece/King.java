@@ -11,4 +11,8 @@ public class King extends AbstractPiece {
                 || super.validInlineMove(fromX, fromY, toX, toY))
                 && super.validLineMove(board, fromX, fromY, toX, toY, 1);
     }
+    @Override
+    public String toString() {
+        return super.toString() + "K";
+    }
 }

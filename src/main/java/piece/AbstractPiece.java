@@ -17,14 +17,18 @@ public abstract class AbstractPiece implements IPiece {
         return this.isBlack;
     }
 
-    public abstract boolean isValidMove(IPiece[][] board, int fromX, int fromY, int toX, int toY);
-
     public boolean movePiece(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
         if (this.isValidMove(board, fromX, fromY, toX, toY)) {
             return true;
         } else {
             return false;
         }
+    }
+
+    public abstract boolean isValidMove(IPiece[][] board, int fromX, int fromY, int toX, int toY);
+
+    public String toString() {
+        return this.isBlack ? "B" : "W";
     }
 
     /**

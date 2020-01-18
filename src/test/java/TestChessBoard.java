@@ -16,7 +16,15 @@ public class TestChessBoard {
 
     @Test
     public void testMovePawns() {
+        // move white King pawn
         assertEquals(true, board1.playGame(4, 1, 4, 3));
-        assertEquals(true, board1.playGame(4, 6, 4, 4));
+
+        // move black Queen pawn
+        assertEquals(true, board1.playGame(3, 6, 3, 4));
+
+        // move white king pawn again
+        assertEquals(true, board1.playGame(4, 3, 4, 4));
+
+        System.out.println(board1.toString());
     }
 }

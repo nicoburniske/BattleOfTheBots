@@ -22,6 +22,11 @@ public class Pawn extends AbstractPiece {
         }
     }
 
+    @Override
+    public String toString() {
+        return super.toString() + "P";
+    }
+
     private boolean isValidPawnMove(int fromX, int fromY, int toX, int toY, int direction, IPiece to) {
         return (fromX == toX && (fromY + direction == toY))
                 || ((Math.abs(fromX - toX) == 1) && (fromY + direction == toY) && to != null);

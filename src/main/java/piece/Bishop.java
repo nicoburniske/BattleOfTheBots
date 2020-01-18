@@ -11,4 +11,8 @@ public class Bishop extends AbstractPiece {
         return super.validDiagonalMove(fromX, fromY, toX, toY)
                 && super.validLineMove(board, fromX, fromY, toX, toY, 8);
     }
+    @Override
+    public String toString() {
+        return super.toString() + "B";
+    }
 }

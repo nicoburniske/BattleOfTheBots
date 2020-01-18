@@ -12,4 +12,9 @@ public class Queen extends AbstractPiece {
                 || super.validInlineMove(fromX, fromY, toX, toY))
                 && super.validLineMove(board, fromX, fromY, toX, toY, 8);
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + "Q";
+    }
 }
