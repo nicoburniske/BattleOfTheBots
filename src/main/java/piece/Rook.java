@@ -2,8 +2,6 @@ package piece;
 
 public class Rook extends AbstractPiece {
 
-    boolean isFirstMove;
-
     public Rook(int x, int y, boolean isBlack) {
         super(x, y, isBlack);
     }
@@ -13,7 +11,7 @@ public class Rook extends AbstractPiece {
     }
 
     public IPiece copy() {
-        return new Rook(super.getX(), super.getY(), super.getIsBlack());
+        return new Rook(super.getX(), super.getY(), super.getIsBlack(), super.getIsFirstMove());
     }
 
     @Override
@@ -26,6 +24,5 @@ public class Rook extends AbstractPiece {
     public String toString() {
         return super.toString() + "C";
     }
-
 
 }

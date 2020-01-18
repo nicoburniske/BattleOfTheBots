@@ -18,7 +18,7 @@ public class Queen extends AbstractPiece {
     }
 
     public IPiece copy() {
-        return new Queen(super.getX(), super.getY(), super.getIsBlack());
+        return new Queen(super.getX(), super.getY(), super.getIsBlack(), super.getIsFirstMove());
     }
 
     @Override

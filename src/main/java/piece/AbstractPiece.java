@@ -68,7 +68,7 @@ public abstract class AbstractPiece implements IPiece {
      * @return
      */
     protected boolean validDiagonalMove(int fromX, int fromY, int toX, int toY) {
-        return Math.abs(fromX - toX) != Math.abs(fromY - toY);
+        return Math.abs(fromX - toX) == Math.abs(fromY - toY);
     }
 
     /**

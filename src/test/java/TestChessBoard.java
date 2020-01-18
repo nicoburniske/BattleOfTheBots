@@ -17,7 +17,7 @@ public class TestChessBoard {
     }
 
     @Test
-    public void testMoveKnights(){
+    public void testMoveKnights() {
         //  [WHITE] - move queen-side knight
         assertEquals(true, board1.playGame(1, 0, 2, 2));
 
@@ -69,7 +69,7 @@ public class TestChessBoard {
     }
 
     @Test
-    public void testMoveKnights_Capture(){
+    public void testMoveKnights_Capture() {
         //  [WHITE] - move queen-side knight
         assertEquals(true, board1.playGame(1, 0, 2, 2));
 
@@ -152,5 +152,24 @@ public class TestChessBoard {
         assertEquals(true, board1.playGame(4, 1, 4, 3));
         // move white King pawn twice again. Should result in IllegalArgumentException
         board1.playGame(4, 3, 4, 5);
+    }
+
+    @Test
+    public void testCastle() {
+        // move king side horse
+        board1.playGame(6, 0, 5, 2);
+        // move black pawn
+        board1.playGame(3, 6, 3, 4);
+        // move white king pawn
+        board1.playGame(4, 1, 4, 2);
+        // move black pawn
+        board1.playGame(4, 6, 4, 4);
+        // move white bishop out of the way in order to castle
+        board1.playGame(5,0, 3, 2);
+        // move black pawn again
+        board1.playGame(3, 4, 3, 3);
+        // castle
+        board1.playGame(4, 0, 6, 0);
+        System.out.println(board1);
     }
 }

@@ -10,7 +10,7 @@ public class Knight extends AbstractPiece {
     }
 
     public IPiece copy() {
-        return new Knight(super.getX(), super.getY(),super.getIsBlack());
+        return new Knight(super.getX(), super.getY(),super.getIsBlack(), super.getIsFirstMove());
     }
 
     @Override

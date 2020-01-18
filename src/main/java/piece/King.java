@@ -10,7 +10,7 @@ public class King extends AbstractPiece {
     }
 
     public IPiece copy() {
-        return new King(super.getX(), super.getY(), super.getIsBlack(), this.getIsFirstMove());
+        return new King(super.getX(), super.getY(), super.getIsBlack(), super.getIsFirstMove());
     }
 
     public boolean isValidMove(IPiece[][] board, int fromX, int fromY, int toX, int toY) {

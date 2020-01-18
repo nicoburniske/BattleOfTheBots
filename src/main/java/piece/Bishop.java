@@ -11,7 +11,7 @@ public class Bishop extends AbstractPiece {
     }
 
     public IPiece copy() {
-        return new Queen(super.getX(), super.getY(),super.getIsBlack());
+        return new Bishop(super.getX(), super.getY(),super.getIsBlack(), super.getIsFirstMove());
     }
 
     @Override
@@ -20,7 +20,7 @@ public class Bishop extends AbstractPiece {
                 && super.validLineMove(board, fromX, fromY, toX, toY, 8);
     }
     @Override
-    public String toString() {
+    public  String toString() {
         return super.toString() + "B";
     }
 }
