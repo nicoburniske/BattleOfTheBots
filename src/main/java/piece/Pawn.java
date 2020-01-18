@@ -3,9 +3,9 @@ package piece;
 public class Pawn extends AbstractPiece {
     private boolean firstMove;
 
-    public Pawn(boolean isBlack) {
-        super(isBlack);
-        firstMove = true;
+    public Pawn(int x, int y, boolean isBlack) {
+        super(x, y, isBlack);
+        this.firstMove = true;
     }
 
     @Override

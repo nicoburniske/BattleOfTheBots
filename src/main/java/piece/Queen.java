@@ -2,8 +2,8 @@ package piece;
 
 public class Queen extends AbstractPiece {
 
-    public Queen(boolean isBlack) {
-        super(isBlack);
+    public Queen(int x, int y, boolean isBlack) {
+        super(x, y, isBlack);
     }
 
     @Override

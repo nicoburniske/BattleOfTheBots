@@ -2,8 +2,8 @@ package piece;
 
 public class Bishop extends AbstractPiece {
 
-    public Bishop(boolean isBlack) {
-        super(isBlack);
+    public Bishop(int x, int y, boolean isBlack) {
+        super(x, y, isBlack);
     }
 
     @Override

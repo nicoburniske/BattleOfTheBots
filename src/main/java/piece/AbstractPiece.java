@@ -9,16 +9,28 @@ public abstract class AbstractPiece implements IPiece {
     private int x, y;
     private boolean isBlack;
 
-    AbstractPiece(boolean isBlack) {
+    AbstractPiece(int x, int y, boolean isBlack) {
         this.isBlack = isBlack;
+        this.x = x;
+        this.y = y;
     }
 
     public boolean getIsBlack() {
         return this.isBlack;
     }
 
+    public int getX() {
+        return this.x;
+    }
+
+    public int getY() {
+        return this.y;
+    }
+
     public boolean movePiece(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
         if (this.isValidMove(board, fromX, fromY, toX, toY)) {
+            this.x = toX;
+            this.y = toY;
             return true;
         } else {
             return false;
