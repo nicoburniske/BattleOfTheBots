@@ -6,6 +6,14 @@ public class Bishop extends AbstractPiece {
         super(x, y, isBlack);
     }
 
+    public Bishop(Bishop piece) {
+        super(piece.getX(), piece.getY(), piece.getIsBlack());
+    }
+
+    public IPiece copy() {
+        return new Queen(super.getX(), super.getY(),super.getIsBlack());
+    }
+
     @Override
     public boolean isValidMove(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
         return super.validDiagonalMove(fromX, fromY, toX, toY)

@@ -6,12 +6,17 @@ public class King extends AbstractPiece {
         super(x, y, isBlack);
     }
 
+    public IPiece copy() {
+        return new King(super.getX(), super.getY(),super.getIsBlack());
+    }
+
     @Override
     public boolean isValidMove(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
         return (super.validDiagonalMove(fromX, fromY, toX, toY)
                 || super.validInlineMove(fromX, fromY, toX, toY))
                 && super.validLineMove(board, fromX, fromY, toX, toY, 1);
     }
+
     @Override
     public String toString() {
         return super.toString() + "K";

@@ -38,6 +38,7 @@ public class ChessBoard {
             this.board[toX][toY] = tempFrom;
             this.board[fromX][fromY] = null;
             this.nextTurn();
+            this.recordHistory();
             return true;
         } else {
             return false;
@@ -63,6 +64,18 @@ public class ChessBoard {
             sb.append("\n");
         }
         return sb.toString();
+    }
+
+    public IPiece[][] getBoard() {
+        IPiece[][] newBoard = new IPiece[8][8];
+
+        for (IPiece p : this.whitePieces) {
+            newBoard[p.getX()][p.getY()] = p.copy();
+        }
+        for (IPiece p : this.blackPieces) {
+            newBoard[p.getX()][p.getY()] = p.copy();
+        }
+        return newBoard;
     }
 
     // Private Methods
@@ -131,18 +144,8 @@ public class ChessBoard {
         this.whiteTurn = !this.whiteTurn;
         this.movesSoFar++;
     }
+
+    private void recordHistory() {
+        this.history.add(this.getBoard());
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -13,6 +13,10 @@ public class Queen extends AbstractPiece {
                 && super.validLineMove(board, fromX, fromY, toX, toY, 8);
     }
 
+    public IPiece copy() {
+        return new Queen(super.getX(), super.getY(),super.getIsBlack());
+    }
+
     @Override
     public String toString() {
         return super.toString() + "Q";
