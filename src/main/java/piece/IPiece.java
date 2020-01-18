@@ -10,6 +10,7 @@ public interface IPiece {
 
     boolean getIsFirstMove();
 
+    void makeMove(int x, int y);
 
     String toString();
 

@@ -39,11 +39,15 @@ public abstract class AbstractPiece implements IPiece {
         return this.isFirstMove;
     }
 
+    public void makeMove(int x, int y) {
+        this.x = x;
+        this.y = y;
+        this.isFirstMove = false;
+    }
+
     public boolean movePiece(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
         if (this.isValidMove(board, fromX, fromY, toX, toY)) {
-            this.x = toX;
-            this.y = toY;
-            this.isFirstMove = false;
+            this.makeMove(toX, toY);
             return true;
         } else {
             return false;

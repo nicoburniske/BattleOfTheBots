@@ -3,6 +3,7 @@ import piece.*;
 import java.util.ArrayList;
 import java.util.List;
 
+// represents a chess board
 public class ChessBoard {
     private IPiece[][] board;
     private List<IPiece> whitePieces;
@@ -17,7 +18,8 @@ public class ChessBoard {
         this.board = generateChessBoard();
         this.whiteTurn = true;
         this.history = new ArrayList<>();
-        movesSoFar = 0;
+        this.movesSoFar = 0;
+        this.recordHistory();
     }
 
     public ChessBoard(IPiece[][] board, boolean whiteTurn) {
@@ -35,11 +37,13 @@ public class ChessBoard {
     public boolean playGame(int fromX, int fromY, int toX, int toY) {
         if (this.isValidMove(fromX, fromY, toX, toY)) {
             IPiece movedPiece = this.board[fromX][fromY];
+            if (movedPiece instanceof King && Math.abs(fromX - toX) == 2) {
+                this.executeCastle(fromX, toX, toY);
+            }
             this.removePiece(this.board[toX][toY]);
             this.board[toX][toY] = movedPiece;
             this.board[fromX][fromY] = null;
             this.nextTurn();
-            this.recordHistory();
             return true;
         } else {
             return false;
@@ -95,6 +99,19 @@ public class ChessBoard {
         return newBoard;
     }
 
+    private void executeCastle(int fromX, int toX, int y) {
+        int direction = toX - fromX;
+        int fromCastleX = direction > 0 ? 7 : 0;
+        int toCastleX = direction > 0 ? 5 : 3;
+
+        if (isValidMove(fromCastleX, y, toCastleX, y)) {
+            IPiece castle = this.board[fromCastleX][y];
+            castle.makeMove(toCastleX, y);
+            this.board[fromCastleX][y] = null;
+            this.board[toCastleX][y] = castle;
+        }
+    }
+
     private IPiece addPiece(IPiece piece) {
         if (piece == null) throw new IllegalArgumentException("Piece cannot be null");
         (piece.getIsBlack() ? this.blackPieces : this.whitePieces).add(piece);
@@ -144,6 +161,7 @@ public class ChessBoard {
     private void nextTurn() {
         this.whiteTurn = !this.whiteTurn;
         this.movesSoFar++;
+        this.recordHistory();
     }
 
     private void recordHistory() {

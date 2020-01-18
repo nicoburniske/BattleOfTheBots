@@ -165,11 +165,12 @@ public class TestChessBoard {
         // move black pawn
         board1.playGame(4, 6, 4, 4);
         // move white bishop out of the way in order to castle
-        board1.playGame(5,0, 3, 2);
+        board1.playGame(5, 0, 3, 2);
         // move black pawn again
         board1.playGame(3, 4, 3, 3);
         // castle
         board1.playGame(4, 0, 6, 0);
-        System.out.println(board1);
+
+        //System.out.println(board1);
     }
 }
