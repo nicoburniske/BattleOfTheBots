@@ -69,14 +69,14 @@ public class ChessBoard {
     private IPiece[][] generateChessBoard() {
         IPiece[][] newBoard =
                 {
-                        {new Castle(false), new Pawn(false), null, null, null, null, new Pawn(true), new Castle(true)},
-                        {new Knight(false), new Pawn(false), null, null, null, null, new Pawn(true), new Knight(true)},
-                        {new Bishop(false), new Pawn(false), null, null, null, null, new Pawn(true), new Bishop(true)},
-                        {new Queen(false), new Pawn(false), null, null, null, null, new Pawn(true), new Queen(true)},
-                        {new King(false), new Pawn(false), null, null, null, null, new Pawn(true), new King(true)},
-                        {new Bishop(false), new Pawn(false), null, null, null, null, new Pawn(true), new Bishop(true)},
-                        {new Knight(false), new Pawn(false), null, null, null, null, new Pawn(true), new Knight(true)},
-                        {new Castle(false), new Pawn(false), null, null, null, null, new Pawn(true), new Castle(true)}
+                        {this.addPiece(new Castle(false)),this.addPiece(new Pawn(false)), null, null, null, null, this.addPiece(new Pawn(true)), this.addPiece(new Castle(true))},
+                        {this.addPiece(new Knight(false)), this.addPiece(new Pawn(false)), null, null, null, null, this.addPiece(new Pawn(true)), this.addPiece(new Knight(true))},
+                        {this.addPiece(new Bishop(false)), this.addPiece(new Pawn(false)), null, null, null, null, this.addPiece(new Pawn(true)), this.addPiece(new Bishop(true))},
+                        {this.addPiece(new Queen(false)), this.addPiece(new Pawn(false)), null, null, null, null, this.addPiece(new Pawn(true)), this.addPiece(new Queen(true))},
+                        {this.addPiece(new King(false)), this.addPiece(new Pawn(false)), null, null, null, null, this.addPiece(new Pawn(true)), this.addPiece(new King(true))},
+                        {this.addPiece(new Bishop(false)), this.addPiece(new Pawn(false)), null, null, null, null, this.addPiece(new Pawn(true)), this.addPiece(new Bishop(true))},
+                        {this.addPiece(new Knight(false)), this.addPiece(new Pawn(false)), null, null, null, null, this.addPiece(new Pawn(true)), this.addPiece(new Knight(true))},
+                        {this.addPiece(new Castle(false)), this.addPiece(new Pawn(false)), null, null, null, null, this.addPiece(new Pawn(true)), this.addPiece(new Castle(true))}
                 };
         return newBoard;
     }

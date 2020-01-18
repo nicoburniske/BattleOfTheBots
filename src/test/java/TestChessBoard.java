@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 
 public class TestChessBoard {
     ChessBoard board1;
+
     @Before
     public void initExamples() {
         board1 = new ChessBoard();
@@ -12,6 +13,7 @@ public class TestChessBoard {
 
     @Test
     public void testBoardConstructor() {
+
     }
 
     @Test
@@ -24,7 +26,13 @@ public class TestChessBoard {
 
         // move white king pawn again
         assertEquals(true, board1.playGame(4, 3, 4, 4));
+    }
 
-        System.out.println(board1.toString());
+    @Test(expected = IllegalArgumentException.class)
+    public void testPawnStartMoveTwice() {
+        // move white King pawn
+        assertEquals(true, board1.playGame(4, 1, 4, 3));
+        // move white King pawn twice again. Should result in IllegalArgumentException
+        board1.playGame(4, 3, 4, 5);
     }
 }
