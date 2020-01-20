@@ -40,6 +40,7 @@ public class ChessBoard {
             if (movedPiece instanceof King && Math.abs(fromX - toX) == 2) {
                 this.executeCastle(fromX, toX, toY);
             }
+            movedPiece.makeMove(toX, toY);
             this.removePiece(this.board[toX][toY]);
             this.board[toX][toY] = movedPiece;
             this.board[fromX][fromY] = null;
@@ -169,7 +170,7 @@ public class ChessBoard {
                 throw new IllegalArgumentException("Other player's move");
             } else if (to != null && (from.getIsBlack() && to.getIsBlack() || !(from.getIsBlack() || to.getIsBlack()))) {
                 throw new IllegalArgumentException("Cannot move to square occupied by piece of same color");
-            } else if (!from.movePiece(this.board, fromX, fromY, toX, toY)) {
+            } else if (!from.isValidMove(this.board, fromX, fromY, toX, toY)) {
                 throw new IllegalArgumentException("Invalid move");
             }
             return true;
