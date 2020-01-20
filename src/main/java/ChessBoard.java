@@ -118,19 +118,25 @@ public class ChessBoard {
         return piece;
     }
 
+    /**
+     *  Checks if the current turn's king is in check
+     * @return - True if in check, false otherwise
+     */
     private boolean isInCheck(){
-        int king_x;
-        int king_y;
         for (IPiece x : (this.whiteTurn ? this.whitePieces : this.blackPieces) ){
             if ( x.toString().charAt(1) == 'K'){
-                king_x = x.getX();
-                king_y = x.getY();
-                return isInDanger(king_x, king_y);
+                return isInDanger(x.getX(), x.getY());
             }
         }
-        return false;
+        return true;
     }
 
+    /**
+     * Returns true is the square at the specified coordinates is at risk.
+     * @param x - Target square's x coordinate
+     * @param y - Target square's y coordinate
+     * @return - True if target square is at risk, false otherwise
+     */
     private boolean isInDanger(int x, int y){
         for (IPiece p : (this.whiteTurn ? this.blackPieces : this.whitePieces) ){
             if ( this.isValidMove(p.getX(), p.getY(), x, y) ) {
