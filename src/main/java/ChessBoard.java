@@ -118,6 +118,28 @@ public class ChessBoard {
         return piece;
     }
 
+    private boolean isInCheck(){
+        int king_x;
+        int king_y;
+        for (IPiece x : (this.whiteTurn ? this.whitePieces : this.blackPieces) ){
+            if ( x.toString().charAt(1) == 'K'){
+                king_x = x.getX();
+                king_y = x.getY();
+                return isInDanger(king_x, king_y);
+            }
+        }
+        return false;
+    }
+
+    private boolean isInDanger(int x, int y){
+        for (IPiece p : (this.whiteTurn ? this.blackPieces : this.whitePieces) ){
+            if ( this.isValidMove(p.getX(), p.getY(), x, y) ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Makes sure:
      * - Both coordinates are inside board.

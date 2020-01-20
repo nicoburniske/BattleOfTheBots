@@ -171,6 +171,6 @@ public class TestChessBoard {
         // castle
         board1.playGame(4, 0, 6, 0);
 
-        //System.out.println(board1);
+        System.out.println(board1);
     }
 }
