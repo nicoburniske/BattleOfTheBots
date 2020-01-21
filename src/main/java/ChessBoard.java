@@ -1,3 +1,4 @@
+import common.Coord;
 import piece.*;
 
 import java.util.ArrayList;
@@ -37,14 +38,7 @@ public class ChessBoard {
 
     public boolean playGame(int fromX, int fromY, int toX, int toY) {
         if (this.isValidMove(fromX, fromY, toX, toY)) {
-            IPiece movedPiece = this.board[fromX][fromY];
-            if (movedPiece instanceof King && Math.abs(fromX - toX) == 2) {
-                this.executeCastle(fromX, toX, toY);
-            }
-            movedPiece.makeMove(toX, toY);
-            this.removePiece(this.board[toX][toY]);
-            this.board[toX][toY] = movedPiece;
-            this.board[fromX][fromY] = null;
+            forceMove(fromX, fromY, toX, toY);
             this.nextTurn();
             return true;
         } else {
@@ -121,6 +115,39 @@ public class ChessBoard {
     }
 
     /**
+     * Forces a move without performing checks
+     *  ONLY FOR USE IN testMove() METHOD
+     * @param fromX
+     * @param fromY
+     * @param toX
+     * @param toY
+     */
+    private void forceMove(int fromX, int fromY, int toX, int toY){
+        IPiece movedPiece = this.board[fromX][fromY];
+        if (movedPiece instanceof King && Math.abs(fromX - toX) == 2) {
+            this.executeCastle(fromX, toX, toY);
+        }
+        movedPiece.makeMove(toX, toY);
+        this.removePiece(this.board[toX][toY]);
+        this.board[toX][toY] = movedPiece;
+        this.board[fromX][fromY] = null;
+    }
+
+    /**
+     *  Tests a move in an isolated clone ChessBoard to see if it will result in king in check.
+     * @param fromX
+     * @param fromY
+     * @param toX
+     * @param toY
+     * @return True if move results in no check, false otherwise
+     */
+    private boolean testMove(int fromX, int fromY, int toX, int toY){
+        ChessBoard temp = new ChessBoard(this.getBoard(), isWhiteTurn());
+        temp.forceMove(fromX, fromY, toX, toY);
+        return !temp.isInCheck();
+    }
+
+    /**
      *  Checks if the current turn's king is in check
      * @return - True if in check, false otherwise
      */
@@ -143,6 +170,40 @@ public class ChessBoard {
         for (IPiece p : (this.whiteTurn ? this.blackPieces : this.whitePieces) ){
             if ( this.isValidMove(p.getX(), p.getY(), x, y) ) {
                 return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns a list of coordinates of all possible valid moves for the specified piece
+     * @param p - IPiece being evaluated
+     * @return Array of coordinates of all valid moves for specified IPiece
+     */
+    private Coord[] possibleMoves(IPiece p){
+        //TODO: Move method to AbstractPiece and introduce specific move seeking algorithms per piece
+        //  Currently checks 64 moves on grid, can be significantly reduced.
+        ArrayList<Coord> moves = new ArrayList<>();
+        for (int i = 0; i < 8; i++){
+            for (int j = 0; j < 8; j++){
+                if ( this.isValidMove(p.getX(), p.getY(), j, i) ){
+                    moves.add(new Coord(j, i));
+                }
+            }
+        }
+        return (Coord[]) moves.toArray();
+    }
+
+    /**
+     * Checks if the current player can make a move that won't result with their king in check
+     * @return True if moves available, false otherwise
+     */
+    private boolean hasRemainingMoves(){
+        for (IPiece p : (this.whiteTurn ? this.whitePieces : this.blackPieces) ){
+            for (Coord c : possibleMoves(p)){
+                if ( testMove(p.getX(), p.getY(), c.getX(), c.getY()) ){
+                    return true;
+                }
             }
         }
         return false;
@@ -180,6 +241,8 @@ public class ChessBoard {
                 throw new IllegalArgumentException("Other player's move");
             } else if (to != null && (from.getIsBlack() && to.getIsBlack() || !(from.getIsBlack() || to.getIsBlack()))) {
                 throw new IllegalArgumentException("Cannot move to square occupied by piece of same color");
+            } else if  ( !testMove(fromX, fromY, toX, toY) && hasRemainingMoves() ) {
+                throw new IllegalArgumentException("Move results with King in check");
             } else if (!from.isValidMove(this.board, fromX, fromY, toX, toY)) {
                 throw new IllegalArgumentException("Invalid move");
             }
