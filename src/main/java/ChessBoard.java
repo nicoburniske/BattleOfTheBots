@@ -34,6 +34,8 @@ public class ChessBoard {
         this.whiteTurn = whiteTurn;
         this.history = new ArrayList<>();
         movesSoFar = 0;
+
+        this.initPieces();
     }
 
     public boolean playGame(int fromX, int fromY, int toX, int toY) {
@@ -47,7 +49,7 @@ public class ChessBoard {
     }
 
     public boolean isWhiteTurn() {
-        return whiteTurn;
+        return this.whiteTurn;
     }
 
     public String toString() {
@@ -142,7 +144,7 @@ public class ChessBoard {
      * @return True if move results in no check, false otherwise
      */
     private boolean testMove(int fromX, int fromY, int toX, int toY){
-        ChessBoard temp = new ChessBoard(this.getBoard(), isWhiteTurn());
+        ChessBoard temp = new ChessBoard(this.getBoard(), this.isWhiteTurn());
         temp.forceMove(fromX, fromY, toX, toY);
         return !temp.isInCheck();
     }
@@ -186,8 +188,12 @@ public class ChessBoard {
         ArrayList<Coord> moves = new ArrayList<>();
         for (int i = 0; i < 8; i++){
             for (int j = 0; j < 8; j++){
-                if ( this.isValidMove(p.getX(), p.getY(), j, i) ){
-                    moves.add(new Coord(j, i));
+                try {
+                    if ( this.isValidMove(p.getX(), p.getY(), j, i) ){
+                        moves.add(new Coord(j, i));
+                    }
+                } catch (Exception error){
+
                 }
             }
         }
@@ -241,7 +247,7 @@ public class ChessBoard {
                 throw new IllegalArgumentException("Other player's move");
             } else if (to != null && (from.getIsBlack() && to.getIsBlack() || !(from.getIsBlack() || to.getIsBlack()))) {
                 throw new IllegalArgumentException("Cannot move to square occupied by piece of same color");
-            } else if  ( !testMove(fromX, fromY, toX, toY) && hasRemainingMoves() ) {
+            } else if  (!testMove(fromX, fromY, toX, toY) /*&& hasRemainingMoves()*/) {
                 throw new IllegalArgumentException("Move results with King in check");
             } else if (!from.isValidMove(this.board, fromX, fromY, toX, toY)) {
                 throw new IllegalArgumentException("Invalid move");
@@ -267,6 +273,16 @@ public class ChessBoard {
     private void removePiece(IPiece p) {
         if (p != null) {
             (p.getIsBlack() ? this.blackPieces : this.whitePieces).remove(p);
+        }
+    }
+    private void initPieces() {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                IPiece curr = this.board[i][j];
+                if(curr != null) {
+                    (curr.getIsBlack() ? this.blackPieces : this.whitePieces).add(curr);
+                }
+            }
         }
     }
 }
