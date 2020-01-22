@@ -23,7 +23,6 @@ public class ChessBoard {
         this.recordHistory();
     }
 
-    // TODO: fix this constructor so that the black pieces and white pieces are updated.
     public ChessBoard(IPiece[][] board, boolean whiteTurn) {
         if (board.length != 8 || board[0].length != 8) {
             throw new IllegalArgumentException("Board is not regulation size");
@@ -34,7 +33,6 @@ public class ChessBoard {
         this.whiteTurn = whiteTurn;
         this.history = new ArrayList<>();
         movesSoFar = 0;
-
         this.initPieces();
     }
 
@@ -50,6 +48,18 @@ public class ChessBoard {
 
     public boolean isWhiteTurn() {
         return this.whiteTurn;
+    }
+
+    public IPiece[][] getBoard() {
+        IPiece[][] newBoard = new IPiece[8][8];
+
+        for (IPiece p : this.whitePieces) {
+            newBoard[p.getX()][p.getY()] = p.copy();
+        }
+        for (IPiece p : this.blackPieces) {
+            newBoard[p.getX()][p.getY()] = p.copy();
+        }
+        return newBoard;
     }
 
     public String toString() {
@@ -69,34 +79,20 @@ public class ChessBoard {
         return sb.toString();
     }
 
-    public IPiece[][] getBoard() {
-        IPiece[][] newBoard = new IPiece[8][8];
 
-        for (IPiece p : this.whitePieces) {
-            newBoard[p.getX()][p.getY()] = p.copy();
-        }
-        for (IPiece p : this.blackPieces) {
-            newBoard[p.getX()][p.getY()] = p.copy();
-        }
-        return newBoard;
-    }
+    /*  ################################
+            PRIVATE METHODS
+        ################################    */
 
-    // Private Methods
-    private IPiece[][] generateChessBoard() {
-        IPiece[][] newBoard =
-                {
-                        {this.addPiece(new Rook(0, 0, false)), this.addPiece(new Pawn(0, 1, false)), null, null, null, null, this.addPiece(new Pawn(0, 6, true)), this.addPiece(new Rook(0, 7, true))},
-                        {this.addPiece(new Knight(1, 0, false)), this.addPiece(new Pawn(1, 1, false)), null, null, null, null, this.addPiece(new Pawn(1, 6, true)), this.addPiece(new Knight(1, 7, true))},
-                        {this.addPiece(new Bishop(2, 0, false)), this.addPiece(new Pawn(2, 1, false)), null, null, null, null, this.addPiece(new Pawn(2, 6, true)), this.addPiece(new Bishop(2, 7, true))},
-                        {this.addPiece(new Queen(3, 0, false)), this.addPiece(new Pawn(3, 1, false)), null, null, null, null, this.addPiece(new Pawn(3, 6, true)), this.addPiece(new Queen(3, 7, true))},
-                        {this.addPiece(new King(4, 0, false)), this.addPiece(new Pawn(4, 1, false)), null, null, null, null, this.addPiece(new Pawn(4, 6, true)), this.addPiece(new King(4, 7, true))},
-                        {this.addPiece(new Bishop(5, 0, false)), this.addPiece(new Pawn(5, 1, false)), null, null, null, null, this.addPiece(new Pawn(5, 6, true)), this.addPiece(new Bishop(5, 7, true))},
-                        {this.addPiece(new Knight(6, 0, false)), this.addPiece(new Pawn(6, 1, false)), null, null, null, null, this.addPiece(new Pawn(6, 6, true)), this.addPiece(new Knight(6, 7, true))},
-                        {this.addPiece(new Rook(7, 0, false)), this.addPiece(new Pawn(7, 1, false)), null, null, null, null, this.addPiece(new Pawn(7, 6, true)), this.addPiece(new Rook(7, 7, true))}
-                };
-        return newBoard;
-    }
 
+    /**
+     *  Executes a castle
+     * @param fromX - x-coordinate of target castle
+     * @param toX - x-coordinate of king
+     * @param y - either 0 or 7
+     */
+    //TODO: remove (int y) parameter and replace with
+    // int y = this.whiteTurn ? 0 : 7;
     private void executeCastle(int fromX, int toX, int y) {
         int direction = toX - fromX;
         int fromCastleX = direction > 0 ? 7 : 0;
@@ -108,31 +104,6 @@ public class ChessBoard {
             this.board[fromCastleX][y] = null;
             this.board[toCastleX][y] = castle;
         }
-    }
-
-    private IPiece addPiece(IPiece piece) {
-        if (piece == null) throw new IllegalArgumentException("Piece cannot be null");
-        (piece.getIsBlack() ? this.blackPieces : this.whitePieces).add(piece);
-        return piece;
-    }
-
-    /**
-     * Forces a move without performing checks
-     *  ONLY FOR USE IN testMove() METHOD
-     * @param fromX - x-coordinate of target piece
-     * @param fromY - y-coordinate of target piece
-     * @param toX - x-coordinate of desired location
-     * @param toY - y-coordinate of desired location
-     */
-    private void forceMove(int fromX, int fromY, int toX, int toY){
-        IPiece movedPiece = this.board[fromX][fromY];
-        if (movedPiece instanceof King && Math.abs(fromX - toX) == 2) {
-            this.executeCastle(fromX, toX, toY);
-        }
-        movedPiece.makeMove(toX, toY);
-        this.removePiece(this.board[toX][toY]);
-        this.board[toX][toY] = movedPiece;
-        this.board[fromX][fromY] = null;
     }
 
     /**
@@ -229,7 +200,7 @@ public class ChessBoard {
      * @param fromX - x-coordinate of target piece
      * @param fromY - y-coordinate of target piece
      * @param toX - x-coordinate of desired location
-     * @param toYy - y-coordinate of desired location
+     * @param toY - y-coordinate of desired location
      * @return - True
      */
     //TODO: if isInCheck and the resulting move does not remove the player from being in check, then it is an invalid move
@@ -258,25 +229,28 @@ public class ChessBoard {
         }
     }
 
-    private boolean coordInsideBoard(int x, int y) {
-        return (x > -1 && x < 8) && (y > -1 && y < 8);
-    }
-
-    private void nextTurn() {
-        this.whiteTurn = !this.whiteTurn;
-        this.movesSoFar++;
-        this.recordHistory();
-    }
-
-    private void recordHistory() {
-        this.history.add(this.getBoard());
-    }
-
-    private void removePiece(IPiece p) {
-        if (p != null) {
-            (p.getIsBlack() ? this.blackPieces : this.whitePieces).remove(p);
+    /**
+     * Forces a move without performing checks
+     *  ONLY FOR USE IN testMove() METHOD
+     * @param fromX - x-coordinate of target piece
+     * @param fromY - y-coordinate of target piece
+     * @param toX - x-coordinate of desired location
+     * @param toY - y-coordinate of desired location
+     */
+    private void forceMove(int fromX, int fromY, int toX, int toY){
+        IPiece movedPiece = this.board[fromX][fromY];
+        if (movedPiece instanceof King && Math.abs(fromX - toX) == 2) {
+            this.executeCastle(fromX, toX, toY);
         }
+        movedPiece.makeMove(toX, toY);
+        this.removePiece(this.board[toX][toY]);
+        this.board[toX][toY] = movedPiece;
+        this.board[fromX][fromY] = null;
     }
+
+    /**
+     * Populates the Black and White IPiece[]'s with piece from IPiece[][] board
+     */
     private void initPieces() {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -287,4 +261,71 @@ public class ChessBoard {
             }
         }
     }
+
+    /**
+     *  Generates a new fully populated chessboard
+     * @return - new populated chessboard (IPiece[][])
+     */
+    private IPiece[][] generateChessBoard() {
+        return new IPiece[][]{
+                {this.addPiece(new Rook(0, 0, false)), this.addPiece(new Pawn(0, 1, false)), null, null, null, null, this.addPiece(new Pawn(0, 6, true)), this.addPiece(new Rook(0, 7, true))},
+                {this.addPiece(new Knight(1, 0, false)), this.addPiece(new Pawn(1, 1, false)), null, null, null, null, this.addPiece(new Pawn(1, 6, true)), this.addPiece(new Knight(1, 7, true))},
+                {this.addPiece(new Bishop(2, 0, false)), this.addPiece(new Pawn(2, 1, false)), null, null, null, null, this.addPiece(new Pawn(2, 6, true)), this.addPiece(new Bishop(2, 7, true))},
+                {this.addPiece(new Queen(3, 0, false)), this.addPiece(new Pawn(3, 1, false)), null, null, null, null, this.addPiece(new Pawn(3, 6, true)), this.addPiece(new Queen(3, 7, true))},
+                {this.addPiece(new King(4, 0, false)), this.addPiece(new Pawn(4, 1, false)), null, null, null, null, this.addPiece(new Pawn(4, 6, true)), this.addPiece(new King(4, 7, true))},
+                {this.addPiece(new Bishop(5, 0, false)), this.addPiece(new Pawn(5, 1, false)), null, null, null, null, this.addPiece(new Pawn(5, 6, true)), this.addPiece(new Bishop(5, 7, true))},
+                {this.addPiece(new Knight(6, 0, false)), this.addPiece(new Pawn(6, 1, false)), null, null, null, null, this.addPiece(new Pawn(6, 6, true)), this.addPiece(new Knight(6, 7, true))},
+                {this.addPiece(new Rook(7, 0, false)), this.addPiece(new Pawn(7, 1, false)), null, null, null, null, this.addPiece(new Pawn(7, 6, true)), this.addPiece(new Rook(7, 7, true))}
+        };
+    }
+
+    /**
+     * Adds a piece to its respective IPiece[] array
+     * @param p - The piece being added to the chessboard
+     * @return - The added piece
+     */
+    private IPiece addPiece(IPiece p) {
+        if (p == null) throw new IllegalArgumentException("Piece cannot be null");
+        (p.getIsBlack() ? this.blackPieces : this.whitePieces).add(p);
+        return p;
+    }
+
+    /**
+     * Removes a piece to its respective IPiece[] array
+     * @param p - The piece being removed to the chessboard
+     * @return - The removed piece
+     */
+    private IPiece removePiece(IPiece p) {
+        if (p != null) {
+            (p.getIsBlack() ? this.blackPieces : this.whitePieces).remove(p);
+        }
+        return p;
+    }
+
+    /**
+     * Checks if the specified coordinate is inside board bounds
+     * @param x - target x-coordinate
+     * @param y - target y-coordinate
+     * @return True if in bounds, false otherwise
+     */
+    private boolean coordInsideBoard(int x, int y) {
+        return (x > -1 && x < 8) && (y > -1 && y < 8);
+    }
+
+    /**
+     * Advances game-state turn
+     */
+    private void nextTurn() {
+        this.whiteTurn = !this.whiteTurn;
+        this.movesSoFar++;
+        this.recordHistory();
+    }
+
+    /**
+     * Adds the board-state to history
+     */
+    private void recordHistory() {
+        this.history.add(this.getBoard());
+    }
+
 }
