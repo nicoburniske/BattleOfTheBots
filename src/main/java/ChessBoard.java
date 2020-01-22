@@ -170,8 +170,12 @@ public class ChessBoard {
      */
     private boolean isInDanger(int x, int y){
         for (IPiece p : (this.whiteTurn ? this.blackPieces : this.whitePieces) ){
-            if ( this.isValidMove(p.getX(), p.getY(), x, y) ) {
-                return true;
+            try {
+                if ( this.isValidMove(p.getX(), p.getY(), x, y) ) {
+                    return true;
+                }
+            } catch (Exception error){
+
             }
         }
         return false;
