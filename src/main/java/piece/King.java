@@ -1,5 +1,7 @@
 package piece;
 
+import common.Coord;
+
 public class King extends AbstractPiece {
     public King(int x, int y, boolean isBlack) {
         super(x, y, isBlack);
@@ -20,6 +22,12 @@ public class King extends AbstractPiece {
             return isCastlingValid(board, fromX, fromY, toX, toY)
                     || this.isValidKingMove(board, fromX, fromY, toX, toY);
         }
+    }
+
+    @Override
+    public Coord[] possibleMoves() {
+        //Coord[] moves;
+        return new Coord[0];
     }
 
     public String toString() {

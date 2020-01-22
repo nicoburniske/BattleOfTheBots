@@ -1,5 +1,7 @@
 package piece;
 
+import common.Coord;
+
 public class Queen extends AbstractPiece {
 
     public Queen(int x, int y, boolean isBlack) {
@@ -15,6 +17,12 @@ public class Queen extends AbstractPiece {
         return (super.validDiagonalMove(fromX, fromY, toX, toY)
                 || super.validInlineMove(fromX, fromY, toX, toY))
                 && super.validLineMove(board, fromX, fromY, toX, toY, 8);
+    }
+
+    @Override
+    public Coord[] possibleMoves() {
+        //Coord[] moves;
+        return new Coord[0];
     }
 
     public IPiece copy() {

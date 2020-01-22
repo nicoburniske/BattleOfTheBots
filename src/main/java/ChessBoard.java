@@ -119,10 +119,10 @@ public class ChessBoard {
     /**
      * Forces a move without performing checks
      *  ONLY FOR USE IN testMove() METHOD
-     * @param fromX
-     * @param fromY
-     * @param toX
-     * @param toY
+     * @param fromX - x-coordinate of target piece
+     * @param fromY - y-coordinate of target piece
+     * @param toX - x-coordinate of desired location
+     * @param toY - y-coordinate of desired location
      */
     private void forceMove(int fromX, int fromY, int toX, int toY){
         IPiece movedPiece = this.board[fromX][fromY];
@@ -137,10 +137,10 @@ public class ChessBoard {
 
     /**
      *  Tests a move in an isolated clone ChessBoard to see if it will result in king in check.
-     * @param fromX
-     * @param fromY
-     * @param toX
-     * @param toY
+     * @param fromX - x-coordinate of target piece
+     * @param fromY - y-coordinate of target piece
+     * @param toX - x-coordinate of desired location
+     * @param toY - y-coordinate of desired location
      * @return True if move results in no check, false otherwise
      */
     private boolean testMove(int fromX, int fromY, int toX, int toY){
@@ -175,7 +175,6 @@ public class ChessBoard {
                     return true;
                 }
             } catch (Exception error){
-
             }
         }
         return false;
@@ -197,7 +196,6 @@ public class ChessBoard {
                         moves.add(new Coord(j, i));
                     }
                 } catch (Exception error){
-
                 }
             }
         }
@@ -228,11 +226,11 @@ public class ChessBoard {
      * - Not moving to a space occupied by space of same color.
      * - Delegates to individual piece logic.
      *
-     * @param fromX
-     * @param fromY
-     * @param toX
-     * @param toY
-     * @return
+     * @param fromX - x-coordinate of target piece
+     * @param fromY - y-coordinate of target piece
+     * @param toX - x-coordinate of desired location
+     * @param toYy - y-coordinate of desired location
+     * @return - True
      */
     //TODO: if isInCheck and the resulting move does not remove the player from being in check, then it is an invalid move
     // use constructor that takes in a 2d board to make a new ChessBoard (feed it this.getBoard(), and this.isWhiteTurn()) to have a copy of the board.

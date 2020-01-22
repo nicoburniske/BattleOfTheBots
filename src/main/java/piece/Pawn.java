@@ -1,5 +1,7 @@
 package piece;
 
+import common.Coord;
+
 public class Pawn extends AbstractPiece {
 
     public Pawn(int x, int y, boolean isBlack) {
@@ -24,6 +26,19 @@ public class Pawn extends AbstractPiece {
             return isFirstMoveValid(fromX, fromY, toX, toY, direction, to)
                     || this.isValidPawnMove(fromX, fromY, toX, toY, direction, to);
         }
+    }
+
+    @Override
+    public Coord[] possibleMoves() {
+        //Coord[] moves;
+        /**
+         * four possibilities:
+         *  - pawn moves (directional) 1
+         *  - pawn moves (directional) 2 (first move)
+         *  - pawn moves (semi-directional (left)) 1 (capture possible)
+         *  - pawn moves (semi-directional (right)) 1 (capture possible)
+         */
+        return new Coord[0];
     }
 
     @Override
