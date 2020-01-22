@@ -1,7 +1,7 @@
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class TestChessBoard {
     ChessBoard board1;
@@ -172,5 +172,17 @@ public class TestChessBoard {
         board1.playGame(4, 0, 6, 0);
 
         System.out.println(board1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidCheckMove() {
+        this.board1.playGame(3, 1, 3, 2);
+        this.board1.playGame(4, 6, 4, 5);
+        this.board1.playGame(0,1, 0,2);
+        this.board1.playGame(3, 7, 7, 3);
+        this.board1.playGame(0,2, 0, 3);
+        this.board1.playGame(5, 7, 1, 3);
+        this.board1.playGame(3,2,3,3);
+        System.out.println(this.board1);
     }
 }
