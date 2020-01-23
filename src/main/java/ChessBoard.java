@@ -76,6 +76,42 @@ public class ChessBoard {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
+        //header
+        sb.append("\n╔");
+        for (int s = 0; s < 7; s++) {
+            sb.append("════╦");
+        }
+        sb.append("════╗\n");
+
+        //body
+        for (int i = 7; i > -1; i--) {
+            sb.append("║ ");
+            for (int j = 0; j < 8; j++) {
+                IPiece current = board[j][i];
+                if (current == null)
+                    sb.append("  ");
+                else {
+                    sb.append(current.toString());
+                }
+                sb.append(" ║ ");
+            }
+            if (i != 0) {
+                sb.append("\n║");
+                for (int s = 0; s < 7; s++) {
+                    sb.append("════╬");
+                }
+                sb.append("════╣");
+                sb.append("\n");
+            }
+        }
+        //footer
+        sb.append("\n╚");
+        for (int s = 0; s < 7; s++) {
+            sb.append("════╩");
+        }
+        sb.append("════╝");
+            /*
+        StringBuilder sb = new StringBuilder();
         for (int i = 7; i > -1; i--) {
             for (int j = 0; j < 8; j++) {
                 IPiece current = board[j][i];
@@ -88,6 +124,7 @@ public class ChessBoard {
             }
             sb.append("\n");
         }
+        */
         return sb.toString();
     }
 

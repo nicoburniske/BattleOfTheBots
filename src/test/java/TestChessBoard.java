@@ -49,7 +49,7 @@ public class TestChessBoard {
 
         //  [BLACK] - move knight
         assertTrue(board1.playGame(3, 3, 5, 2));
-
+        
         //  [WHITE] - move knight
         assertTrue(board1.playGame(4, 3, 5, 5));
 
@@ -173,7 +173,6 @@ public class TestChessBoard {
         // castle
         board1.playGame(4, 0, 6, 0);
 
-        System.out.println(board1);
     }
 
     @Test(expected = IllegalArgumentException.class)
