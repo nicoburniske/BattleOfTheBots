@@ -7,7 +7,7 @@ public class Main {
         ChessBoard board = new ChessBoard();
         System.out.println(board);
     }
-    //TODO: figure out castling logic. Only one part missing. Description in Castle Class.
+    //TODO: figure out castling logic. Only one part missing. Description in King Class.
     //TODO: isInCheck() method in ChessBoard class. if isInCheck, and the move does not remove the player from check it is an invalid move.
     //TODO: make sure that the play game method ensures that the move will not endanger user king,
     //TODO: create isGameOver method: () -> boolean

@@ -21,7 +21,7 @@ public class Rook extends AbstractPiece {
     @Override
     public boolean isValidMove(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
         return super.validInlineMove(fromX, fromY, toX, toY)
-                || super.validLineMove(board, fromX, fromY, toX, toY, 8);
+                && super.validLineMove(board, fromX, fromY, toX, toY, 8);
     }
 
     @Override

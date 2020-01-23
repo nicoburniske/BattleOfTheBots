@@ -19,7 +19,7 @@ public class ChessBoard {
         ################################
      */
 
-    ChessBoard() {
+    public ChessBoard() {
         this.whitePieces = new ArrayList<>();
         this.blackPieces = new ArrayList<>();
         this.board = generateChessBoard();
@@ -29,7 +29,7 @@ public class ChessBoard {
         this.recordHistory();
     }
 
-    private ChessBoard(IPiece[][] board, boolean whiteTurn) {
+    public ChessBoard(IPiece[][] board, boolean whiteTurn) {
         if (board.length != 8 || board[0].length != 8) {
             throw new IllegalArgumentException("Board is not regulation size");
         }
@@ -56,7 +56,7 @@ public class ChessBoard {
      * @param toY - y-coordinate of desired location
      * @return - true if valid move*, false otherwise
      */
-    boolean playGame(int fromX, int fromY, int toX, int toY) {
+    public boolean playGame(int fromX, int fromY, int toX, int toY) {
         if (this.isValidMove(fromX, fromY, toX, toY)) {
             this.makeMove(fromX, fromY, toX, toY);
             this.nextTurn();
@@ -70,7 +70,7 @@ public class ChessBoard {
      * Returns the current turn
      * @return true if white's turn, false if black's
      */
-    boolean isWhiteTurn() {
+    public boolean isWhiteTurn() {
         return this.whiteTurn;
     }
 
@@ -271,7 +271,7 @@ public class ChessBoard {
             } else if (!from.isValidMove(this.board, fromX, fromY, toX, toY)) {
                 throw new IllegalArgumentException("Invalid move");
             } else if (this.isInCheck() && !this.testMove(fromX, fromY, toX, toY)) {
-                throw new IllegalArgumentException("Move results with King in check");
+                throw new IllegalStateException("Move results with King in check");
             }
             return true;
         }
