@@ -2,6 +2,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TestChessBoard {
     ChessBoard board1;
@@ -26,6 +27,7 @@ public class TestChessBoard {
 
         //  [WHITE] - move previous knight
         assertTrue(board1.playGame(2, 2, 4, 3));
+
 
         //  [BLACK] - move king-side knight
         assertTrue(board1.playGame(6, 7, 5, 5));
