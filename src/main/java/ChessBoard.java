@@ -169,7 +169,7 @@ public class ChessBoard {
      */
     private boolean isInDanger(int x, int y){
         for (IPiece p : (this.whiteTurn ? this.blackPieces : this.whitePieces) ){
-            if ( this.isValidMoveBoolean(p.getX(), p.getY(), x, y) ) {
+            if ( this.isValidMovePiece(p.getX(), p.getY(), x, y) ) {
                 return true;
             }
         }
@@ -238,6 +238,19 @@ public class ChessBoard {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     * Checks if the given piece is allowed to move to the given coordinate on the board.
+     * @param fromX
+     * @param fromY
+     * @param toX
+     * @param toY
+     * @return
+     */
+    private boolean isValidMovePiece(int fromX, int fromY, int toX, int toY){
+        IPiece from = this.board[fromX][fromY];
+        return from.isValidMove(this.board, fromX, fromY, toX, toY);
     }
 
     /**
