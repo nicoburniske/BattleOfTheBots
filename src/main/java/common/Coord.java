@@ -17,6 +17,14 @@ public class Coord {
         return this.y;
     }
 
+    public Coord addCoords(Coord c){
+        return new Coord(this.x + c.getX(), this.y + c.getY());
+    }
+
+    public boolean isInsideBoard(){
+        return (this.x > -1 && this.x < 8) && (this.y > -1 && this.y < 8);
+    }
+
     public String toString() {
         return "(" + this.x + ", " + this.y + ")";
     }

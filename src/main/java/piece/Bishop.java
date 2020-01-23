@@ -1,5 +1,9 @@
 package piece;
 
+import common.Coord;
+
+import java.util.List;
+
 public class Bishop extends AbstractPiece {
 
     public Bishop(int x, int y, boolean isBlack) {
@@ -19,6 +23,12 @@ public class Bishop extends AbstractPiece {
         return super.validDiagonalMove(fromX, fromY, toX, toY)
                 && super.validLineMove(board, fromX, fromY, toX, toY, 8);
     }
+
+    @Override
+    public List<Coord> getPossibleMoves(IPiece[][] board) {
+        return null;
+    }
+
     @Override
     public  String toString() {
         return super.toString() + "B";

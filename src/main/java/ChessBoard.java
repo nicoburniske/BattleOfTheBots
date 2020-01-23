@@ -13,7 +13,13 @@ public class ChessBoard {
     private List<IPiece[][]> history;
     private int movesSoFar;
 
-    public ChessBoard() {
+    /*
+        ################################
+            CONSTRUCTORS
+        ################################
+     */
+
+    ChessBoard() {
         this.whitePieces = new ArrayList<>();
         this.blackPieces = new ArrayList<>();
         this.board = generateChessBoard();
@@ -23,8 +29,7 @@ public class ChessBoard {
         this.recordHistory();
     }
 
-    // TODO: fix this constructor so that the black pieces and white pieces are updated.
-    public ChessBoard(IPiece[][] board, boolean whiteTurn) {
+    private ChessBoard(IPiece[][] board, boolean whiteTurn) {
         if (board.length != 8 || board[0].length != 8) {
             throw new IllegalArgumentException("Board is not regulation size");
         }
@@ -37,7 +42,21 @@ public class ChessBoard {
         this.initPieces();
     }
 
-    public boolean playGame(int fromX, int fromY, int toX, int toY) {
+    /*
+        ################################
+            PUBLIC / GEN
+        ################################
+     */
+
+    /**
+     * Master method for a turn in the game
+     * @param fromX - x-coordinate of target piece
+     * @param fromY - y-coordinate of target piece
+     * @param toX - x-coordinate of desired location
+     * @param toY - y-coordinate of desired location
+     * @return - true if valid move*, false otherwise
+     */
+    boolean playGame(int fromX, int fromY, int toX, int toY) {
         if (this.isValidMove(fromX, fromY, toX, toY)) {
             this.makeMove(fromX, fromY, toX, toY);
             this.nextTurn();
@@ -47,7 +66,11 @@ public class ChessBoard {
         }
     }
 
-    public boolean isWhiteTurn() {
+    /**
+     * Returns the current turn
+     * @return true if white's turn, false if black's
+     */
+    boolean isWhiteTurn() {
         return this.whiteTurn;
     }
 
@@ -136,10 +159,10 @@ public class ChessBoard {
 
     /**
      *  Tests a move in an isolated clone ChessBoard to see if it will result in king in check.
-     * @param fromX
-     * @param fromY
-     * @param toX
-     * @param toY
+     * @param fromX - x-coordinate of target piece
+     * @param fromY - y-coordinate of target piece
+     * @param toX - x-coordinate of desired location
+     * @param toY - y-coordinate of desired location
      * @return True if move results in no check, false otherwise
      */
     private boolean testMove(int fromX, int fromY, int toX, int toY){

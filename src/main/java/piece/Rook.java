@@ -1,5 +1,9 @@
 package piece;
 
+import common.Coord;
+
+import java.util.List;
+
 public class Rook extends AbstractPiece {
 
     public Rook(int x, int y, boolean isBlack) {
@@ -18,6 +22,11 @@ public class Rook extends AbstractPiece {
     public boolean isValidMove(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
         return super.validInlineMove(fromX, fromY, toX, toY)
                 || super.validLineMove(board, fromX, fromY, toX, toY, 8);
+    }
+
+    @Override
+    public List<Coord> getPossibleMoves(IPiece[][] board) {
+        return null;
     }
 
     @Override
