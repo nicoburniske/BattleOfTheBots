@@ -56,7 +56,7 @@ public abstract class AbstractPiece implements IPiece {
 
     public abstract boolean isValidMove(IPiece[][] board, int fromX, int fromY, int toX, int toY);
 
-    public abstract Coord[] possibleMoves();
+    public abstract List<Coord> getPossibleMoves(IPiece[][] board);
 
     public abstract IPiece copy();
 

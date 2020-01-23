@@ -13,7 +13,13 @@ public class ChessBoard {
     private List<IPiece[][]> history;
     private int movesSoFar;
 
-    public ChessBoard() {
+    /*
+        ################################
+            CONSTRUCTORS
+        ################################
+     */
+
+    ChessBoard() {
         this.whitePieces = new ArrayList<>();
         this.blackPieces = new ArrayList<>();
         this.board = generateChessBoard();
@@ -23,7 +29,7 @@ public class ChessBoard {
         this.recordHistory();
     }
 
-    public ChessBoard(IPiece[][] board, boolean whiteTurn) {
+    private ChessBoard(IPiece[][] board, boolean whiteTurn) {
         if (board.length != 8 || board[0].length != 8) {
             throw new IllegalArgumentException("Board is not regulation size");
         }
@@ -36,9 +42,23 @@ public class ChessBoard {
         this.initPieces();
     }
 
-    public boolean playGame(int fromX, int fromY, int toX, int toY) {
+    /*
+        ################################
+            PUBLIC / GEN
+        ################################
+     */
+
+    /**
+     * Master method for a turn in the game
+     * @param fromX - x-coordinate of target piece
+     * @param fromY - y-coordinate of target piece
+     * @param toX - x-coordinate of desired location
+     * @param toY - y-coordinate of desired location
+     * @return - true if valid move*, false otherwise
+     */
+    boolean playGame(int fromX, int fromY, int toX, int toY) {
         if (this.isValidMove(fromX, fromY, toX, toY)) {
-            forceMove(fromX, fromY, toX, toY);
+            performMove(fromX, fromY, toX, toY);
             this.nextTurn();
             return true;
         } else {
@@ -46,10 +66,18 @@ public class ChessBoard {
         }
     }
 
-    public boolean isWhiteTurn() {
+    /**
+     * Returns the current turn
+     * @return true if white's turn, false if black's
+     */
+    boolean isWhiteTurn() {
         return this.whiteTurn;
     }
 
+    /**
+     * Creates a new copy of the board
+     * @return - new copy of board
+     */
     public IPiece[][] getBoard() {
         IPiece[][] newBoard = new IPiece[8][8];
 
@@ -62,13 +90,16 @@ public class ChessBoard {
         return newBoard;
     }
 
+    /*
+        toString() method
+     */
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (int i = 7; i > -1; i--) {
             for (int j = 0; j < 8; j++) {
                 IPiece current = board[j][i];
                 if (current == null)
-                    sb.append("X ");
+                    sb.append("XX");
                 else {
                     sb.append(current.toString());
                 }
@@ -79,11 +110,11 @@ public class ChessBoard {
         return sb.toString();
     }
 
-
-    /*  ################################
+    /*
+        ################################
             PRIVATE METHODS
-        ################################    */
-
+        ################################
+    */
 
     /**
      *  Executes a castle
@@ -116,7 +147,7 @@ public class ChessBoard {
      */
     private boolean testMove(int fromX, int fromY, int toX, int toY){
         ChessBoard temp = new ChessBoard(this.getBoard(), this.isWhiteTurn());
-        temp.forceMove(fromX, fromY, toX, toY);
+        temp.performMove(fromX, fromY, toX, toY);
         return !temp.isInCheck();
     }
 
@@ -141,11 +172,8 @@ public class ChessBoard {
      */
     private boolean isInDanger(int x, int y){
         for (IPiece p : (this.whiteTurn ? this.blackPieces : this.whitePieces) ){
-            try {
-                if ( this.isValidMove(p.getX(), p.getY(), x, y) ) {
-                    return true;
-                }
-            } catch (Exception error){
+            if ( this.isValidMovePiece(p.getX(), p.getY(), x, y) ) {
+                return true;
             }
         }
         return false;
@@ -156,21 +184,17 @@ public class ChessBoard {
      * @param p - IPiece being evaluated
      * @return Array of coordinates of all valid moves for specified IPiece
      */
-    private Coord[] possibleMoves(IPiece p){
+    private List<Coord> possibleMoves(IPiece p){
         //TODO: Move method to AbstractPiece and introduce specific move seeking algorithms per piece
         //  Currently checks 64 moves on grid, can be significantly reduced.
-        ArrayList<Coord> moves = new ArrayList<>();
-        for (int i = 0; i < 8; i++){
-            for (int j = 0; j < 8; j++){
-                try {
-                    if ( this.isValidMove(p.getX(), p.getY(), j, i) ){
-                        moves.add(new Coord(j, i));
-                    }
-                } catch (Exception error){
-                }
+        //TODO: STILL SLOPPY, testMove() should be in Piece's getPossibleMoves()
+        List<Coord> pos_moves = new ArrayList<>(p.getPossibleMoves(this.getBoard()));
+        for (int i = 0; i < pos_moves.size(); i++){
+            if ( !testMove(p.getX(), p.getY(), pos_moves.get(i).getX(), pos_moves.get(i).getY()) ){
+                pos_moves.remove(i);
             }
         }
-        return (Coord[]) moves.toArray();
+       return pos_moves;
     }
 
     /**
@@ -179,10 +203,8 @@ public class ChessBoard {
      */
     private boolean hasRemainingMoves(){
         for (IPiece p : (this.whiteTurn ? this.whitePieces : this.blackPieces) ){
-            for (Coord c : possibleMoves(p)){
-                if ( testMove(p.getX(), p.getY(), c.getX(), c.getY()) ){
-                    return true;
-                }
+            if ( !this.possibleMoves(p).isEmpty() ){
+                return true;
             }
         }
         return false;
@@ -201,7 +223,43 @@ public class ChessBoard {
      * @param fromY - y-coordinate of target piece
      * @param toX - x-coordinate of desired location
      * @param toY - y-coordinate of desired location
-     * @return - True
+     * @return will return true if the given move is valid, and false otherwise.
+     */
+    private boolean isValidMoveBoolean(int fromX, int fromY, int toX, int toY) {
+        try {
+            return this.isValidMove(fromX, fromY, toX, toY);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Checks if the given piece is allowed to move to the given coordinate on the board.
+     * @param fromX - x-coordinate of target piece
+     * @param fromY - y-coordinate of target piece
+     * @param toX - x-coordinate of desired location
+     * @param toY - y-coordinate of desired location
+     * @return
+     */
+    private boolean isValidMovePiece(int fromX, int fromY, int toX, int toY){
+        IPiece from = this.board[fromX][fromY];
+        return from.isValidMove(this.board, fromX, fromY, toX, toY);
+    }
+
+    /**
+     * Makes sure:
+     * - Both coordinates are inside board.
+     * - From coordinate contains a piece.
+     * - Coordinates are not the same.
+     * - It is the correct player's turn.
+     * - Not moving to a space occupied by space of same color.
+     * - Delegates to individual piece logic.
+     *
+     * @param fromX - x-coordinate of target piece
+     * @param fromY - y-coordinate of target piece
+     * @param toX - x-coordinate of desired location
+     * @param toY - y-coordinate of desired location
+     * @return - True if the given move is valid, and will throw an exception otherwise.
      */
     //TODO: if isInCheck and the resulting move does not remove the player from being in check, then it is an invalid move
     // use constructor that takes in a 2d board to make a new ChessBoard (feed it this.getBoard(), and this.isWhiteTurn()) to have a copy of the board.
@@ -220,24 +278,23 @@ public class ChessBoard {
                 throw new IllegalArgumentException("Other player's move");
             } else if (to != null && (from.getIsBlack() && to.getIsBlack() || !(from.getIsBlack() || to.getIsBlack()))) {
                 throw new IllegalArgumentException("Cannot move to square occupied by piece of same color");
-            } else if  (!testMove(fromX, fromY, toX, toY) /*&& hasRemainingMoves()*/) {
-                throw new IllegalArgumentException("Move results with King in check");
             } else if (!from.isValidMove(this.board, fromX, fromY, toX, toY)) {
                 throw new IllegalArgumentException("Invalid move");
+            } else if (this.isInCheck() && !this.testMove(fromX, fromY, toX, toY)) {
+                throw new IllegalArgumentException("Move results with King in check");
             }
             return true;
         }
     }
 
     /**
-     * Forces a move without performing checks
-     *  ONLY FOR USE IN testMove() METHOD
+     * Performs a given move. Should be used after making check that it is a valid move.
      * @param fromX - x-coordinate of target piece
      * @param fromY - y-coordinate of target piece
      * @param toX - x-coordinate of desired location
      * @param toY - y-coordinate of desired location
      */
-    private void forceMove(int fromX, int fromY, int toX, int toY){
+    private void performMove(int fromX, int fromY, int toX, int toY){
         IPiece movedPiece = this.board[fromX][fromY];
         if (movedPiece instanceof King && Math.abs(fromX - toX) == 2) {
             this.executeCastle(fromX, toX, toY);
@@ -293,13 +350,11 @@ public class ChessBoard {
     /**
      * Removes a piece to its respective IPiece[] array
      * @param p - The piece being removed to the chessboard
-     * @return - The removed piece
      */
-    private IPiece removePiece(IPiece p) {
+    private void removePiece(IPiece p) {
         if (p != null) {
             (p.getIsBlack() ? this.blackPieces : this.whitePieces).remove(p);
         }
-        return p;
     }
 
     /**

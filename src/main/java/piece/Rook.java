@@ -2,6 +2,8 @@ package piece;
 
 import common.Coord;
 
+import java.util.List;
+
 public class Rook extends AbstractPiece {
 
     public Rook(int x, int y, boolean isBlack) {
@@ -23,9 +25,8 @@ public class Rook extends AbstractPiece {
     }
 
     @Override
-    public Coord[] possibleMoves() {
-        //Coord[] moves;
-        return new Coord[0];
+    public List<Coord> getPossibleMoves(IPiece[][] board) {
+        return null;
     }
 
     @Override

@@ -2,6 +2,8 @@ package piece;
 
 import common.Coord;
 
+import java.util.List;
+
 public class Pawn extends AbstractPiece {
 
     public Pawn(int x, int y, boolean isBlack) {
@@ -29,16 +31,15 @@ public class Pawn extends AbstractPiece {
     }
 
     @Override
-    public Coord[] possibleMoves() {
-        //Coord[] moves;
+    public List<Coord> getPossibleMoves(IPiece[][] board) {
         /**
          * four possibilities:
          *  - pawn moves (directional) 1
          *  - pawn moves (directional) 2 (first move)
-         *  - pawn moves (semi-directional (left)) 1 (capture possible)
-         *  - pawn moves (semi-directional (right)) 1 (capture possible)
+         *  - pawn moves (semi-directional (left)) 1 (capture possible) (en passent)
+         *  - pawn moves (semi-directional (right)) 1 (capture possible) (en passent)
          */
-        return new Coord[0];
+        return null;
     }
 
     @Override
