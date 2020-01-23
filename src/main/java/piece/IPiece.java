@@ -1,5 +1,9 @@
 package piece;
 
+import common.Coord;
+
+import java.util.List;
+
 public interface IPiece {
 
     int getX();
@@ -17,6 +21,8 @@ public interface IPiece {
     boolean isValidMove(IPiece[][] board, int fromX, int fromY, int toX, int toY);
 
     boolean movePiece(IPiece[][] board, int fromX, int fromY, int toX, int toY);
+
+    List<Coord> getPossibleMoves(IPiece[][] board);
 
     IPiece copy();
 }

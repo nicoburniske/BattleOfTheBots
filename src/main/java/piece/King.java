@@ -1,5 +1,10 @@
 package piece;
 
+import common.Coord;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class King extends AbstractPiece {
     public King(int x, int y, boolean isBlack) {
         super(x, y, isBlack);
@@ -20,6 +25,31 @@ public class King extends AbstractPiece {
             return isCastlingValid(board, fromX, fromY, toX, toY)
                     || this.isValidKingMove(board, fromX, fromY, toX, toY);
         }
+    }
+
+    /**
+     * Possible Moves (King)
+     *  - Coordinate on board (in-bounds)
+     *  - Coordinate not occupied by piece of same color
+     *
+     * @param board
+     * @return
+     */
+    @Override
+    public List<Coord> getPossibleMoves(IPiece[][] board) {
+        Coord self = new Coord(super.getX(), super.getY());
+        Coord[] skeleton = {
+                new Coord(0, 1), new Coord(1, 1),
+                new Coord(1, 0), new Coord(1, -1),
+                new Coord(0, -1), new Coord(-1, -1),
+                new Coord(-1, 0), new Coord(-1, 1)
+        };
+        List<Coord> moves = new ArrayList<>();
+        for (Coord c : skeleton){
+            Coord temp = c.addCoords(self);
+            if ( temp.isInsideBoard() && (super.getIsBlack() != board[temp.getX()][temp.getY()].getIsBlack()) ) moves.add(temp);
+        }
+        return moves;
     }
 
     public String toString() {
