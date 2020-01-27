@@ -1,6 +1,6 @@
 package com.burnyarosh;
 
-public class Main {
+public class ServiceMain {
     public static void main(String[] args) {
         ChessBoard board = new ChessBoard();
         System.out.println(board);

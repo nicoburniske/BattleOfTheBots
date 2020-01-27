@@ -28,7 +28,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.burnyarosh.Main</mainClass>
+                            <mainClass>com.burnyarosh.ServiceMain</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
