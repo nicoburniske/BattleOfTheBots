@@ -1,5 +1,6 @@
-import common.Coord;
-import piece.*;
+package com.burnyarosh;
+
+import com.burnyarosh.piece.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,8 +51,8 @@ public class ChessBoard {
 
     /**
      * Master method for a turn in the game
-     * @param fromX - x-coordinate of target piece
-     * @param fromY - y-coordinate of target piece
+     * @param fromX - x-coordinate of target com.burnyarosh.piece
+     * @param fromY - y-coordinate of target com.burnyarosh.piece
      * @param toX - x-coordinate of desired location
      * @param toY - y-coordinate of desired location
      * @return - true if valid move*, false otherwise
@@ -195,9 +196,9 @@ public class ChessBoard {
     }
 
     /**
-     *  Tests a move in an isolated clone ChessBoard to see if it will result in king in check.
-     * @param fromX - x-coordinate of target piece
-     * @param fromY - y-coordinate of target piece
+     *  Tests a move in an isolated clone com.burnyarosh.ChessBoard to see if it will result in king in check.
+     * @param fromX - x-coordinate of target com.burnyarosh.piece
+     * @param fromY - y-coordinate of target com.burnyarosh.piece
      * @param toX - x-coordinate of desired location
      * @param toY - y-coordinate of desired location
      * @return True if move results in no check, false otherwise
@@ -239,11 +240,11 @@ public class ChessBoard {
     /**
      * Makes sure:
      * - Both coordinates are inside board.
-     * - From coordinate contains a piece.
+     * - From coordinate contains a com.burnyarosh.piece.
      * - Coordinates are not the same.
      * - It is the correct player's turn.
      * - Not moving to a space occupied by space of same color.
-     * - Delegates to individual piece logic.
+     * - Delegates to individual com.burnyarosh.piece logic.
      *
      * @param fromX
      * @param fromY
@@ -252,7 +253,7 @@ public class ChessBoard {
      * @return will return true if the given move is valid, and will throw an exception otherwise.
      */
     //TODO: if isInCheck and the resulting move does not remove the player from being in check, then it is an invalid move
-    // use constructor that takes in a 2d board to make a new ChessBoard (feed it this.getBoard(), and this.isWhiteTurn()) to have a copy of the board.
+    // use constructor that takes in a 2d board to make a new com.burnyarosh.ChessBoard (feed it this.getBoard(), and this.isWhiteTurn()) to have a copy of the board.
     // perform the move on this board and if the king is still in check (for the player that moved, than the move is invalid.
     private boolean isValidMove(int fromX, int fromY, int toX, int toY) {
         if (!coordInsideBoard(fromX, fromY) || !coordInsideBoard(toX, toY)) {
@@ -261,13 +262,13 @@ public class ChessBoard {
             IPiece from = this.board[fromX][fromY];
             IPiece to = this.board[toX][toY];
             if (from == null) {
-                throw new IllegalArgumentException("Must move a piece");
+                throw new IllegalArgumentException("Must move a com.burnyarosh.piece");
             } else if (fromX == toX && fromY == toY) {
                 throw new IllegalArgumentException("Cannot move to same space");
             } else if (from.getIsBlack() && this.whiteTurn || !from.getIsBlack() && !this.whiteTurn) {
                 throw new IllegalArgumentException("Other player's move");
             } else if (to != null && (from.getIsBlack() && to.getIsBlack() || !(from.getIsBlack() || to.getIsBlack()))) {
-                throw new IllegalArgumentException("Cannot move to square occupied by piece of same color");
+                throw new IllegalArgumentException("Cannot move to square occupied by com.burnyarosh.piece of same color");
             } else if (!from.isValidMove(this.board, fromX, fromY, toX, toY)) {
                 throw new IllegalArgumentException("Invalid move");
             } else if (this.isInCheck() && !this.testMove(fromX, fromY, toX, toY)) {
@@ -280,11 +281,11 @@ public class ChessBoard {
     /**
      * Makes sure:
      * - Both coordinates are inside board.
-     * - From coordinate contains a piece.
+     * - From coordinate contains a com.burnyarosh.piece.
      * - Coordinates are not the same.
      * - It is the correct player's turn.
      * - Not moving to a space occupied by space of same color.
-     * - Delegates to individual piece logic.
+     * - Delegates to individual com.burnyarosh.piece logic.
      *
      * @param fromX
      * @param fromY
@@ -301,7 +302,7 @@ public class ChessBoard {
     }
 
     /**
-     * Checks if the given piece is allowed to move to the given coordinate on the board.
+     * Checks if the given com.burnyarosh.piece is allowed to move to the given coordinate on the board.
      * @param fromX
      * @param fromY
      * @param toX
@@ -314,7 +315,7 @@ public class ChessBoard {
     }
 
     /**
-     * Will determine if the given coordinate is within a ChessBoard.
+     * Will determine if the given coordinate is within a com.burnyarosh.ChessBoard.
      * @param x the x value of the given coordinate.
      * @param y the y value of the given coordinate.
      * @return true if the coordinate is within the bounds of the board, false otherwise.
@@ -340,7 +341,7 @@ public class ChessBoard {
     }
 
     /**
-     * Will remove the given piece from the appropriate list of pieces. Depends on the color/team of the IPiece parameter.
+     * Will remove the given com.burnyarosh.piece from the appropriate list of pieces. Depends on the color/team of the IPiece parameter.
      *  If p is null, nothing will happen.
      *
      * @param p the IPiece to be removed from the appropriate list of pieces.

@@ -1,6 +1,6 @@
-package piece;
+package com.burnyarosh.piece;
 
-import common.Coord;
+import com.burnyarosh.common.Coord;
 
 import java.util.List;
 
@@ -48,7 +48,7 @@ public class Pawn extends AbstractPiece {
     }
 
     private boolean isValidPawnMove(int fromX, int fromY, int toX, int toY, int direction, IPiece to) {
-        return (fromX == toX && (fromY + direction == toY))
+        return (fromX == toX && (fromY + direction == toY) && to == null)
                 || ((Math.abs(fromX - toX) == 1) && (fromY + direction == toY) && to != null);
     }
 

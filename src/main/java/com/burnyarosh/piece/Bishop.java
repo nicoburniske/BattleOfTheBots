@@ -1,6 +1,6 @@
-package piece;
+package com.burnyarosh.piece;
 
-import common.Coord;
+import com.burnyarosh.common.Coord;
 
 import java.util.List;
 
