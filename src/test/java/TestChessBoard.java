@@ -1,8 +1,10 @@
+import com.burnyarosh.ChessBoard;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 public class TestChessBoard {
     ChessBoard board1;
@@ -49,7 +51,7 @@ public class TestChessBoard {
 
         //  [BLACK] - move knight
         assertTrue(board1.playGame(3, 3, 5, 2));
-        
+
         //  [WHITE] - move knight
         assertTrue(board1.playGame(4, 3, 5, 5));
 
@@ -134,29 +136,6 @@ public class TestChessBoard {
     }
 
     @Test
-    public void testMovePawns() {
-        assertEquals(true, board1.isWhiteTurn());
-        // move white King pawn
-        assertEquals(true, board1.playGame(4, 1, 4, 3));
-
-        assertEquals(false, board1.isWhiteTurn());
-        // move black Queen pawn
-        assertEquals(true, board1.playGame(3, 6, 3, 4));
-
-        assertEquals(true, board1.isWhiteTurn());
-        // move white king pawn again
-        assertEquals(true, board1.playGame(4, 3, 4, 4));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testPawnStartMoveTwice() {
-        // move white King pawn
-        assertEquals(true, board1.playGame(4, 1, 4, 3));
-        // move white King pawn twice again. Should result in IllegalArgumentException
-        board1.playGame(4, 3, 4, 5);
-    }
-
-    @Test
     public void testCastle() {
         // move king side horse
         board1.playGame(6, 0, 5, 2);
@@ -175,15 +154,189 @@ public class TestChessBoard {
 
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    // King in Check exception unit test.
+    @Test
     public void testInvalidCheckMove() {
-        this.board1.playGame(3, 1, 3, 2);
-        this.board1.playGame(4, 6, 4, 5);
-        this.board1.playGame(0,1, 0,2);
-        this.board1.playGame(3, 7, 7, 3);
-        this.board1.playGame(0,2, 0, 3);
-        this.board1.playGame(5, 7, 1, 3);
-        this.board1.playGame(3,2,3,3);
-        System.out.println(this.board1);
+        try {
+            this.board1.playGame(3, 1, 3, 2);
+            this.board1.playGame(4, 6, 4, 5);
+            this.board1.playGame(0, 1, 0, 2);
+            this.board1.playGame(3, 7, 7, 3);
+            this.board1.playGame(0, 2, 0, 3);
+            this.board1.playGame(5, 7, 1, 3);
+            this.board1.playGame(3, 2, 3, 3);
+            fail("Exception not thrown");
+        } catch (IllegalStateException e) {
+            assertEquals("Move results with King in check", e.getMessage());
+        }
     }
+
+    // Black in checkmate exception and functionality unit test.
+    @Test
+    public void testCheckMate() {
+        /*
+        SCHOLARS MATE: 4 move checkmate
+         */
+        try {
+            board1.playGame(4, 1, 4, 3);
+            board1.playGame(2, 6, 2, 5);
+            board1.playGame(3, 0, 7, 4);
+            board1.playGame(0, 6, 0, 5);
+            board1.playGame(5, 0, 2, 3);
+            board1.playGame(0, 5, 0, 4);
+            board1.playGame(7, 4, 5, 6);
+            board1.playGame(0, 4, 0, 3);
+        } catch (IllegalStateException e) {
+            //TODO: make check for isGameOver() (is checkmate or stalemate)
+        }
+    }
+
+    @Test
+    public void testMovePawns() {
+        assertEquals(true, board1.isWhiteTurn());
+        // move white King pawn
+        assertEquals(true, board1.playGame(4, 1, 4, 3));
+
+        assertEquals(false, board1.isWhiteTurn());
+        // move black Queen pawn
+        assertEquals(true, board1.playGame(3, 6, 3, 4));
+
+        assertEquals(true, board1.isWhiteTurn());
+        // move white king pawn again
+        assertEquals(true, board1.playGame(4, 3, 4, 4));
+    }
+
+    @Test
+    public void testWhitePawnStartMoveTwice() {
+        try {
+            // move white King pawn
+            assertTrue(board1.playGame(4, 1, 4, 3));
+            assertTrue(board1.playGame(3, 6, 3, 5));
+            // move white King pawn twice again. Should result in IllegalArgumentException
+            board1.playGame(4, 3, 4, 5);
+            fail("Exception not thrown");
+        } catch (IllegalArgumentException e) {
+            assertEquals("Invalid move", e.getMessage());
+        }
+
+    }
+
+    @Test
+    public void testWhitePawnMoveThreeSquares() {
+        try {
+            this.board1.playGame(4, 1, 4, 4);
+            fail("Exception not thrown");
+        } catch (IllegalArgumentException e) {
+            assertEquals("Invalid move", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testWhitePawnMoveSideways() {
+        try {
+            this.board1.playGame(4, 1, 4, 3);
+            this.board1.playGame(4, 6, 4, 4);
+            this.board1.playGame(4, 3, 5, 3);
+            fail("Exception not thrown");
+        } catch (IllegalArgumentException e) {
+            assertEquals("Invalid move", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testMoveQueenThroughPawn() {
+        try {
+            this.board1.playGame(4, 0, 4, 2);
+            fail("Exception not thrown");
+        } catch (IllegalArgumentException e) {
+            assertEquals("Invalid move", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testMoveBishopThroughPawn() {
+        try {
+            this.board1.playGame(2, 0, 4, 2);
+            fail("Exception not thrown");
+        } catch (IllegalArgumentException e) {
+            assertEquals("Invalid move", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testMoveKingThroughPawn() {
+        try {
+            this.board1.playGame(3, 0, 3, 1);
+            fail("Exception not thrown");
+        } catch (IllegalArgumentException e) {
+            assertEquals("Cannot move to square occupied by com.burnyarosh.piece of same color", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testMoveCastleThroughPawn() {
+        try {
+            this.board1.playGame(0, 0, 0, 2);
+            fail("Exception not thrown");
+        } catch (IllegalArgumentException e) {
+            assertEquals("Invalid move", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testEntireGame() {
+        board1.playGame(4, 1, 4, 3);
+        board1.playGame(4, 6, 4, 4);
+        board1.playGame(5, 0, 2, 3);
+        board1.playGame(3, 6, 3, 5);
+        board1.playGame(3, 0, 6, 3);
+        board1.playGame(1, 7, 2, 5);
+        board1.playGame(6, 3, 7, 4);
+        board1.playGame(6, 7, 5, 5);
+        board1.playGame(7, 4, 6, 4);
+        board1.playGame(6, 6, 6, 5);
+        board1.playGame(2, 3, 5, 6);
+        board1.playGame(4, 7, 5, 6);
+        board1.playGame(6, 4, 4, 2);
+        board1.playGame(5, 5, 6, 3);
+        board1.playGame(4, 2, 5, 2);
+        board1.playGame(5, 6, 6, 6);
+        board1.playGame(6, 0, 4, 1);
+        board1.playGame(3, 5, 3, 4);
+        board1.playGame(4, 3, 3, 4);
+        board1.playGame(2, 5, 3, 3);
+        board1.playGame(4, 1, 3, 3);
+        board1.playGame(4, 4, 3, 3);
+        board1.playGame(5, 2, 5, 3);
+        board1.playGame(3, 3, 3, 2);
+        board1.playGame(2, 1, 3, 2);
+        board1.playGame(2, 7, 5, 4);
+        board1.playGame(7, 1, 7, 2);
+        board1.playGame(3, 7, 3, 4);
+        board1.playGame(7, 2, 6, 3);
+        board1.playGame(3, 4, 6, 1);
+        board1.playGame(5, 3, 4, 4);
+        board1.playGame(6, 6, 6, 7);
+        board1.playGame(6, 3, 5, 4);
+        board1.playGame(6, 1, 7, 0);
+        board1.playGame(4, 0, 4, 1);
+        board1.playGame(7, 0, 2, 0);
+        board1.playGame(5, 4, 6, 5);
+        board1.playGame(7, 6, 6, 5);
+        board1.playGame(4, 4, 4, 5);
+        board1.playGame(6, 7, 6, 6);
+        board1.playGame(4, 5, 3, 6);
+        board1.playGame(6, 6, 7, 5);
+        board1.playGame(1, 0, 2, 2);
+        board1.playGame(2, 0, 0, 0);
+        board1.playGame(3, 6, 2, 6);
+        board1.playGame(0, 7, 4, 7);
+        board1.playGame(4, 1, 5, 2);
+        board1.playGame(5, 7, 6, 6);
+
+        /**
+         * Petey White, Nick Black.
+         */
+    }
+
 }

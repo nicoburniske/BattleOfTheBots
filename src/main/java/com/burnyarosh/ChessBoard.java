@@ -1,5 +1,6 @@
-import common.Coord;
-import piece.*;
+package com.burnyarosh;
+
+import com.burnyarosh.piece.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,7 @@ public class ChessBoard {
         ################################
      */
 
-    ChessBoard() {
+    public ChessBoard() {
         this.whitePieces = new ArrayList<>();
         this.blackPieces = new ArrayList<>();
         this.board = generateChessBoard();
@@ -29,7 +30,7 @@ public class ChessBoard {
         this.recordHistory();
     }
 
-    private ChessBoard(IPiece[][] board, boolean whiteTurn) {
+    public ChessBoard(IPiece[][] board, boolean whiteTurn) {
         if (board.length != 8 || board[0].length != 8) {
             throw new IllegalArgumentException("Board is not regulation size");
         }
@@ -56,7 +57,7 @@ public class ChessBoard {
      * @param toY - y-coordinate of desired location
      * @return - true if valid move*, false otherwise
      */
-    boolean playGame(int fromX, int fromY, int toX, int toY) {
+    public boolean playGame(int fromX, int fromY, int toX, int toY) {
         if (this.isValidMove(fromX, fromY, toX, toY)) {
             this.makeMove(fromX, fromY, toX, toY);
             this.nextTurn();
@@ -70,7 +71,7 @@ public class ChessBoard {
      * Returns the current turn
      * @return true if white's turn, false if black's
      */
-    boolean isWhiteTurn() {
+    public boolean isWhiteTurn() {
         return this.whiteTurn;
     }
 
@@ -252,7 +253,7 @@ public class ChessBoard {
      * @return will return true if the given move is valid, and will throw an exception otherwise.
      */
     //TODO: if isInCheck and the resulting move does not remove the player from being in check, then it is an invalid move
-    // use constructor that takes in a 2d board to make a new ChessBoard (feed it this.getBoard(), and this.isWhiteTurn()) to have a copy of the board.
+    // use constructor that takes in a 2d board to make a new chessBoard (feed it this.getBoard(), and this.isWhiteTurn()) to have a copy of the board.
     // perform the move on this board and if the king is still in check (for the player that moved, than the move is invalid.
     private boolean isValidMove(int fromX, int fromY, int toX, int toY) {
         if (!coordInsideBoard(fromX, fromY) || !coordInsideBoard(toX, toY)) {
@@ -271,7 +272,7 @@ public class ChessBoard {
             } else if (!from.isValidMove(this.board, fromX, fromY, toX, toY)) {
                 throw new IllegalArgumentException("Invalid move");
             } else if (this.isInCheck() && !this.testMove(fromX, fromY, toX, toY)) {
-                throw new IllegalArgumentException("Move results with King in check");
+                throw new IllegalStateException("Move results with King in check");
             }
             return true;
         }
