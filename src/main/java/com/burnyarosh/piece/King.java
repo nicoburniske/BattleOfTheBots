@@ -30,7 +30,7 @@ public class King extends AbstractPiece {
     /**
      * Possible Moves (King)
      *  - Coordinate on board (in-bounds)
-     *  - Coordinate not occupied by com.burnyarosh.piece of same color
+     *  - Coordinate not occupied by piece of same color
      *
      * @param board
      * @return

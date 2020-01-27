@@ -1,3 +1,4 @@
+import com.burnyarosh.ChessBoard;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -255,7 +256,7 @@ public class TestChessBoard {
     @Test
     public void testMoveBishopThroughPawn() {
         try {
-            this.board1.playGame(2,0,4,2);
+            this.board1.playGame(2, 0, 4, 2);
             fail("Exception not thrown");
         } catch (IllegalArgumentException e) {
             assertEquals("Invalid move", e.getMessage());
@@ -265,10 +266,10 @@ public class TestChessBoard {
     @Test
     public void testMoveKingThroughPawn() {
         try {
-            this.board1.playGame(3,0,3,1);
+            this.board1.playGame(3, 0, 3, 1);
             fail("Exception not thrown");
         } catch (IllegalArgumentException e) {
-            assertEquals("Cannot move to square occupied by piece of same color", e.getMessage());
+            assertEquals("Cannot move to square occupied by com.burnyarosh.piece of same color", e.getMessage());
         }
     }
 
@@ -280,6 +281,62 @@ public class TestChessBoard {
         } catch (IllegalArgumentException e) {
             assertEquals("Invalid move", e.getMessage());
         }
+    }
+
+    @Test
+    public void testEntireGame() {
+        board1.playGame(4, 1, 4, 3);
+        board1.playGame(4, 6, 4, 4);
+        board1.playGame(5, 0, 2, 3);
+        board1.playGame(3, 6, 3, 5);
+        board1.playGame(3, 0, 6, 3);
+        board1.playGame(1, 7, 2, 5);
+        board1.playGame(6, 3, 7, 4);
+        board1.playGame(6, 7, 5, 5);
+        board1.playGame(7, 4, 6, 4);
+        board1.playGame(6, 6, 6, 5);
+        board1.playGame(2, 3, 5, 6);
+        board1.playGame(4, 7, 5, 6);
+        board1.playGame(6, 4, 4, 2);
+        board1.playGame(5, 5, 6, 3);
+        board1.playGame(4, 2, 5, 2);
+        board1.playGame(5, 6, 6, 6);
+        board1.playGame(6, 0, 4, 1);
+        board1.playGame(3, 5, 3, 4);
+        board1.playGame(4, 3, 3, 4);
+        board1.playGame(2, 5, 3, 3);
+        board1.playGame(4, 1, 3, 3);
+        board1.playGame(4, 4, 3, 3);
+        board1.playGame(5, 2, 5, 3);
+        board1.playGame(3, 3, 3, 2);
+        board1.playGame(2, 1, 3, 2);
+        board1.playGame(2, 7, 5, 4);
+        board1.playGame(7, 1, 7, 2);
+        board1.playGame(3, 7, 3, 4);
+        board1.playGame(7, 2, 6, 3);
+        board1.playGame(3, 4, 6, 1);
+        board1.playGame(5, 3, 4, 4);
+        board1.playGame(6, 6, 6, 7);
+        board1.playGame(6, 3, 5, 4);
+        board1.playGame(6, 1, 7, 0);
+        board1.playGame(4, 0, 4, 1);
+        board1.playGame(7, 0, 2, 0);
+        board1.playGame(5, 4, 6, 5);
+        board1.playGame(7, 6, 6, 5);
+        board1.playGame(4, 4, 4, 5);
+        board1.playGame(6, 7, 6, 6);
+        board1.playGame(4, 5, 3, 6);
+        board1.playGame(6, 6, 7, 5);
+        board1.playGame(1, 0, 2, 2);
+        board1.playGame(2, 0, 0, 0);
+        board1.playGame(3, 6, 2, 6);
+        board1.playGame(0, 7, 4, 7);
+        board1.playGame(4, 1, 5, 2);
+        board1.playGame(5, 7, 6, 6);
+
+        /**
+         * Petey White, Nick Black.
+         */
     }
 
 }
