@@ -1,6 +1,6 @@
-package com.burnyarosh;
+package com.burnyarosh.board;
 
-import com.burnyarosh.piece.*;
+import com.burnyarosh.board.piece.IPiece;
 
 import java.util.ArrayList;
 import java.util.List;

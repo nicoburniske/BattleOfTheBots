@@ -1,6 +1,6 @@
-import com.burnyarosh.ChessBoard;
+import com.burnyarosh.board.ChessBoard;
 import org.junit.Before;
-import com.burnyarosh.piece.IPiece;
+import com.burnyarosh.board.piece.IPiece;
 
 public class TestPieces {
     ChessBoard board1;

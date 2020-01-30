@@ -1,7 +1,12 @@
 package com.burnyarosh;
 
+import com.burnyarosh.board.ChessBoard;
+
 public class ServiceMain {
     public static void main(String[] args) {
+        ApiMain api = new ApiMain();
+        api.startRouter();
+
         ChessBoard board = new ChessBoard();
         System.out.println(board);
     }

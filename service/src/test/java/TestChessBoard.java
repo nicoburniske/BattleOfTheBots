@@ -1,4 +1,4 @@
-import com.burnyarosh.ChessBoard;
+import com.burnyarosh.board.ChessBoard;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -269,7 +269,7 @@ public class TestChessBoard {
             this.board1.playGame(3, 0, 3, 1);
             fail("Exception not thrown");
         } catch (IllegalArgumentException e) {
-            assertEquals("Cannot move to square occupied by com.burnyarosh.piece of same color", e.getMessage());
+            assertEquals("Cannot move to square occupied by com.burnyarosh.board.piece of same color", e.getMessage());
         }
     }
 
@@ -334,6 +334,7 @@ public class TestChessBoard {
         board1.playGame(4, 1, 5, 2);
         board1.playGame(5, 7, 6, 6);
 
+        System.out.println(board1);
         /**
          * Petey White, Nick Black.
          */

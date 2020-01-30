@@ -1,4 +1,4 @@
-package com.burnyarosh.common;
+package com.burnyarosh.board.common;
 
 public class Coord {
     private int x;
