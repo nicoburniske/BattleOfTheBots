@@ -1,5 +1,6 @@
 package com.burnyarosh.board;
 
+import com.burnyarosh.board.common.Coord;
 import com.burnyarosh.board.piece.*;
 
 import java.util.ArrayList;
@@ -162,7 +163,7 @@ public class ChessBoard {
         int fromCastleX = direction > 0 ? 7 : 0;
         int toCastleX = direction > 0 ? 5 : 3;
 
-        if (isValidMove(fromCastleX, y, toCastleX, y)) {
+        if (isValidMoveBoolean(fromCastleX, y, toCastleX, y)) {
             IPiece castle = this.board[fromCastleX][y];
             castle.makeMove(toCastleX, y);
             this.board[fromCastleX][y] = null;
@@ -186,7 +187,9 @@ public class ChessBoard {
      */
     private void makeMove(int fromX, int fromY, int toX, int toY) {
         IPiece movedPiece = this.board[fromX][fromY];
-        if (movedPiece instanceof King && Math.abs(fromX - toX) == 2) {
+        if (movedPiece instanceof King
+                && Math.abs(fromX - toX) == 2
+                && !isInDangerBetween(fromX, fromY, toX, toY)) {
             this.executeCastle(fromX, toX, toY);
         }
         movedPiece.makeMove(toX, toY);
@@ -233,6 +236,13 @@ public class ChessBoard {
             if ( this.isValidMovePiece(p.getX(), p.getY(), x, y) ) {
                 return true;
             }
+        }
+        return false;
+    }
+
+    private boolean isInDangerBetween(int fromX, int fromY, int toX, int toY) {
+        for ( Coord coord : new Coord(fromX, fromY).calculatePointsBetweenInclusiveEnd((new Coord(toX, toY)))) {
+            if (this.isInDanger(coord.getX(), coord.getY())) return true;
         }
         return false;
     }

@@ -269,7 +269,7 @@ public class TestChessBoard {
             this.board1.playGame(3, 0, 3, 1);
             fail("Exception not thrown");
         } catch (IllegalArgumentException e) {
-            assertEquals("Cannot move to square occupied by com.burnyarosh.board.piece of same color", e.getMessage());
+            assertEquals("Cannot move to square occupied by piece of same color", e.getMessage());
         }
     }
 
