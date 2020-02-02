@@ -177,40 +177,14 @@ public class ChessBoard {
      */
     public double getScore(Map<Class, Double> values) {
         if (!this.isValidPieceValueMap(values)) throw new IllegalArgumentException("Invalid values map");
-        double whiteScore = 0;
-        double blackScore = 0;
+        double score = 0;
         for (IPiece b : this.blackPieces) {
-            if (b instanceof King) {
-                blackScore -= values.get(King.class);
-            } else if (b instanceof Bishop) {
-                blackScore -= values.get(Bishop.class);
-            } else if (b instanceof Knight) {
-                blackScore -= values.get(Knight.class);
-            } else if (b instanceof Pawn) {
-                blackScore -= values.get(Pawn.class);
-            } else if (b instanceof Queen) {
-                blackScore -= values.get(Queen.class);
-            } else if (b instanceof Rook) {
-                blackScore -= values.get(Rook.class);
-            }
+            score -= values.get(b.getClass());
         }
-        for (IPiece w : this.blackPieces) {
-            if (w instanceof King) {
-                blackScore += values.get(King.class);
-            } else if (w instanceof Bishop) {
-                blackScore += values.get(Bishop.class);
-            } else if (w instanceof Knight) {
-                blackScore += values.get(Knight.class);
-            } else if (w instanceof Pawn) {
-                blackScore += values.get(Pawn.class);
-            } else if (w instanceof Queen) {
-                blackScore += values.get(Queen.class);
-            } else if (w instanceof Rook) {
-                blackScore += values.get(Rook.class);
-            }
-
+        for (IPiece w : this.whitePieces) {
+            score += values.get(w.getClass());
         }
-        return (double) Math.round((blackScore + whiteScore) * 100) / 100;
+        return (double) Math.round(score * 100) / 100;
     }
 
     private boolean isValidPieceValueMap(Map<Class, Double> values) {
