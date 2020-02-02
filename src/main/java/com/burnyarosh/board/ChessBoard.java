@@ -14,7 +14,6 @@ public class ChessBoard {
     private List<IPiece> blackPieces;
     private boolean whiteTurn;
     private List<Move> moves;
-    private int movesSoFar;
 
     /*
         ################################
@@ -28,7 +27,6 @@ public class ChessBoard {
         this.board = generateChessBoard();
         this.whiteTurn = true;
         this.moves = new ArrayList<>();
-        this.movesSoFar = 0;
     }
 
     public ChessBoard(IPiece[][] board, boolean whiteTurn) {
@@ -40,7 +38,6 @@ public class ChessBoard {
         this.board = board;
         this.whiteTurn = whiteTurn;
         this.moves = new ArrayList<>();
-        movesSoFar = 0;
         this.initPieces();
     }
 
@@ -172,7 +169,6 @@ public class ChessBoard {
         int y = target.getY();
         int fromCastleX = direction > 0 ? 7 : 0;
         int toCastleX = direction > 0 ? 5 : 3;
-
         if (isValidMoveBoolean(new Coord(fromCastleX, y), new Coord(toCastleX, y))) {
             IPiece castle = this.board[fromCastleX][y];
             castle.makeMove(toCastleX, y);
@@ -205,9 +201,8 @@ public class ChessBoard {
     private boolean isValidEnPassant(Coord origin, Coord target){
         if ( this.board[origin.getX()][origin.getY()] instanceof Pawn && Math.abs(origin.getY() - target.getY()) == 1 && Math.abs(origin.getX() - target.getX()) == 1 && this.board[target.getX()][target.getY()] == null){ // std conditiona
             if ( (origin.getY() == (this.isWhiteTurn() ? 4 : 3)) ) {    //  Condition #1
-                if (this.movesSoFar > 3) { //  avoid OutOfBoundsException  (en passant impossible under 4 moves)
-                    //conditionS 2, 3, and 4
-                    return (this.moves.get(this.moves.size() - 2).getPiece() instanceof Pawn) && (this.board[target.getX()][origin.getY()].getMoveCount() == 1);
+                if (this.moves.size() > 3) { //  avoid OutOfBoundsException  (en passant impossible under 4 moves)
+                    return (this.moves.get(this.moves.size() - 2).getPiece() instanceof Pawn) && (this.board[target.getX()][origin.getY()].getMoveCount() == 1); //Conditions 2, 3, and 4
                 }
             }
         }
@@ -216,7 +211,6 @@ public class ChessBoard {
 
     /**
      * Performs a given move. Should be used after making check that it is a valid move.
-     *
      * @param origin - origin Coord obj
      * @param target - target Coord obj
      */
@@ -267,15 +261,12 @@ public class ChessBoard {
      */
     private boolean isInDanger(Coord target){
         for (IPiece p : (this.whiteTurn ? this.blackPieces : this.whitePieces) ){
-            if ( this.isValidMovePiece(new Coord(p.getX(), p.getY()), target) ) {
-                return true;
-            }
+            if (this.isValidMovePiece(new Coord(p.getX(), p.getY()), target)) return true;
         }
         return false;
     }
 
     /**
-     *
      * @param origin - origin Coord obj
      * @param target - target Coord obj
      * @return - true if is in danger, false otherwise
@@ -295,7 +286,6 @@ public class ChessBoard {
      * - It is the correct player's turn.
      * - Not moving to a space occupied by space of same color.
      * - Delegates to individual piece logic.
-     *
      * @param origin - origin Coord obj
      * @param target - target Coord obj
      * @return will return true if the given move is valid, and will throw an exception otherwise.
@@ -311,7 +301,7 @@ public class ChessBoard {
             IPiece to = this.board[target.getX()][target.getY()];
             if (from == null) {
                 throw new IllegalArgumentException("Must move a piece");
-            } else if (origin.getX() == target.getX() && origin.getY() == target.getY()) {  //TODO: update this to be target.equals(origin)
+            } else if (origin.equals(target)) {
                 throw new IllegalArgumentException("Cannot move to same space");
             } else if (from.getIsBlack() && this.whiteTurn || !from.getIsBlack() && !this.whiteTurn) {
                 throw new IllegalArgumentException("Other player's move");
@@ -334,7 +324,6 @@ public class ChessBoard {
      * - It is the correct player's turn.
      * - Not moving to a space occupied by space of same color.
      * - Delegates to individual piece logic.
-     *
      * @param origin - origin Coord obj
      * @param target - target Coord obj
      * @return will return true if the given move is valid, and false otherwise.
@@ -354,8 +343,7 @@ public class ChessBoard {
      * @return - true if given move can be made, false otherwise
      */
     private boolean isValidMovePiece(Coord origin, Coord target){
-        IPiece from = this.board[origin.getX()][origin.getY()];
-        return from.isValidMove(this.board, origin.getX(), origin.getY(), target.getX(), target.getY());    //TODO: update this method to use Coords
+        return this.board[origin.getX()][origin.getY()].isValidMove(this.board, origin.getX(), origin.getY(), target.getX(), target.getY()); //TODO: update this method to use Coords
     }
 
     /**
@@ -363,20 +351,18 @@ public class ChessBoard {
      */
     private void nextTurn() {
         this.whiteTurn = !this.whiteTurn;
-        this.movesSoFar++;
     }
 
     /**
-     * Will record the current state of the board by adding it to the history fields (List<IPiece[][]>)
+     * Updates the Move List with the most recent move
      */
     private void updateMoveList(Coord origin, IPiece p) {
-        this.moves.add(new Move(origin.getX(), origin.getX(), p)); //TODO: update this method to use Coord
+        this.moves.add(new Move(origin, p));
     }
 
     /**
      * Will remove the given piece from the appropriate list of pieces. Depends on the color/team of the IPiece parameter.
      *  If p is null, nothing will happen.
-     *
      * @param p the IPiece to be removed from the appropriate list of pieces.
      */
     private void removePiece(IPiece p) {
