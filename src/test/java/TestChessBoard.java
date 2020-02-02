@@ -20,6 +20,26 @@ public class TestChessBoard {
     }
 
     @Test
+    public void testEnPassant(){
+        //  [WHITE]
+        assertTrue(board1.playGame(1, 1, 1, 3));
+
+        //  [BLACK]
+        assertTrue(board1.playGame(0, 6, 0, 5));
+
+        //  [WHITE]
+        assertTrue(board1.playGame(1, 3, 1, 4));
+
+        //  [BLACK]
+        assertTrue(board1.playGame(2, 6, 2, 4));
+
+        //  [WHITE], En Passant
+        assertTrue(board1.playGame(1, 4, 2, 5));
+        System.out.println(board1);
+
+    }
+
+    @Test
     public void testMoveKnights() {
         //  [WHITE] - move queen-side knight
         assertTrue(board1.playGame(1, 0, 2, 2));
@@ -315,7 +335,6 @@ public class TestChessBoard {
         board1.playGame(4, 1, 5, 2);
         board1.playGame(5, 7, 6, 6);
 
-        System.out.println(board1);
         /**
          * Petey White, Nick Black.
          */
