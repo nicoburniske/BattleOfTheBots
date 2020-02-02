@@ -16,14 +16,14 @@ public class Move {
     public Move(){
     }
 
-    public Move(int toX, int toY, IPiece p){
+    public Move(int fromX, int fromY, IPiece p){
         this.p = p;
-        this.target = new Coord(toX, toY);
-        this.origin = new Coord(p.getX(), p.getY());
+        this.target = new Coord(p.getX(), p.getY());
+        this.origin = new Coord(fromX, fromY);
     }
 
     public IPiece getPiece(){
-        //#TODO: Should this return a copy of IPiece p?
+        //TODO: Should this return a copy of IPiece p?
         return this.p;
     }
 
@@ -36,7 +36,8 @@ public class Move {
     }
 
     public String toString(){
-        return "lol";
+        //TODO: this
+        return "return algebraic notation of move";
     }
 
 }
