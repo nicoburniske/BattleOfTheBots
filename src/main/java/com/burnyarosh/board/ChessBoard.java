@@ -1,6 +1,7 @@
 package com.burnyarosh.board;
 
 import com.burnyarosh.board.common.Coord;
+import com.burnyarosh.board.common.Move;
 import com.burnyarosh.board.piece.*;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ public class ChessBoard {
     private List<IPiece> whitePieces;
     private List<IPiece> blackPieces;
     private boolean whiteTurn;
-    private List<IPiece[][]> history;
+    private List<Move> moves;
     private int movesSoFar;
 
     /*
@@ -26,9 +27,8 @@ public class ChessBoard {
         this.blackPieces = new ArrayList<>();
         this.board = generateChessBoard();
         this.whiteTurn = true;
-        this.history = new ArrayList<>();
+        this.moves = new ArrayList<>();
         this.movesSoFar = 0;
-        this.recordHistory();
     }
 
     public ChessBoard(IPiece[][] board, boolean whiteTurn) {
@@ -39,7 +39,7 @@ public class ChessBoard {
         this.blackPieces = new ArrayList<>();
         this.board = board;
         this.whiteTurn = whiteTurn;
-        this.history = new ArrayList<>();
+        this.moves = new ArrayList<>();
         movesSoFar = 0;
         this.initPieces();
     }
@@ -61,6 +61,7 @@ public class ChessBoard {
     public boolean playGame(int fromX, int fromY, int toX, int toY) {
         if (this.isValidMove(fromX, fromY, toX, toY)) {
             this.makeMove(fromX, fromY, toX, toY);
+            this.updateMoveList(fromX, fromY, board[toX][toY]);
             this.nextTurn();
             return true;
         } else {
@@ -192,7 +193,7 @@ public class ChessBoard {
             if ( fromY == (this.isWhiteTurn() ? 4 : 3) ) {
                 //condition 1 met
                 if (this.movesSoFar > 3) { //  avoids OutOfBounds for this.history.get() (impossible for en passant in under 4 moves)
-                    if (this.history.get(this.history.size() - 2)[toX][(this.isWhiteTurn() ? 1 : 6)] instanceof Pawn && (this.board[toX][fromY].getMoveCount() == 1)) {
+                    if (this.moves.get(this.moves.size() - 2).getPiece() instanceof Pawn && (this.board[toX][fromY].getMoveCount() == 1)) {
                         //conditionS 2, 3, and 4
                         return true;
                     }
@@ -367,14 +368,13 @@ public class ChessBoard {
     private void nextTurn() {
         this.whiteTurn = !this.whiteTurn;
         this.movesSoFar++;
-        this.recordHistory();
     }
 
     /**
      * Will record the current state of the board by adding it to the history fields (List<IPiece[][]>)
      */
-    private void recordHistory() {
-        this.history.add(this.getBoard());
+    private void updateMoveList(int fromX, int fromY, IPiece p) {
+        this.moves.add(new Move(fromX, fromY, p));
     }
 
     /**
