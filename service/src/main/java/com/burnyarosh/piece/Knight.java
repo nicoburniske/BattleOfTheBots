@@ -9,12 +9,12 @@ public class Knight extends AbstractPiece {
         super(x, y, isBlack);
     }
 
-    public Knight(int x, int y, boolean isBlack, boolean firstMove) {
-        super(x, y, isBlack, firstMove);
+    public Knight(int x, int y, boolean isBlack, boolean firstMove, int moveCount) {
+        super(x, y, isBlack, firstMove, moveCount);
     }
 
     public IPiece copy() {
-        return new Knight(super.getX(), super.getY(),super.getIsBlack(), super.getIsFirstMove());
+        return new Knight(super.getX(), super.getY(),super.getIsBlack(), super.getIsFirstMove(), super.getMoveCount());
     }
 
     @Override

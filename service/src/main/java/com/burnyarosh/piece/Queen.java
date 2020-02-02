@@ -10,8 +10,8 @@ public class Queen extends AbstractPiece {
         super(x, y, isBlack);
     }
 
-    public Queen(int x, int y, boolean isBlack, boolean firstMove) {
-        super(x, y, isBlack, firstMove);
+    public Queen(int x, int y, boolean isBlack, boolean firstMove, int moveCount) {
+        super(x, y, isBlack, firstMove, moveCount);
     }
 
     @Override
@@ -27,7 +27,7 @@ public class Queen extends AbstractPiece {
     }
 
     public IPiece copy() {
-        return new Queen(super.getX(), super.getY(), super.getIsBlack(), super.getIsFirstMove());
+        return new Queen(super.getX(), super.getY(), super.getIsBlack(), super.getIsFirstMove(), super.getMoveCount());
     }
 
     @Override

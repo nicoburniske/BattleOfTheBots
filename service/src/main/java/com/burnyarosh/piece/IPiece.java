@@ -12,6 +12,8 @@ public interface IPiece {
 
     boolean getIsBlack();
 
+    int getMoveCount();
+
     boolean getIsFirstMove();
 
     void makeMove(int x, int y);
