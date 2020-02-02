@@ -60,6 +60,10 @@ public class Coord {
         return res;
     }
 
+    public boolean equals(Coord c){
+        return (this.x == c.getX() && this.y == c.getY());
+    }
+
 
 
 }
