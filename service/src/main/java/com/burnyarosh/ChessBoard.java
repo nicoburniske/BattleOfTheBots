@@ -143,18 +143,16 @@ public class ChessBoard {
 
     // Private Methods
     private IPiece[][] generateChessBoard() {
-        IPiece[][] newBoard =
-                {
-                        {this.addPiece(new Rook(0, 0, false)), this.addPiece(new Pawn(0, 1, false)), null, null, null, null, this.addPiece(new Pawn(0, 6, true)), this.addPiece(new Rook(0, 7, true))},
-                        {this.addPiece(new Knight(1, 0, false)), this.addPiece(new Pawn(1, 1, false)), null, null, null, null, this.addPiece(new Pawn(1, 6, true)), this.addPiece(new Knight(1, 7, true))},
-                        {this.addPiece(new Bishop(2, 0, false)), this.addPiece(new Pawn(2, 1, false)), null, null, null, null, this.addPiece(new Pawn(2, 6, true)), this.addPiece(new Bishop(2, 7, true))},
-                        {this.addPiece(new Queen(3, 0, false)), this.addPiece(new Pawn(3, 1, false)), null, null, null, null, this.addPiece(new Pawn(3, 6, true)), this.addPiece(new Queen(3, 7, true))},
-                        {this.addPiece(new King(4, 0, false)), this.addPiece(new Pawn(4, 1, false)), null, null, null, null, this.addPiece(new Pawn(4, 6, true)), this.addPiece(new King(4, 7, true))},
-                        {this.addPiece(new Bishop(5, 0, false)), this.addPiece(new Pawn(5, 1, false)), null, null, null, null, this.addPiece(new Pawn(5, 6, true)), this.addPiece(new Bishop(5, 7, true))},
-                        {this.addPiece(new Knight(6, 0, false)), this.addPiece(new Pawn(6, 1, false)), null, null, null, null, this.addPiece(new Pawn(6, 6, true)), this.addPiece(new Knight(6, 7, true))},
-                        {this.addPiece(new Rook(7, 0, false)), this.addPiece(new Pawn(7, 1, false)), null, null, null, null, this.addPiece(new Pawn(7, 6, true)), this.addPiece(new Rook(7, 7, true))}
-                };
-        return newBoard;
+        return new IPiece[][] {
+                {this.addPiece(new Rook(0, 0, false)), this.addPiece(new Pawn(0, 1, false)), null, null, null, null, this.addPiece(new Pawn(0, 6, true)), this.addPiece(new Rook(0, 7, true))},
+                {this.addPiece(new Knight(1, 0, false)), this.addPiece(new Pawn(1, 1, false)), null, null, null, null, this.addPiece(new Pawn(1, 6, true)), this.addPiece(new Knight(1, 7, true))},
+                {this.addPiece(new Bishop(2, 0, false)), this.addPiece(new Pawn(2, 1, false)), null, null, null, null, this.addPiece(new Pawn(2, 6, true)), this.addPiece(new Bishop(2, 7, true))},
+                {this.addPiece(new Queen(3, 0, false)), this.addPiece(new Pawn(3, 1, false)), null, null, null, null, this.addPiece(new Pawn(3, 6, true)), this.addPiece(new Queen(3, 7, true))},
+                {this.addPiece(new King(4, 0, false)), this.addPiece(new Pawn(4, 1, false)), null, null, null, null, this.addPiece(new Pawn(4, 6, true)), this.addPiece(new King(4, 7, true))},
+                {this.addPiece(new Bishop(5, 0, false)), this.addPiece(new Pawn(5, 1, false)), null, null, null, null, this.addPiece(new Pawn(5, 6, true)), this.addPiece(new Bishop(5, 7, true))},
+                {this.addPiece(new Knight(6, 0, false)), this.addPiece(new Pawn(6, 1, false)), null, null, null, null, this.addPiece(new Pawn(6, 6, true)), this.addPiece(new Knight(6, 7, true))},
+                {this.addPiece(new Rook(7, 0, false)), this.addPiece(new Pawn(7, 1, false)), null, null, null, null, this.addPiece(new Pawn(7, 6, true)), this.addPiece(new Rook(7, 7, true))}
+        };
     }
 
     private void executeCastle(int fromX, int toX, int y) {
@@ -177,6 +175,33 @@ public class ChessBoard {
     }
 
     /**
+     * Checks to see if the move was a valid En Passant move.
+     * 1) capturor must be on its 5th rank
+     * 2) capturee must be on an adjacent file
+     * 3) capturee must have just moved two squares in a single move (double-step move)
+     * 4) the capture can only be made on the move immediately after the enemy pawn makes the double-step move
+     * @param fromX X coordinate to be moved from.
+     * @param fromY Y coordinate to be moved from.
+     * @param toX X coordinate to be moved to.
+     * @param toY Y coordinate to be moved to.
+     * @return
+     */
+    private boolean isValidEnPassant(int fromX, int fromY, int toX, int toY){
+        if ( this.board[fromX][fromY] instanceof Pawn && Math.abs(fromY - toY) == 1 && Math.abs(fromX - toX) == 1 && this.board[toX][toY] == null){ // std conditiona
+            if ( fromY == (this.isWhiteTurn() ? 4 : 3) ) {
+                //condition 1 met
+                if (this.movesSoFar > 3) { //  avoids OutOfBounds for this.history.get() (impossible for en passant in under 4 moves)
+                    if (this.history.get(this.history.size() - 2)[toX][(this.isWhiteTurn() ? 1 : 6)] instanceof Pawn && (this.board[toX][fromY].getMoveCount() == 1)) {
+                        //conditionS 2, 3, and 4
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Performs a given move. Should be used after making check that it is a valid move.
      *
      * @param fromX X coordinate to be moved from.
@@ -188,6 +213,8 @@ public class ChessBoard {
         IPiece movedPiece = this.board[fromX][fromY];
         if (movedPiece instanceof King && Math.abs(fromX - toX) == 2) {
             this.executeCastle(fromX, toX, toY);
+        } else if ( this.isValidEnPassant(fromX, fromY, toX, toY)){
+            this.board[toX][fromY] = null;
         }
         movedPiece.makeMove(toX, toY);
         this.removePiece(this.board[toX][toY]);
@@ -246,10 +273,10 @@ public class ChessBoard {
      * - Not moving to a space occupied by space of same color.
      * - Delegates to individual piece logic.
      *
-     * @param fromX
-     * @param fromY
-     * @param toX
-     * @param toY
+     * @param fromX - x-coordinate of target piece
+     * @param fromY - y-coordinate of target piece
+     * @param toX - x-coordinate of desired location
+     * @param toY - y-coordinate of desired location
      * @return will return true if the given move is valid, and will throw an exception otherwise.
      */
     //TODO: if isInCheck and the resulting move does not remove the player from being in check, then it is an invalid move
@@ -269,7 +296,7 @@ public class ChessBoard {
                 throw new IllegalArgumentException("Other player's move");
             } else if (to != null && (from.getIsBlack() && to.getIsBlack() || !(from.getIsBlack() || to.getIsBlack()))) {
                 throw new IllegalArgumentException("Cannot move to square occupied by piece of same color");
-            } else if (!from.isValidMove(this.board, fromX, fromY, toX, toY)) {
+            } else if (!from.isValidMove(this.board, fromX, fromY, toX, toY) && !this.isValidEnPassant(fromX, fromY, toX, toY)) {
                 throw new IllegalArgumentException("Invalid move");
             } else if (this.isInCheck() && !this.testMove(fromX, fromY, toX, toY)) {
                 throw new IllegalStateException("Move results with King in check");
@@ -287,10 +314,10 @@ public class ChessBoard {
      * - Not moving to a space occupied by space of same color.
      * - Delegates to individual piece logic.
      *
-     * @param fromX
-     * @param fromY
-     * @param toX
-     * @param toY
+     * @param fromX X coordinate to be moved from.
+     * @param fromY Y coordinate to be moved from.
+     * @param toX X coordinate to be moved to.
+     * @param toY Y coordinate to be moved to.
      * @return will return true if the given move is valid, and false otherwise.
      */
     private boolean isValidMoveBoolean(int fromX, int fromY, int toX, int toY) {
@@ -303,10 +330,10 @@ public class ChessBoard {
 
     /**
      * Checks if the given piece is allowed to move to the given coordinate on the board.
-     * @param fromX
-     * @param fromY
-     * @param toX
-     * @param toY
+     * @param fromX X coordinate to be moved from.
+     * @param fromY Y coordinate to be moved from.
+     * @param toX X coordinate to be moved to.
+     * @param toY Y coordinate to be moved to.
      * @return
      */
     private boolean isValidMovePiece(int fromX, int fromY, int toX, int toY){
