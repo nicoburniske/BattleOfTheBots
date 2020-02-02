@@ -1,6 +1,8 @@
 package com.burnyarosh.board.piece;
 
 import com.burnyarosh.board.common.Coord;
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,7 @@ public class King extends AbstractPiece {
     public IPiece copy() {
         return new King(super.getX(), super.getY(), super.getIsBlack(), super.getIsFirstMove());
     }
+
 
     public boolean isValidMove(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
         if (!super.getIsFirstMove()) {
@@ -55,6 +58,7 @@ public class King extends AbstractPiece {
     public String toString() {
         return super.toString() + "K";
     }
+
 
     private boolean isValidKingMove(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
         return (super.validDiagonalMove(fromX, fromY, toX, toY)

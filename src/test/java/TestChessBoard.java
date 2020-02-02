@@ -340,4 +340,9 @@ public class TestChessBoard {
          */
     }
 
+    @Test
+    public void testToJson() {
+        System.out.println(board1.toJson().toString());
+    }
+
 }

@@ -1,5 +1,8 @@
 package com.burnyarosh.board.common;
 
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,5 +64,15 @@ public class Coord {
     }
 
 
+    public JsonObject toJson() {
+        JsonObject ret = new JsonObject();
+        ret.put("file", this.getFile());
+        ret.put("rank", this.y + 1);
+        return ret;
+    }
 
+    private String getFile() {
+        String[] file = new String[]{"a", "b", "c", "d", "e", "f", "g"};
+        return file[this.x];
+    }
 }

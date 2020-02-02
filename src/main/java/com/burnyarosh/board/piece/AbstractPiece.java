@@ -1,6 +1,7 @@
 package com.burnyarosh.board.piece;
 
 import com.burnyarosh.board.common.Coord;
+import io.vertx.core.json.JsonObject;
 
 import java.util.List;
 
@@ -61,6 +62,12 @@ public abstract class AbstractPiece implements IPiece {
 
     public String toString() {
         return this.isBlack ? "B" : "W";
+    }
+
+    public JsonObject toJson() {
+        JsonObject ret = new JsonObject();
+        ret.put(this.toString(), new Coord(this.x, this.y).toJson());
+        return ret;
     }
 
     /**

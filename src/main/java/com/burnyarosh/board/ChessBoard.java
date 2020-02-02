@@ -2,6 +2,8 @@ package com.burnyarosh.board;
 
 import com.burnyarosh.board.common.Coord;
 import com.burnyarosh.board.piece.*;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -140,6 +142,22 @@ public class ChessBoard {
             newBoard[p.getX()][p.getY()] = p.copy();
         }
         return newBoard;
+    }
+
+    public JsonObject toJson() {
+        JsonObject ret = new JsonObject();
+        JsonArray whitePieces = new JsonArray();
+        for (IPiece w : this.whitePieces) {
+            whitePieces.add(w.toJson());
+        }
+        JsonArray blackPieces = new JsonArray();
+        for (IPiece b : this.blackPieces) {
+            whitePieces.add(b.toJson());
+        }
+        ret.put("white", whitePieces);
+        ret.put("black", blackPieces);
+
+        return ret;
     }
 
     // Private Methods

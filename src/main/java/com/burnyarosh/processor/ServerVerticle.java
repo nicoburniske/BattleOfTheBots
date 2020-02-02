@@ -41,7 +41,6 @@ public class ServerVerticle extends AbstractVerticle {
                             this.onPlayerConnection(websocket);
                             break;
                         case "/player/game":
-                            this.handlePlayerRequest(websocket);
                             break;
                         default:
                             LOGGER.warn(String.format("Invalid web socket: %s", websocket.path()));
@@ -53,28 +52,6 @@ public class ServerVerticle extends AbstractVerticle {
                     if (host.succeeded())
                         LOGGER.info(String.format("Game server initialized on port: %d", host.result().actualPort()));
                 });
-    }
-
-    private void handlePlayerRequest(ServerWebSocket websocket) {
-        websocket
-                .exceptionHandler(Throwable::printStackTrace)
-                .frameHandler(frame -> {
-                    JsonObject json = this.toJson(frame);
-                    if (this.isValidRequest(json)) {
-                        super.vertx.eventBus().request(json.getString("type"), new DeliveryOptions().setSendTimeout(10000),
-                                ar -> {
-                                    if (ar.failed()) {
-                                        LOGGER.error("Refusing connection", ar.cause());
-                                        this.closeQuietly(websocket);
-                                    } else {
-
-                                    }
-                                });
-                    }
-                    ;
-                });
-        websocket.accept();
-        websocket.writeTextMessage(websocket.remoteAddress().toString());
     }
 
     private void onPlayerConnection(ServerWebSocket websocket) {
@@ -97,10 +74,6 @@ public class ServerVerticle extends AbstractVerticle {
                 });
         websocket.accept();
         websocket.writeTextMessage(websocket.remoteAddress().toString());
-    }
-
-    private Handler<AsyncResult<Message<String>>> configureRegistration(AsyncResult<Object> result) {
-        return null;
     }
 
     private JsonObject toJson(WebSocketFrame frame) {
