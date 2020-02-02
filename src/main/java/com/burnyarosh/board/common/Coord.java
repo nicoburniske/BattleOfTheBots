@@ -62,7 +62,6 @@ public class Coord {
         return res;
     }
 
-
     public JsonObject toJson() {
         JsonObject ret = new JsonObject();
         ret.put("file", this.getFile());

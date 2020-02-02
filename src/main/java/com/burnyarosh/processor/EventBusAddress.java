@@ -1,20 +1,21 @@
 package com.burnyarosh.processor;
 
 public enum EventBusAddress {
-    NEW_PLAYER("new_player"),
-    NEW_MOVE("make_move"),
-    JOIN_LOBBY("join_lobby"),
-    NEW_LOBBY("new_lobby"),
-    LIST_LOBBIES("list_lobbies"),
-    LIST_PLAYERS("list_players");
+    NEW_PLAYER_ADDRESS("new.player"),
+    NEW_MOVE_ADDRESS("new.move"),
+    JOIN_LOBBY_ADDRESS("join.lobby"),
+    NEW_LOBBY_ADDRESS("new.lobby"),
+    LIST_LOBBY_ADDRESS("list.lobby"),
+    LIST_PLAYER_ADDRESS("list.player"),
+    LOBBY_BASE_ADDRESS("burnyarosh.lobby.");
 
-    private String type;
+    private String address;
 
     EventBusAddress(String type) {
-        this.type = type;
+        this.address = type;
     }
 
-    public String getType() {
-        return this.type;
+    public String getAddress() {
+        return this.address;
     }
 }

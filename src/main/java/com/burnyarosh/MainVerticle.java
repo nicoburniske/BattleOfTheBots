@@ -25,7 +25,6 @@ public class MainVerticle extends AbstractVerticle {
 
     private JsonObject initializeConfig() {
         JsonObject config = super.config();
-
         return config;
     }
 }

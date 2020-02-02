@@ -9,7 +9,6 @@ public class GameVerticle extends AbstractVerticle {
 
     @Override
     public void start(Future<Void> future) throws Exception {
-        /*String id = Entity.generateGUID();
-        this.game = new Game();*/
+
     }
 }
