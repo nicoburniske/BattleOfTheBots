@@ -10,12 +10,12 @@ public class Rook extends AbstractPiece {
         super(x, y, isBlack);
     }
 
-    public Rook(int x, int y, boolean isBlack, boolean isFirstMove) {
-        super(x, y, isBlack, isFirstMove);
+    public Rook(int x, int y, boolean isBlack, boolean isFirstMove, int moveCount) {
+        super(x, y, isBlack, isFirstMove, moveCount);
     }
 
     public IPiece copy() {
-        return new Rook(super.getX(), super.getY(), super.getIsBlack(), super.getIsFirstMove());
+        return new Rook(super.getX(), super.getY(), super.getIsBlack(), super.getIsFirstMove(), super.getMoveCount());
     }
 
     @Override
