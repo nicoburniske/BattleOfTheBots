@@ -5,17 +5,15 @@ import com.burnyarosh.board.piece.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 // represents a chess board
 public class ChessBoard {
-    private IPiece[][] board;
-    private List<IPiece> whitePieces;
-    private List<IPiece> blackPieces;
+    private final IPiece[][] board;
+    private final List<IPiece> whitePieces;
+    private final List<IPiece> blackPieces;
+    private final List<IPiece[][]> history;
     private boolean whiteTurn;
-    private List<IPiece[][]> history;
     private int movesSoFar;
 
     /*
@@ -55,10 +53,11 @@ public class ChessBoard {
 
     /**
      * Master method for a turn in the game
+     *
      * @param fromX - x-coordinate of target piece
      * @param fromY - y-coordinate of target piece
-     * @param toX - x-coordinate of desired location
-     * @param toY - y-coordinate of desired location
+     * @param toX   - x-coordinate of desired location
+     * @param toY   - y-coordinate of desired location
      * @return - true if valid move*, false otherwise
      */
     public boolean playGame(int fromX, int fromY, int toX, int toY) {
@@ -73,6 +72,7 @@ public class ChessBoard {
 
     /**
      * Returns the current turn
+     *
      * @return true if white's turn, false if black's
      */
     public boolean isWhiteTurn() {
@@ -161,54 +161,63 @@ public class ChessBoard {
         return ret;
     }
 
+    public double getScore() {
+        Map<Class, Double> values = new HashMap<>();
+        values.put(King.class, 1000.0);
+        values.put(Queen.class, 9.0);
+        values.put(Rook.class, 5.0);
+        values.put(Bishop.class, 3.0);
+        values.put(Knight.class, 3.0);
+        values.put(Pawn.class, 1.0);
+        return this.getScore(values);
+    }
+
     /**
-     *
+     * TODO: Reilly purpose statement and tests.
      */
-    public int getScore(Map<Class, Integer> values){
-        int whiteScore = 0;
-        int blackScore = 0;
-        for(IPiece b: this.blackPieces){
-            if(b instanceof King){
-                blackScore -= 1000;
-            }
-            else if(b instanceof Bishop){
-                blackScore -= 3;
-            }
-            else if(b instanceof Knight){
-                blackScore -= 3;
-            }
-            else if(b instanceof Pawn){
-                blackScore -= 1;
-            }
-            else if(b instanceof Queen){
-                blackScore -= 9;
-            }
-            else if(b instanceof Rook){
-                blackScore -= 5;
+    public double getScore(Map<Class, Double> values) {
+        if (!this.isValidPieceValueMap(values)) throw new IllegalArgumentException("Invalid values map");
+        double whiteScore = 0;
+        double blackScore = 0;
+        for (IPiece b : this.blackPieces) {
+            if (b instanceof King) {
+                blackScore -= values.get(King.class);
+            } else if (b instanceof Bishop) {
+                blackScore -= values.get(Bishop.class);
+            } else if (b instanceof Knight) {
+                blackScore -= values.get(Knight.class);
+            } else if (b instanceof Pawn) {
+                blackScore -= values.get(Pawn.class);
+            } else if (b instanceof Queen) {
+                blackScore -= values.get(Queen.class);
+            } else if (b instanceof Rook) {
+                blackScore -= values.get(Rook.class);
             }
         }
-        for(IPiece w: this.blackPieces){
-            if(w instanceof King){
-                blackScore += 1000;
-            }
-            else if(w instanceof Bishop){
-                blackScore += 3;
-            }
-            else if(w instanceof Knight){
-                blackScore += 3;
-            }
-            else if(w instanceof Pawn){
-                blackScore += 1;
-            }
-            else if(w instanceof Queen){
-                blackScore += 9;
-            }
-            else if(w instanceof Rook){
-                blackScore += 5;
+        for (IPiece w : this.blackPieces) {
+            if (w instanceof King) {
+                blackScore += values.get(King.class);
+            } else if (w instanceof Bishop) {
+                blackScore += values.get(Bishop.class);
+            } else if (w instanceof Knight) {
+                blackScore += values.get(Knight.class);
+            } else if (w instanceof Pawn) {
+                blackScore += values.get(Pawn.class);
+            } else if (w instanceof Queen) {
+                blackScore += values.get(Queen.class);
+            } else if (w instanceof Rook) {
+                blackScore += values.get(Rook.class);
             }
 
         }
-        return blackScore+whiteScore;
+        return (double) Math.round((blackScore + whiteScore) * 100) / 100;
+    }
+
+    private boolean isValidPieceValueMap(Map<Class, Double> values) {
+        if (values == null) return false;
+        Set<Class> set = new HashSet<>();
+        set.addAll(Arrays.asList(King.class, Queen.class, Rook.class, Bishop.class, Knight.class, Pawn.class));
+        return values.keySet().containsAll(set);
     }
 
     // Private Methods
@@ -251,8 +260,8 @@ public class ChessBoard {
      *
      * @param fromX X coordinate to be moved from.
      * @param fromY Y coordinate to be moved from.
-     * @param toX X coordinate to be moved to.
-     * @param toY Y coordinate to be moved to.
+     * @param toX   X coordinate to be moved to.
+     * @param toY   Y coordinate to be moved to.
      */
     private void makeMove(int fromX, int fromY, int toX, int toY) {
         IPiece movedPiece = this.board[fromX][fromY];
@@ -268,26 +277,28 @@ public class ChessBoard {
     }
 
     /**
-     *  Tests a move in an isolated clone ChessBoard to see if it will result in king in check.
+     * Tests a move in an isolated clone ChessBoard to see if it will result in king in check.
+     *
      * @param fromX - x-coordinate of target piece
      * @param fromY - y-coordinate of target piece
-     * @param toX - x-coordinate of desired location
-     * @param toY - y-coordinate of desired location
+     * @param toX   - x-coordinate of desired location
+     * @param toY   - y-coordinate of desired location
      * @return True if move results in no check, false otherwise
      */
-    private boolean testMove(int fromX, int fromY, int toX, int toY){
+    private boolean testMove(int fromX, int fromY, int toX, int toY) {
         ChessBoard temp = new ChessBoard(this.getBoard(), this.isWhiteTurn());
         temp.makeMove(fromX, fromY, toX, toY);
         return !temp.isInCheck();
     }
 
     /**
-     *  Checks if the current turn's king is in check
+     * Checks if the current turn's king is in check
+     *
      * @return - True if in check, false otherwise
      */
-    private boolean isInCheck(){
-        for (IPiece x : (this.whiteTurn ? this.whitePieces : this.blackPieces) ){
-            if (x.toString().charAt(1) == 'K'){
+    private boolean isInCheck() {
+        for (IPiece x : (this.whiteTurn ? this.whitePieces : this.blackPieces)) {
+            if (x.toString().charAt(1) == 'K') {
                 return isInDanger(x.getX(), x.getY());
             }
         }
@@ -296,13 +307,14 @@ public class ChessBoard {
 
     /**
      * Returns true is the square at the specified coordinates is at risk.
+     *
      * @param x - Target square's x coordinate
      * @param y - Target square's y coordinate
      * @return - True if target square is at risk, false otherwise
      */
-    private boolean isInDanger(int x, int y){
-        for (IPiece p : (this.whiteTurn ? this.blackPieces : this.whitePieces) ){
-            if ( this.isValidMovePiece(p.getX(), p.getY(), x, y) ) {
+    private boolean isInDanger(int x, int y) {
+        for (IPiece p : (this.whiteTurn ? this.blackPieces : this.whitePieces)) {
+            if (this.isValidMovePiece(p.getX(), p.getY(), x, y)) {
                 return true;
             }
         }
@@ -310,7 +322,7 @@ public class ChessBoard {
     }
 
     private boolean isInDangerBetween(int fromX, int fromY, int toX, int toY) {
-        for ( Coord coord : new Coord(fromX, fromY).calculatePointsBetweenInclusiveEnd((new Coord(toX, toY)))) {
+        for (Coord coord : new Coord(fromX, fromY).calculatePointsBetweenInclusiveEnd((new Coord(toX, toY)))) {
             if (this.isInDanger(coord.getX(), coord.getY())) return true;
         }
         return false;
@@ -382,19 +394,21 @@ public class ChessBoard {
 
     /**
      * Checks if the given piece is allowed to move to the given coordinate on the board.
+     *
      * @param fromX
      * @param fromY
      * @param toX
      * @param toY
      * @return
      */
-    private boolean isValidMovePiece(int fromX, int fromY, int toX, int toY){
+    private boolean isValidMovePiece(int fromX, int fromY, int toX, int toY) {
         IPiece from = this.board[fromX][fromY];
         return from.isValidMove(this.board, fromX, fromY, toX, toY);
     }
 
     /**
      * Will determine if the given coordinate is within a ChessBoard.
+     *
      * @param x the x value of the given coordinate.
      * @param y the y value of the given coordinate.
      * @return true if the coordinate is within the bounds of the board, false otherwise.
@@ -421,7 +435,7 @@ public class ChessBoard {
 
     /**
      * Will remove the given piece from the appropriate list of pieces. Depends on the color/team of the IPiece parameter.
-     *  If p is null, nothing will happen.
+     * If p is null, nothing will happen.
      *
      * @param p the IPiece to be removed from the appropriate list of pieces.
      */
@@ -438,7 +452,7 @@ public class ChessBoard {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 IPiece curr = this.board[i][j];
-                if(curr != null) {
+                if (curr != null) {
                     (curr.getIsBlack() ? this.blackPieces : this.whitePieces).add(curr);
                 }
             }
