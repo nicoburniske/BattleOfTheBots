@@ -1,6 +1,5 @@
 package com.burnyarosh.board.common;
 
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
@@ -72,7 +71,7 @@ public class Coord {
     }
 
     private String getFile() {
-        String[] file = new String[]{"a", "b", "c", "d", "e", "f", "g"};
+        String[] file = new String[]{"a", "b", "c", "d", "e", "f", "g", "h"};
         return file[this.x];
     }
 }

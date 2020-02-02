@@ -152,7 +152,7 @@ public class ChessBoard {
         }
         JsonArray blackPieces = new JsonArray();
         for (IPiece b : this.blackPieces) {
-            whitePieces.add(b.toJson());
+            blackPieces.add(b.toJson());
         }
         ret.put("white", whitePieces);
         ret.put("black", blackPieces);
