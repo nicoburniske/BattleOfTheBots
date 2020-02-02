@@ -2,6 +2,8 @@ import com.burnyarosh.board.ChessBoard;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashMap;
+
 import static org.junit.Assert.fail;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
@@ -344,6 +346,11 @@ public class TestChessBoard {
     public void testToJson() {
         System.out.println(board1.toJson().toString());
         //TODO: test this
+    }
+
+    @Test
+    public void testGetScore(){
+        assertEquals(0, this.board1.getScore(new HashMap<>()));
     }
 
 }

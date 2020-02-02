@@ -7,6 +7,7 @@ import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 // represents a chess board
 public class ChessBoard {
@@ -158,6 +159,56 @@ public class ChessBoard {
         ret.put("black", blackPieces);
 
         return ret;
+    }
+
+    /**
+     *
+     */
+    public int getScore(Map<Class, Integer> values){
+        int whiteScore = 0;
+        int blackScore = 0;
+        for(IPiece b: this.blackPieces){
+            if(b instanceof King){
+                blackScore -= 1000;
+            }
+            else if(b instanceof Bishop){
+                blackScore -= 3;
+            }
+            else if(b instanceof Knight){
+                blackScore -= 3;
+            }
+            else if(b instanceof Pawn){
+                blackScore -= 1;
+            }
+            else if(b instanceof Queen){
+                blackScore -= 9;
+            }
+            else if(b instanceof Rook){
+                blackScore -= 5;
+            }
+        }
+        for(IPiece w: this.blackPieces){
+            if(w instanceof King){
+                blackScore += 1000;
+            }
+            else if(w instanceof Bishop){
+                blackScore += 3;
+            }
+            else if(w instanceof Knight){
+                blackScore += 3;
+            }
+            else if(w instanceof Pawn){
+                blackScore += 1;
+            }
+            else if(w instanceof Queen){
+                blackScore += 9;
+            }
+            else if(w instanceof Rook){
+                blackScore += 5;
+            }
+
+        }
+        return blackScore+whiteScore;
     }
 
     // Private Methods
