@@ -1,15 +1,16 @@
 package com.burnyarosh.processor;
 
-public enum EventbusAddy {
+public enum EventBusAddress {
     NEW_PLAYER("new_player"),
     NEW_MOVE("make_move"),
     JOIN_LOBBY("join_lobby"),
-    LIST_LOBBY("list_lobbies"),
+    NEW_LOBBY("new_lobby"),
+    LIST_LOBBIES("list_lobbies"),
     LIST_PLAYERS("list_players");
 
     private String type;
 
-    EventbusAddy(String type) {
+    EventBusAddress(String type) {
         this.type = type;
     }
 

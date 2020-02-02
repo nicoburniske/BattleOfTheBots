@@ -12,36 +12,36 @@ import io.vertx.core.http.WebSocketFrame;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.BodyHandler;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.burnyarosh.Config.PORT_NUMBER;
+import static com.burnyarosh.processor.EventBusAddress.NEW_PLAYER;
 
 /**
  * Verticle to comprise of the backend WebSocket server.
  */
 public class ServerVerticle extends AbstractVerticle {
-    public final static Logger LOGGER = LoggerFactory.getLogger(ServerVerticle.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(ServerVerticle.class);
     private Map<String, String> addressToGuidMap = new HashMap<>();
     private JsonObject config;
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
-        Router router = Router.router(vertx);
-        router.route().handler(BodyHandler.create());
-
+        /*Router router = Router.router(vertx);
+        router.route().handler(BodyHandler.create());*/
+        vertx.deployVerticle(new GameLobbyVerticle());
         HttpServer server = vertx.createHttpServer();
         server.websocketHandler(
                 // websocket is of type ServerWebSocket
                 websocket -> {
-                    // handle handshake. if valid username generate player
-                    // websocket.setHandshake(Future.future(), this.handleHandShake(websocket));
                     switch (websocket.path()) {
                         case "/player":
                             this.onPlayerConnection(websocket);
+                            break;
+                        case "/player/game":
+                            this.handlePlayerRequest(websocket);
                             break;
                         default:
                             LOGGER.warn(String.format("Invalid web socket: %s", websocket.path()));
@@ -55,22 +55,47 @@ public class ServerVerticle extends AbstractVerticle {
                 });
     }
 
+    private void handlePlayerRequest(ServerWebSocket websocket) {
+        websocket
+                .exceptionHandler(Throwable::printStackTrace)
+                .frameHandler(frame -> {
+                    JsonObject json = this.toJson(frame);
+                    if (this.isValidRequest(json)) {
+                        super.vertx.eventBus().request(json.getString("type"), new DeliveryOptions().setSendTimeout(10000),
+                                ar -> {
+                                    if (ar.failed()) {
+                                        LOGGER.error("Refusing connection", ar.cause());
+                                        this.closeQuietly(websocket);
+                                    } else {
+
+                                    }
+                                });
+                    }
+                    ;
+                });
+        websocket.accept();
+        websocket.writeTextMessage(websocket.remoteAddress().toString());
+    }
+
     private void onPlayerConnection(ServerWebSocket websocket) {
         websocket
                 .exceptionHandler(Throwable::printStackTrace)
-                .frameHandler( frame -> {
-                  super.vertx.eventBus().request("register.player",
-                          new JsonObject().put("event", "login").put("message", this.toJson(frame)), new DeliveryOptions().setSendTimeout(10000),
-                          ar -> {
-                            if (ar.failed()) {
-                                LOGGER.error("Refusing connection", ar.cause());
-                            } else {
-
-                            }
-                          });
+                .frameHandler(frame -> {
+                    JsonObject json = this.toJson(frame);
+                    if (this.isValidRequest(json)) {
+                        super.vertx.eventBus().request(NEW_PLAYER.getType(), json,
+                                ar -> {
+                                    if (ar.failed()) {
+                                        LOGGER.error("Refusing connection", ar.cause());
+                                        this.closeQuietly(websocket);
+                                    } else {
+                                        websocket.writeTextMessage(ar.result().body().toString());
+                                    }
+                                });
+                    }
+                    ;
                 });
         websocket.accept();
-
         websocket.writeTextMessage(websocket.remoteAddress().toString());
     }
 
@@ -92,5 +117,17 @@ public class ServerVerticle extends AbstractVerticle {
         } catch (Exception ignored) {
 
         }
+    }
+
+    private boolean isValidRequest(JsonObject request) {
+        try {
+            String type = request.getString("type");
+            for (EventBusAddress req : EventBusAddress.values()) {
+                if (req.getType().equals(type)) return true;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return false;
     }
 }
