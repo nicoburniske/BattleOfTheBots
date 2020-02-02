@@ -16,10 +16,10 @@ public class Move {
     public Move(){
     }
 
-    public Move(int fromX, int fromY, IPiece p){
+    public Move(Coord origin, IPiece p){
         this.p = p;
         this.target = new Coord(p.getX(), p.getY());
-        this.origin = new Coord(fromX, fromY);
+        this.origin = origin;
     }
 
     public IPiece getPiece(){
