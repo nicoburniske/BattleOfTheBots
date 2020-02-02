@@ -7,15 +7,17 @@ import java.util.List;
 public abstract class AbstractPiece implements IPiece {
     private int x, y;
     private boolean isBlack, isFirstMove;
+    private int moveCount;
 
     AbstractPiece(int x, int y, boolean isBlack) {
-        this(x, y, isBlack, true);
+        this(x, y, isBlack, true, 0);
     }
 
-    AbstractPiece(int x, int y, boolean isBlack, boolean isFirstMove) {
+    AbstractPiece(int x, int y, boolean isBlack, boolean isFirstMove, int moveCount) {
         this.x = x;
         this.y = y;
         this.isBlack = isBlack;
+        this.moveCount = moveCount;
         this.isFirstMove = isFirstMove;
     }
 
@@ -34,6 +36,10 @@ public abstract class AbstractPiece implements IPiece {
         return this.y;
     }
 
+    public int getMoveCount() {
+        return this.moveCount;
+    }
+
     public boolean getIsFirstMove() {
         return this.isFirstMove;
     }
@@ -42,6 +48,7 @@ public abstract class AbstractPiece implements IPiece {
         this.x = x;
         this.y = y;
         this.isFirstMove = false;
+        this.moveCount++;
     }
 
     public boolean movePiece(IPiece[][] board, int fromX, int fromY, int toX, int toY) {

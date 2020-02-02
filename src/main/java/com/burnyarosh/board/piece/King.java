@@ -10,12 +10,12 @@ public class King extends AbstractPiece {
         super(x, y, isBlack);
     }
 
-    public King(int x, int y, boolean isBlack, boolean isFirstMove) {
-        super(x, y, isBlack, isFirstMove);
+    public King(int x, int y, boolean isBlack, boolean isFirstMove, int moveCount) {
+        super(x, y, isBlack, isFirstMove, moveCount);
     }
 
     public IPiece copy() {
-        return new King(super.getX(), super.getY(), super.getIsBlack(), super.getIsFirstMove());
+        return new King(super.getX(), super.getY(), super.getIsBlack(), super.getIsFirstMove(), super.getMoveCount());
     }
 
     public boolean isValidMove(IPiece[][] board, int fromX, int fromY, int toX, int toY) {

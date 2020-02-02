@@ -51,25 +51,6 @@ public class TestChessBoard {
 
         //  [BLACK] - move knight
         assertTrue(board1.playGame(3, 3, 5, 2));
-
-        //  [WHITE] - move knight
-        assertTrue(board1.playGame(4, 3, 5, 5));
-
-        //  [BLACK] - move knight
-        assertTrue(board1.playGame(3, 4, 2, 2));
-
-        //  [WHITE] - move knight
-        assertTrue(board1.playGame(2, 5, 1, 7));
-
-        //  [BLACK] - move knight
-        assertTrue(board1.playGame(5, 2, 6, 0));
-
-        //  [WHITE] - move knight
-        assertTrue(board1.playGame(5, 5, 6, 7));
-
-        //  [BLACK] - move knight
-        assertTrue(board1.playGame(2, 2, 1, 0));
-
     }
 
     @Test

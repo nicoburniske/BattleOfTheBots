@@ -10,12 +10,12 @@ public class Pawn extends AbstractPiece {
         super(x, y, isBlack);
     }
 
-    public Pawn(int x, int y, boolean isBlack, boolean firstMove) {
-        super(x, y, isBlack, firstMove);
+    public Pawn(int x, int y, boolean isBlack, boolean firstMove, int moveCount) {
+        super(x, y, isBlack, firstMove, moveCount);
     }
 
     public IPiece copy() {
-        return new Pawn(super.getX(), super.getY(),super.getIsBlack(), this.getIsFirstMove());
+        return new Pawn(super.getX(), super.getY(),super.getIsBlack(), this.getIsFirstMove(), this.getMoveCount());
     }
 
     @Override
