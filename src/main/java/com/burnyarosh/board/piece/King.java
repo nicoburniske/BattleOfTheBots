@@ -1,6 +1,7 @@
 package com.burnyarosh.board.piece;
 
 import com.burnyarosh.board.common.Coord;
+import com.burnyarosh.board.common.Move;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,7 @@ public class King extends AbstractPiece {
      * @return
      */
     @Override
-    public List<Coord> getPossibleMoves(IPiece[][] board) {
+    public List<Coord> getPossibleMoves(IPiece[][] board, List<Move> move_history) {
         Coord self = new Coord(super.getX(), super.getY());
         Coord[] skeleton = {
                 new Coord(0, 1), new Coord(1, 1),
