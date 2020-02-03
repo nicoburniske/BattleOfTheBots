@@ -119,7 +119,7 @@ public class ServerVerticle extends AbstractVerticle {
     }
 
     private boolean isValidRequest(JsonObject request) {
-        if (!request.containsKey("guid")) return false;
+        if (!request.containsKey("playerGUID")) return false;
         String type = request.getString("type");
         if (type == null || type.equals(NEW_PLAYER_REQUEST.getType())) return false;
         for (Request req : Request.values()) {

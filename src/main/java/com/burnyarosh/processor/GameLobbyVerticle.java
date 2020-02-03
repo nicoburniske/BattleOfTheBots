@@ -1,6 +1,7 @@
 package com.burnyarosh.processor;
 
 import com.burnyarosh.dto.Success;
+import com.burnyarosh.entity.Entity;
 import com.burnyarosh.entity.Game;
 import com.burnyarosh.entity.Player;
 import io.vertx.core.AbstractVerticle;
@@ -20,12 +21,21 @@ import java.util.Map;
 import static com.burnyarosh.processor.EventBusAddress.*;
 
 public class GameLobbyVerticle extends AbstractVerticle {
-    private final static Logger LOGGER = LoggerFactory.getLogger(GameLobbyVerticle.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GameLobbyVerticle.class);
+    private static final String ERROR_PLAYER_NAME_EXISTS = "Conflict: Username already taken";
+    private static final String ERROR_NO_PLAYER_EXISTS = "Error: Player does not exist";
+    private static final String ERROR_MALFORMED_REQUEST = "Malformed request";
+    private static final String ERROR_MALFORMED_REQUEST_TEMPLATE = "Malformed request: %s";
+
+    private static final String GAME_GUID = "gameGUID";
+    private static final String PLAYER_GUID = "playerGUID";
 
     List<Player> activePlayers = new ArrayList();
+    List<Game> activeGames = new ArrayList<>();
     private Map<String, Game> activeGamesById = new HashMap<>();
     private Map<String, Player> activePlayersById = new HashMap<>();
     private Map<String, Player> activePlayersByName = new HashMap<>();
+    private Map<String, String> verticleDeploymentByGUID = new HashMap<>();
 
     @Override
     public void start(Future<Void> future) throws Exception {
@@ -47,39 +57,66 @@ public class GameLobbyVerticle extends AbstractVerticle {
         LOGGER.info("Successfully deployed GameLobbyVerticle");
     }
 
-    private void newPlayer(Message<JsonObject> request) {
-        JsonObject req = request.body();
-        if (!req.containsKey("username")) request.fail(400, "Malformed request");
+    private void newPlayer(Message<JsonObject> message) {
+        JsonObject body = message.body();
+        if (!body.containsKey("username")) message.fail(400, ERROR_MALFORMED_REQUEST);
         for (Player p : activePlayers) {
-            if (req.getString("username").equals(p.getName())) request.fail(409, "Conflict: Username already taken");
+            if (body.getString("username").equals(p.getName())) message.fail(409, ERROR_PLAYER_NAME_EXISTS);
         }
-        Player temp = new Player(req.getString("username"), Player.generateGUID());
+        Player temp = new Player(body.getString("username"), Player.generateGUID());
         this.activePlayers.add(temp);
-        request.reply(new Success().put("guid", temp.getId()));
+        message.reply(new Success().put("playerGUID", temp.getId()));
     }
 
-    private void listPlayers(Message<Void> request) {
+    private void listPlayers(Message<Void> message) {
         JsonArray result = new JsonArray();
         this.activePlayers.forEach(player -> {
             result.add(player.getName());
         });
-        request.reply(new Success().put("players", result));
+        message.reply(new Success().put("players", result));
     }
 
-    private void listLobbies(Message<Void> request) {
+    private void listLobbies(Message<Void> message) {
         JsonArray result = new JsonArray();
         this.activeGamesById.keySet().forEach(key -> {
             result.add(key);
         });
-        request.reply(new Success().put("lobbies", result));
+        message.reply(new Success().put("lobbies", result));
     }
 
-    private JsonObject joinLobby(Message<JsonObject> objectMessage) {
+    private JsonObject joinLobby(Message<JsonObject> request) {
         return null;
     }
 
-    private JsonObject newLobby(Message<JsonObject> objectMessage) {
-        super.vertx.deployVerticle(new GameVerticle());
-        return null;
+    /**
+     * Message should have param guid
+     * TODO: is not currently part of existing lobby.
+     */
+    private void newLobby(Message<JsonObject> request) {
+        JsonObject req = request.body();
+        String guid = req.getString(PLAYER_GUID);
+        if (guid == null)
+            request.fail(400, String.format(ERROR_MALFORMED_REQUEST_TEMPLATE, "Missing guid from request"));
+        Player player = activePlayersById.get(guid);
+        if (player == null) request.fail(400, ERROR_NO_PLAYER_EXISTS);
+
+        String lobbyguid = Entity.generateGUID();
+        Game game = new Game(lobbyguid, lobbyguid, player);
+        activeGamesById.put(lobbyguid, game);
+        activeGames.add(game);
+
+        JsonObject config = new JsonObject();
+        config.put(GAME_GUID, lobbyguid);
+        config.put(PLAYER_GUID, player.getId());
+
+        super.vertx.deployVerticle(GameVerticle.class.getName(), ar -> {
+            if (ar.succeeded()) {
+                verticleDeploymentByGUID.put(guid, ar.result());
+                LOGGER.info(String.format("Deployed verticle %s for game %s", ar.result(), guid));
+                request.reply(new Success().put(GAME_GUID, guid));
+            } else {
+
+            }
+        });
     }
 }

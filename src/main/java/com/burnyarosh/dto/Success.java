@@ -6,7 +6,7 @@ public class Success extends AbstractDTO {
     }
 
     @Override
-    protected String getType() {
+    protected String getStatus() {
         return "success";
     }
 

@@ -5,8 +5,8 @@ import io.vertx.core.json.JsonObject;
 public abstract class AbstractDTO extends JsonObject {
 
     public AbstractDTO() {
-        this.put("type", getType());
+        this.put("status", getStatus());
     }
 
-    protected abstract String getType();
+    protected abstract String getStatus();
 }

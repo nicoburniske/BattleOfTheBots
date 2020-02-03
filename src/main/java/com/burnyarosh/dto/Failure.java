@@ -12,7 +12,7 @@ public class Failure extends AbstractDTO {
     }
 
     @Override
-    protected String getType() {
+    protected String getStatus() {
         return "error";
     }
 }
