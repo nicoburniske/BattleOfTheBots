@@ -2,6 +2,7 @@ package com.burnyarosh.board.common;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Coord {
     private int x;
@@ -60,10 +61,17 @@ public class Coord {
         return res;
     }
 
-    public boolean equals(Coord c){
-        return (this.x == c.getX() && this.y == c.getY());
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Coord coord = (Coord) o;
+        return this.x == coord.getX() &&
+                this.y == coord.getY();
     }
 
-
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
+    }
 }
