@@ -1,6 +1,6 @@
-package com.burnyarosh.dto;
+package com.burnyarosh.dto.out;
 
-public class Failure extends AbstractDTO {
+public class Failure extends AbstractResponseDTO {
     public Failure() {
         super();
         this.put("reason", "none");

@@ -31,10 +31,15 @@ public class Game extends Entity {
         return players[0] != null && players[1] != null;
     }
 
+    public boolean includesPlayer(String playerGUID) {
+        return this.players[0] != null && this.players[0].getId().equals(playerGUID)
+                || this.players[1] != null && this.players[1].getId().equals(playerGUID);
+    }
+
     @Override
     public JsonObject toJson() {
         JsonObject game = new JsonObject();
-        game.put("id", this.id);
+        game.put("gameGUID", this.id);
         JsonArray plyrs = new JsonArray();
         if (players[0] != null)
             plyrs.add(players[0].toJson());

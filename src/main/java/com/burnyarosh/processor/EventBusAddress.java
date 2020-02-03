@@ -7,7 +7,8 @@ public enum EventBusAddress {
     NEW_LOBBY_ADDRESS("new.lobby"),
     LIST_LOBBY_ADDRESS("list.lobby"),
     LIST_PLAYER_ADDRESS("list.player"),
-    LOBBY_BASE_ADDRESS("burnyarosh.lobby.");
+    LOBBY_BASE_ADDRESS("burnyarosh.lobby."),
+    UPDATE_PLAYERS_ADDRESS("burnyarosh.player.connection.update");
 
     private String address;
 

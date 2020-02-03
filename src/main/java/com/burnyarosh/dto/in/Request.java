@@ -1,4 +1,4 @@
-package com.burnyarosh.dto;
+package com.burnyarosh.dto.in;
 
 public enum Request {
     NEW_PLAYER_REQUEST("new_player"),

@@ -1,6 +1,6 @@
-package com.burnyarosh.dto;
+package com.burnyarosh.dto.out;
 
-public class Success extends AbstractDTO {
+public class Success extends AbstractResponseDTO {
     public Success () {
         super();
     }

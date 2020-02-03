@@ -1,11 +1,14 @@
 package com.burnyarosh.processor;
 
-import com.burnyarosh.dto.Request;
+import com.burnyarosh.dto.in.Request;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.http.WebSocketFrame;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -14,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.burnyarosh.Config.PORT_NUMBER;
-import static com.burnyarosh.dto.Request.*;
+import static com.burnyarosh.dto.in.Request.*;
 import static com.burnyarosh.processor.EventBusAddress.*;
 
 /**
@@ -23,8 +26,8 @@ import static com.burnyarosh.processor.EventBusAddress.*;
 public class ServerVerticle extends AbstractVerticle {
     private final static Logger LOGGER = LoggerFactory.getLogger(ServerVerticle.class);
     private Map<String, String> addressToGuidMap = new HashMap<>();
-    private JsonObject config;
     private Map<String, String> requestToEventBusAddress;
+    private Map<String, ServerWebSocket> playerIDtoSocket;
 
     @Override
     public void start(Promise<Void> promise) throws Exception {
@@ -52,24 +55,51 @@ public class ServerVerticle extends AbstractVerticle {
     }
 
     private void initialize() {
+        this.playerIDtoSocket = new HashMap<>();
         this.requestToEventBusAddress = new HashMap<>();
         this.requestToEventBusAddress.put(NEW_PLAYER_REQUEST.getType(), NEW_PLAYER_ADDRESS.getAddress());
         this.requestToEventBusAddress.put(NEW_LOBBY_REQUEST.getType(), NEW_LOBBY_ADDRESS.getAddress());
         this.requestToEventBusAddress.put(LIST_PLAYERS_REQUEST.getType(), LIST_PLAYER_ADDRESS.getAddress());
         this.requestToEventBusAddress.put(LIST_LOBBIES_REQUEST.getType(), LIST_LOBBY_ADDRESS.getAddress());
         this.requestToEventBusAddress.put(JOIN_LOBBY_REQUEST.getType(), JOIN_LOBBY_ADDRESS.getAddress());
+
+        MessageConsumer<JsonObject> updateClients = vertx.eventBus().consumer(UPDATE_PLAYERS_ADDRESS.getAddress());
+        updateClients.handler(this::updateClients);
+    }
+
+    private void updateClients(Message<JsonObject> jsonObjectMessage) {
+        JsonObject update = jsonObjectMessage.body();
+        JsonObject state = update.getJsonObject("state");
+        JsonArray players = update.getJsonArray("players");
+        for(int i = 0; i < players.size(); i++) {
+            sendMessageToClient(state, players.getString(i));
+        }
+    }
+
+    private void sendMessageToClient(JsonObject message, String playerGUID) {
+        this.playerIDtoSocket.get(playerGUID).writeTextMessage(message.toString());
     }
 
     private void onPlayerConnection(ServerWebSocket websocket) {
         websocket
                 .exceptionHandler(Throwable::printStackTrace)
-                .frameHandler(frame -> this.newConnectionHandler(frame, websocket));
+                .frameHandler(frame -> this.newConnectionHandler(frame, websocket))
+                .closeHandler(v -> this.dropConnectionHandler(websocket));
+    }
+
+    private void dropConnectionHandler(ServerWebSocket websocket) {
+        String address = websocket.remoteAddress().toString();
+        String guid = addressToGuidMap.get(address);
+        if (guid != null) {
+            addressToGuidMap.remove(address);
+        }
+        //TODO: publish message to event bus to remove player.
     }
 
     private void newConnectionHandler(WebSocketFrame frame, ServerWebSocket websocket) {
         JsonObject request = this.toJson(frame);
-        boolean isValid = (request.getString("type").equals(NEW_PLAYER_REQUEST.getType())
-                || request.getString("type").equals(LIST_PLAYERS_REQUEST.getType()));
+        boolean isValid = (request.getString("type").equals(NEW_PLAYER_REQUEST.getType()));
+        // || request.getString("type").equals(LIST_PLAYERS_REQUEST.getType()));
         if (isValid) {
             super.vertx.eventBus().request(this.requestToEventBusAddress.get(request.getString("type")), request,
                     ar -> {
@@ -77,7 +107,11 @@ public class ServerVerticle extends AbstractVerticle {
                             LOGGER.error("Refusing connection", ar.cause());
                             websocket.writeTextMessage(ar.cause().getMessage());
                         } else {
-                            websocket.writeTextMessage(ar.result().body().toString());
+                            JsonObject result = (JsonObject) ar.result().body();
+                            String playerGUID = result.getString("playerGUID");
+                            this.addressToGuidMap.put(websocket.remoteAddress().toString(), playerGUID);
+                            this.playerIDtoSocket.put(playerGUID, websocket);
+                            websocket.writeTextMessage(result.toString());
                             websocket.frameHandler(newFrame -> this.establishedConnectionHandler(newFrame, websocket));
                         }
                     });
@@ -102,6 +136,7 @@ public class ServerVerticle extends AbstractVerticle {
             websocket.writeTextMessage("Invalid Request.");
         }
     }
+
 
     private JsonObject toJson(WebSocketFrame frame) {
         return new JsonObject(frame.textData());

@@ -1,10 +1,10 @@
-package com.burnyarosh.dto;
+package com.burnyarosh.dto.out;
 
 import io.vertx.core.json.JsonObject;
 
-public abstract class AbstractDTO extends JsonObject {
+public abstract class AbstractResponseDTO extends JsonObject {
 
-    public AbstractDTO() {
+    public AbstractResponseDTO() {
         this.put("status", getStatus());
     }
 

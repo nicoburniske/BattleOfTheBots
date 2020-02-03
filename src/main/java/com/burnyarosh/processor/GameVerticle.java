@@ -1,16 +1,21 @@
 package com.burnyarosh.processor;
 
 import com.burnyarosh.board.ChessBoard;
+import com.burnyarosh.dto.out.Success;
 import com.burnyarosh.entity.Player;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.util.Objects;
 import java.util.Random;
 
 import static com.burnyarosh.processor.EventBusAddress.LOBBY_BASE_ADDRESS;
+import static com.burnyarosh.processor.EventBusAddress.UPDATE_PLAYERS_ADDRESS;
+import static com.burnyarosh.processor.GameLobbyVerticle.GAME_GUID;
 
 public class GameVerticle extends AbstractVerticle {
     private String lobbyID;
@@ -27,7 +32,29 @@ public class GameVerticle extends AbstractVerticle {
     }
 
     private void handleInput(Message<JsonObject> message) {
-        message.reply("URGAY");
+        JsonObject messageJSON = message.body();
+        String type = jsonValue(messageJSON, "type");
+        if (type.equals("setup")) {
+            this.lobbyID = jsonValue(messageJSON, GAME_GUID);
+            JsonArray players = jsonArrayValue(messageJSON, "players");
+            JsonObject player1 = players.getJsonObject(0);
+            this.players[0] = new Player(player1.getString("username"), player1.getString("id"));
+            JsonObject player2 = players.getJsonObject(0);
+            this.players[1] = new Player(player2.getString("username"), player2.getString("id"));
+            this.newGame();
+            message.reply(new Success());
+            this.sendGameUpdate();
+        }
+    }
+
+    private void sendGameUpdate() {
+        JsonObject update = new JsonObject();
+        update.put("state", this.board.toJson());
+        JsonArray players = new JsonArray();
+        players.add(this.players[0].getId());
+        players.add(this.players[1].getId());
+        update.put("players", players);
+        super.vertx.eventBus().publish(UPDATE_PLAYERS_ADDRESS.getAddress(), update);
     }
 
     private void newGame() {
@@ -43,5 +70,19 @@ public class GameVerticle extends AbstractVerticle {
      */
     public void setWhitePlayer(int whitePlayer) {
         this.whitePlayer = whitePlayer - 1;
+    }
+
+    public String jsonValue(JsonObject json, String key) {
+        Objects.requireNonNull(key);
+        String value = json.getString(key);
+        if (value == null) throw new IllegalArgumentException("Given key does not have a value");
+        return value;
+    }
+
+    public JsonArray jsonArrayValue(JsonObject json, String key) {
+        Objects.requireNonNull(key);
+        JsonArray value = json.getJsonArray(key);
+        if (value == null) throw new IllegalArgumentException("Given key does not have a value");
+        return value;
     }
 }

@@ -10,6 +10,6 @@ public class Player extends Entity {
 
     @Override
     public JsonObject toJson() {
-        return new JsonObject().put("name", super.name).put("id", super.id);
+        return new JsonObject().put("username", super.name).put("id", super.id);
     }
 }
