@@ -62,6 +62,9 @@ public class ChessBoard {
             this.performMove(origin, target);
             this.updateMoveList(origin, board[toX][toY]);
             this.nextTurn();
+            if (isCheckMate()){
+                throw new IllegalStateException("Current player is in Checkmate");
+            }
             return true;
         } else {
             return false;
@@ -239,6 +242,17 @@ public class ChessBoard {
         ChessBoard temp = new ChessBoard(this.getBoard(), this.isWhiteTurn());
         temp.performMove(origin, target);
         return !temp.isInCheck();
+    }
+
+    private boolean isCheckMate(){
+        if (isInCheck()){
+            for (IPiece p : this.isWhiteTurn() ? this.whitePieces : this.blackPieces){
+                for (Coord c : p.getPossibleMoves(this.board, moves)){
+                    if (testMove(new Coord(p.getX(), p.getY()), c)) return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

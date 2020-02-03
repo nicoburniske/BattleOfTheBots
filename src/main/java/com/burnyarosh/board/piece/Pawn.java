@@ -32,20 +32,17 @@ public class Pawn extends AbstractPiece {
         }
     }
 
+    /**
+     * four possibilities:
+     *  - pawn moves (directional) 1
+     *  - pawn moves (directional) 2 (first move)
+     *  - pawn moves (semi-directional (left)) 1 (capture possible) (en passent)
+     *  - pawn moves (semi-directional (right)) 1 (capture possible) (en passent)
+     */
     @Override
     public List<Coord> getPossibleMoves(IPiece[][] board, List<Move> move_history) {
-        //IPiece[][] board, List of moves
         Coord self = new Coord(super.getX(), super.getY());
         List<Coord> moves = new ArrayList<>();
-
-        /**
-         * four possibilities:
-         *  - pawn moves (directional) 1
-         *  - pawn moves (directional) 2 (first move)
-         *  - pawn moves (semi-directional (left)) 1 (capture possible) (en passent)
-         *  - pawn moves (semi-directional (right)) 1 (capture possible) (en passent)
-         */
-        //if the space ahead is null, move 1 is legal
         Coord temp1 = new Coord(self.getX(), (super.getIsBlack() ? -1 : 1)).addCoords(self);
         if (board[temp1.getX()][temp1.getY()] == null){
             moves.add(temp1);
@@ -55,9 +52,14 @@ public class Pawn extends AbstractPiece {
         if (super.getIsFirstMove() && isFirstMoveValid(self.getX(), self.getY(), temp2.getX(), temp2.getY(), (super.getIsBlack() ? -1 : 1), board[temp2.getX()][temp2.getY()])){
             moves.add(temp2);
         }
-        //TODO: FINISH LAST TWO TYPES OF MOVES
-        //if the diagonal left is occupied by enemy pawn, move 3 is legal
-        //en passe
+        Coord temp3 = new Coord(-1, (super.getIsBlack() ? -1 : 1)).addCoords(self);
+        if (temp3.isInsideBoard() && (this.isValidPawnMove(self.getX(), self.getY(), temp3.getX(), temp3.getY(), (super.getIsBlack() ? -1 : 1), board[temp3.getX()][temp3.getY()]) || isValidEnPassant(self, temp3, board, move_history))){
+            moves.add(temp3);
+        }
+        Coord temp4 = new Coord(1, (super.getIsBlack() ? -1 : 1)).addCoords(self);
+        if (temp4.isInsideBoard() && (this.isValidPawnMove(self.getX(), self.getY(), temp4.getX(), temp4.getY(), (super.getIsBlack() ? -1 : 1), board[temp4.getX()][temp4.getY()]) || isValidEnPassant(self, temp4, board, move_history))){
+            moves.add(temp4);
+        }
         return moves;
     }
 
