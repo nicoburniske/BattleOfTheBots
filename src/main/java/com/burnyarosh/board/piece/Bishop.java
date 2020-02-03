@@ -1,6 +1,7 @@
 package com.burnyarosh.board.piece;
 
 import com.burnyarosh.board.common.Coord;
+import com.burnyarosh.board.common.Move;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class Bishop extends AbstractPiece {
     }
 
     @Override
-    public List<Coord> getPossibleMoves(IPiece[][] board) {
+    public List<Coord> getPossibleMoves(IPiece[][] board, List<Move> move_history) {
         return null;
     }
 

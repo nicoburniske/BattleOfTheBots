@@ -1,7 +1,9 @@
 package com.burnyarosh.board.piece;
 
 import com.burnyarosh.board.common.Coord;
+import com.burnyarosh.board.common.Move;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Pawn extends AbstractPiece {
@@ -31,7 +33,11 @@ public class Pawn extends AbstractPiece {
     }
 
     @Override
-    public List<Coord> getPossibleMoves(IPiece[][] board) {
+    public List<Coord> getPossibleMoves(IPiece[][] board, List<Move> move_history) {
+        //IPiece[][] board, List of moves
+        Coord self = new Coord(super.getX(), super.getY());
+        List<Coord> moves = new ArrayList<>();
+
         /**
          * four possibilities:
          *  - pawn moves (directional) 1
@@ -39,8 +45,33 @@ public class Pawn extends AbstractPiece {
          *  - pawn moves (semi-directional (left)) 1 (capture possible) (en passent)
          *  - pawn moves (semi-directional (right)) 1 (capture possible) (en passent)
          */
-        return null;
+        //if the space ahead is null, move 1 is legal
+        Coord temp1 = new Coord(self.getX(), (super.getIsBlack() ? -1 : 1)).addCoords(self);
+        if (board[temp1.getX()][temp1.getY()] == null){
+            moves.add(temp1);
+        }
+        //  move 2
+        Coord temp2 = new Coord(self.getX(), (super.getIsBlack() ? -2 : 2)).addCoords(self);
+        if (super.getIsFirstMove() && isFirstMoveValid(self.getX(), self.getY(), temp2.getX(), temp2.getY(), (super.getIsBlack() ? -1 : 1), board[temp2.getX()][temp2.getY()])){
+            moves.add(temp2);
+        }
+        //TODO: FINISH LAST TWO TYPES OF MOVES
+        //if the diagonal left is occupied by enemy pawn, move 3 is legal
+        //en passe
+        return moves;
     }
+
+    private boolean isValidEnPassant(Coord origin, Coord target, IPiece[][] board, List<Move> move_history){
+        if ( board[origin.getX()][origin.getY()] instanceof Pawn && Math.abs(origin.getY() - target.getY()) == 1 && Math.abs(origin.getX() - target.getX()) == 1 && board[target.getX()][target.getY()] == null){ // std conditiona
+            if ( (origin.getY() == (super.getIsBlack() ? 3 : 4)) ) {    //  Condition #1
+                if (move_history.size() > 3) { //  avoid OutOfBoundsException  (en passant impossible under 4 moves)
+                    return (move_history.get(move_history.size() - 2).getPiece() instanceof Pawn) && (board[target.getX()][origin.getY()].getMoveCount() == 1); //Conditions 2, 3, and 4
+                }
+            }
+        }
+        return false;
+    }
+
 
     @Override
     public String toString() {
