@@ -2,7 +2,7 @@ package com.burnyarosh.processor;
 
 import com.burnyarosh.dto.Request;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.http.WebSocketFrame;
@@ -27,7 +27,7 @@ public class ServerVerticle extends AbstractVerticle {
     private Map<String, String> requestToEventBusAddress;
 
     @Override
-    public void start(Future<Void> startFuture) throws Exception {
+    public void start(Promise<Void> promise) throws Exception {
         //TODO: figure out rest api requests
         vertx.deployVerticle(new GameLobbyVerticle());
         HttpServer server = vertx.createHttpServer();
@@ -48,6 +48,7 @@ public class ServerVerticle extends AbstractVerticle {
                         LOGGER.info(String.format("Game server initialized on port: %d", host.result().actualPort()));
                 });
         this.initialize();
+        promise.complete();
     }
 
     private void initialize() {

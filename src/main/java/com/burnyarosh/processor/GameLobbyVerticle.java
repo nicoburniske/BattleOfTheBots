@@ -5,7 +5,8 @@ import com.burnyarosh.entity.Entity;
 import com.burnyarosh.entity.Game;
 import com.burnyarosh.entity.Player;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Future;
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonArray;
@@ -27,8 +28,9 @@ public class GameLobbyVerticle extends AbstractVerticle {
     private static final String ERROR_MALFORMED_REQUEST = "Malformed request";
     private static final String ERROR_MALFORMED_REQUEST_TEMPLATE = "Malformed request: %s";
 
-    private static final String GAME_GUID = "gameGUID";
-    private static final String PLAYER_GUID = "playerGUID";
+    static final String GAME_GUID = "gameGUID";
+    static final String PLAYER_GUID = "playerGUID";
+    static final String PLAYER_NAME = "playerNAME";
 
     List<Player> activePlayers = new ArrayList();
     List<Game> activeGames = new ArrayList<>();
@@ -38,7 +40,7 @@ public class GameLobbyVerticle extends AbstractVerticle {
     private Map<String, String> verticleDeploymentByGUID = new HashMap<>();
 
     @Override
-    public void start(Future<Void> future) throws Exception {
+    public void start(Promise<Void> promise) throws Exception {
         MessageConsumer<JsonObject> newPlayer = vertx.eventBus().consumer(NEW_PLAYER_ADDRESS.getAddress());
         newPlayer.handler(this::newPlayer);
 
@@ -55,6 +57,7 @@ public class GameLobbyVerticle extends AbstractVerticle {
         listPlayers.handler(this::listPlayers);
 
         LOGGER.info("Successfully deployed GameLobbyVerticle");
+        promise.complete();
     }
 
     private void newPlayer(Message<JsonObject> message) {
@@ -65,27 +68,43 @@ public class GameLobbyVerticle extends AbstractVerticle {
         }
         Player temp = new Player(body.getString("username"), Player.generateGUID());
         this.activePlayers.add(temp);
-        message.reply(new Success().put("playerGUID", temp.getId()));
+        this.activePlayersById.put(temp.getId(), temp);
+        message.reply(new Success().put(PLAYER_GUID, temp.getId()));
     }
 
     private void listPlayers(Message<Void> message) {
-        JsonArray result = new JsonArray();
+        JsonArray body = new JsonArray();
         this.activePlayers.forEach(player -> {
-            result.add(player.getName());
+            body.add(player.getName());
         });
-        message.reply(new Success().put("players", result));
+        message.reply(new Success().put("players", body));
     }
 
     private void listLobbies(Message<Void> message) {
         JsonArray result = new JsonArray();
-        this.activeGamesById.keySet().forEach(key -> {
-            result.add(key);
+        this.activeGames.stream().filter(game -> !game.gameIsReady()).forEach(game -> {
+            result.add(game.toJson());
         });
         message.reply(new Success().put("lobbies", result));
     }
 
-    private JsonObject joinLobby(Message<JsonObject> request) {
-        return null;
+    private void joinLobby(Message<JsonObject> message) {
+        JsonObject body = message.body();
+        String lobbyGUID = body.getString(GAME_GUID);
+        String playerGUID = body.getString(PLAYER_GUID);
+        if (lobbyGUID == null || playerGUID == null) message.fail(400, ERROR_MALFORMED_REQUEST);
+        //TODO: add logic here. is lobby full? how much info do you actually need in gameVerticle? do we need player info? yes probably.
+        if (activeGamesById.containsKey(lobbyGUID) && activePlayersById.containsKey(playerGUID)) {
+            super.vertx.eventBus().request(String.format(LOBBY_BASE_ADDRESS.getAddress(), verticleDeploymentByGUID.get(lobbyGUID)), new JsonObject(),
+                    ar -> {
+               if (ar.succeeded()) {
+                   activeGamesById.get(lobbyGUID).addSecondPlayer(activePlayersById.get(playerGUID));
+                   message.reply(new Success());
+               } else {
+                   message.fail(400, ar.cause().toString());
+               }
+            });
+        }
     }
 
     /**
@@ -97,25 +116,25 @@ public class GameLobbyVerticle extends AbstractVerticle {
         String guid = req.getString(PLAYER_GUID);
         if (guid == null)
             request.fail(400, String.format(ERROR_MALFORMED_REQUEST_TEMPLATE, "Missing guid from request"));
-        Player player = activePlayersById.get(guid);
+        Player player = this.activePlayersById.get(guid);
         if (player == null) request.fail(400, ERROR_NO_PLAYER_EXISTS);
 
         String lobbyguid = Entity.generateGUID();
         Game game = new Game(lobbyguid, lobbyguid, player);
-        activeGamesById.put(lobbyguid, game);
-        activeGames.add(game);
+        this.activeGamesById.put(lobbyguid, game);
+        this.activeGames.add(game);
 
         JsonObject config = new JsonObject();
         config.put(GAME_GUID, lobbyguid);
-        config.put(PLAYER_GUID, player.getId());
+        config.put("player1", player.toJson());
 
-        super.vertx.deployVerticle(GameVerticle.class.getName(), ar -> {
+        super.vertx.deployVerticle(GameVerticle.class.getName(), new DeploymentOptions(config), ar -> {
             if (ar.succeeded()) {
                 verticleDeploymentByGUID.put(guid, ar.result());
                 LOGGER.info(String.format("Deployed verticle %s for game %s", ar.result(), guid));
                 request.reply(new Success().put(GAME_GUID, guid));
             } else {
-
+                request.fail(400, ERROR_MALFORMED_REQUEST);
             }
         });
     }

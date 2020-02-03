@@ -1,5 +1,7 @@
 package com.burnyarosh.entity;
 
+import io.vertx.core.json.JsonObject;
+
 import java.util.Objects;
 import java.util.UUID;
 
@@ -12,6 +14,8 @@ public abstract class Entity {
     }
 
     public Entity(String name, String id) {
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(id);
         this.name = name;
         this.id = id;
     }
@@ -23,6 +27,8 @@ public abstract class Entity {
     public String getId() {
         return this.id;
     }
+
+    public abstract JsonObject toJson();
 
     @Override
     public boolean equals(Object o) {
