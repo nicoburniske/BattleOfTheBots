@@ -46,7 +46,24 @@ public class ChessBoard {
             PUBLIC METHODS
         ################################
      */
-
+    public boolean playGame(int originX, int originY, int targetX, int targetY, char promotion){
+        if (isGameOver()){
+            //GAME IS OVER HERE BECAUSE CHECKMATE DETECTED
+            return false;
+        } else {
+            Coord origin = new Coord(originX, originY);
+            Coord target = new Coord(targetX, targetY);
+            if (this.isValidMove(origin, target)) {
+                this.updateMoveList(board, origin, target);
+                this.performMove(origin, target);
+                this.nextTurn();
+                this.updatePreviousMove();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
     /**
      * Master method for a turn in the game
      * @param fromX - x-coordinate of target piece
@@ -66,6 +83,7 @@ public class ChessBoard {
                 this.updateMoveList(board, origin, target);
                 this.performMove(origin, target);
                 this.nextTurn();
+                this.updatePreviousMove();
                 return true;
             } else {
                 return false;
@@ -88,10 +106,10 @@ public class ChessBoard {
     public IPiece[][] getBoard() {
         IPiece[][] newBoard = new IPiece[8][8];
         for (IPiece p : this.whitePieces) {
-            newBoard[p.getX()][p.getY()] = p.copy();
+            newBoard[p.getCoord().getX()][p.getCoord().getY()] = p.copy();
         }
         for (IPiece p : this.blackPieces) {
-            newBoard[p.getX()][p.getY()] = p.copy();
+            newBoard[p.getCoord().getX()][p.getCoord().getY()] = p.copy();
         }
         return newBoard;
     }
@@ -146,7 +164,11 @@ public class ChessBoard {
             PRIVATE METHODS
         ################################
      */
-        
+
+    private void executePromotion(char p){
+
+    }
+
     private boolean isGameOver(){
         return isCheckmate();
     }
@@ -155,7 +177,7 @@ public class ChessBoard {
         if (isInCheck()){
             for (IPiece p : this.isWhiteTurn() ? this.whitePieces : this.blackPieces){
                 for (Coord c : p.getPossibleMoves(this.board, moves)){
-                    if (tryMove(new Coord(p.getX(), p.getY()), c)){
+                    if (tryMove(p.getCoord(), c)){
                         return false;
                     }
                 }
@@ -190,8 +212,9 @@ public class ChessBoard {
             this.executeCastle(origin, target);
         } else if ( this.isValidEnPassant(origin, target)){
             this.board[target.getX()][origin.getY()] = null;
+            this.moves.get(this.moves.size()-1).setEnPassant();
         }
-        movedPiece.makeMove(target.getX(), target.getY());
+        movedPiece.makeMove(target);
         this.removePiece(this.board[target.getX()][target.getY()]);
         this.board[target.getX()][target.getY()] = movedPiece;
         this.board[origin.getX()][origin.getY()] = null;
@@ -209,7 +232,7 @@ public class ChessBoard {
         int toCastleX = direction > 0 ? 5 : 3;
         if (isValidMoveBoolean(new Coord(fromCastleX, y), new Coord(toCastleX, y))) {
             IPiece castle = this.board[fromCastleX][y];
-            castle.makeMove(toCastleX, y);
+            castle.makeMove(new Coord(toCastleX, y));
             this.board[fromCastleX][y] = null;
             this.board[toCastleX][y] = castle;
         }
@@ -243,7 +266,7 @@ public class ChessBoard {
     private boolean isInCheck(){
         for (IPiece p : (this.whiteTurn ? this.whitePieces : this.blackPieces) ){
             if (p.toString().charAt(1) == 'K'){
-                return isInDanger(new Coord(p.getX(), p.getY()));
+                return isInDanger(p.getCoord());
             }
         }
         return true;
@@ -268,7 +291,7 @@ public class ChessBoard {
      */
     private boolean isInDanger(Coord target){
         for (IPiece p : (this.whiteTurn ? this.blackPieces : this.whitePieces) ){
-            if (this.isValidMovePiece(new Coord(p.getX(), p.getY()), target)) return true;
+            if (this.isValidMovePiece(p.getCoord(), target)) return true;
         }
         return false;
     }
@@ -280,7 +303,7 @@ public class ChessBoard {
      * @return - true if given move can be made, false otherwise
      */
     private boolean isValidMovePiece(Coord origin, Coord target){
-        return this.board[origin.getX()][origin.getY()].isValidMove(this.board, origin.getX(), origin.getY(), target.getX(), target.getY()); //TODO: update this method to use Coords
+        return this.board[origin.getX()][origin.getY()].isValidMove(this.board, origin, target);
     }
 
     /**
@@ -332,7 +355,7 @@ public class ChessBoard {
                 throw new IllegalArgumentException("Other player's move");
             } else if (to != null && (from.getIsBlack() && to.getIsBlack() || !(from.getIsBlack() || to.getIsBlack()))) {
                 throw new IllegalArgumentException("Cannot move to square occupied by piece of same color");
-            } else if (!from.isValidMove(this.board, origin.getX(), origin.getY(), target.getX(), target.getY()) && !this.isValidEnPassant(origin, target)) {   //TODO: update IPiece.isValidMove method to take Coord as params
+            } else if (!from.isValidMove(this.board, origin, target) && !this.isValidEnPassant(origin, target)) {
                 throw new IllegalArgumentException("Invalid move");
             } else if (this.isInCheck() && !this.tryMove(origin, target)) {
                 throw new IllegalStateException("Move results with King in check");
@@ -382,6 +405,17 @@ public class ChessBoard {
     private void updateMoveList(IPiece[][] board, Coord origin, Coord target) {
         this.moves.add(new Move(board, origin, target));
     }
+
+    private void updatePreviousMove(){
+        if (isInCheck()){
+            this.moves.get(this.moves.size()-1).setIsCheck();
+            if (isCheckmate()){
+                this.moves.get(this.moves.size()-1).setIsCheckmate();
+            }
+        }
+    }
+
+
 
     /**
      * Will remove the given piece from the appropriate list of pieces. Depends on the color/team of the IPiece parameter.
