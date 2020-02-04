@@ -63,8 +63,8 @@ public class ChessBoard {
             Coord origin = new Coord(fromX, fromY);
             Coord target = new Coord(toX, toY);
             if (this.isValidMove(origin, target)) {
+                this.updateMoveList(board, origin, target);
                 this.performMove(origin, target);
-                this.updateMoveList(origin, board[toX][toY]);
                 this.nextTurn();
                 return true;
             } else {
@@ -146,22 +146,55 @@ public class ChessBoard {
             PRIVATE METHODS
         ################################
      */
+        
+    private boolean isGameOver(){
+        return isCheckmate();
+    }
+
+    private boolean isCheckmate(){
+        if (isInCheck()){
+            for (IPiece p : this.isWhiteTurn() ? this.whitePieces : this.blackPieces){
+                for (Coord c : p.getPossibleMoves(this.board, moves)){
+                    if (tryMove(new Coord(p.getX(), p.getY()), c)){
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        return false;
+    }
 
     /**
-     *  Generates a new default IPiece[][] board with all pieces in their starting positions
-      * @return - new default IPiece[][] board
+     *  Tests a move in an isolated clone ChessBoard to see if it will result in king in check.
+     * @param origin - origin Coord obj
+     * @param target - target Coord obj
+     * @return True if move results in no check, false otherwise
      */
-    private IPiece[][] generateChessBoard() {
-        return new IPiece[][] {
-                {this.addPiece(new Rook(0, 0, false)), this.addPiece(new Pawn(0, 1, false)), null, null, null, null, this.addPiece(new Pawn(0, 6, true)), this.addPiece(new Rook(0, 7, true))},
-                {this.addPiece(new Knight(1, 0, false)), this.addPiece(new Pawn(1, 1, false)), null, null, null, null, this.addPiece(new Pawn(1, 6, true)), this.addPiece(new Knight(1, 7, true))},
-                {this.addPiece(new Bishop(2, 0, false)), this.addPiece(new Pawn(2, 1, false)), null, null, null, null, this.addPiece(new Pawn(2, 6, true)), this.addPiece(new Bishop(2, 7, true))},
-                {this.addPiece(new Queen(3, 0, false)), this.addPiece(new Pawn(3, 1, false)), null, null, null, null, this.addPiece(new Pawn(3, 6, true)), this.addPiece(new Queen(3, 7, true))},
-                {this.addPiece(new King(4, 0, false)), this.addPiece(new Pawn(4, 1, false)), null, null, null, null, this.addPiece(new Pawn(4, 6, true)), this.addPiece(new King(4, 7, true))},
-                {this.addPiece(new Bishop(5, 0, false)), this.addPiece(new Pawn(5, 1, false)), null, null, null, null, this.addPiece(new Pawn(5, 6, true)), this.addPiece(new Bishop(5, 7, true))},
-                {this.addPiece(new Knight(6, 0, false)), this.addPiece(new Pawn(6, 1, false)), null, null, null, null, this.addPiece(new Pawn(6, 6, true)), this.addPiece(new Knight(6, 7, true))},
-                {this.addPiece(new Rook(7, 0, false)), this.addPiece(new Pawn(7, 1, false)), null, null, null, null, this.addPiece(new Pawn(7, 6, true)), this.addPiece(new Rook(7, 7, true))}
-        };
+    private boolean tryMove(Coord origin, Coord target){
+        ChessBoard temp = new ChessBoard(this.getBoard(), this.isWhiteTurn());
+        temp.performMove(origin, target);
+        return !temp.isInCheck();
+    }
+
+    /**
+     * Performs a given move. Should be used after making check that it is a valid move.
+     * @param origin - origin Coord obj
+     * @param target - target Coord obj
+     */
+    private void performMove(Coord origin, Coord target) {
+        IPiece movedPiece = this.board[origin.getX()][origin.getY()];
+        if (movedPiece instanceof King
+                && Math.abs(origin.getX() - target.getX()) == 2
+                && !isInDangerBetween(origin, target)) {
+            this.executeCastle(origin, target);
+        } else if ( this.isValidEnPassant(origin, target)){
+            this.board[target.getX()][origin.getY()] = null;
+        }
+        movedPiece.makeMove(target.getX(), target.getY());
+        this.removePiece(this.board[target.getX()][target.getY()]);
+        this.board[target.getX()][target.getY()] = movedPiece;
+        this.board[origin.getX()][origin.getY()] = null;
     }
 
     /**
@@ -180,17 +213,6 @@ public class ChessBoard {
             this.board[fromCastleX][y] = null;
             this.board[toCastleX][y] = castle;
         }
-    }
-
-    /**
-     * Adds an IPiece to list of pieces
-     * @param p - IPiece to be added
-     * @return - added IPiece
-     */
-    private IPiece addPiece(IPiece p) {
-        if (p == null) throw new IllegalArgumentException("Piece cannot be null");
-        (p.getIsBlack() ? this.blackPieces : this.whitePieces).add(p);
-        return p;
     }
 
     /**
@@ -215,56 +237,6 @@ public class ChessBoard {
     }
 
     /**
-     * Performs a given move. Should be used after making check that it is a valid move.
-     * @param origin - origin Coord obj
-     * @param target - target Coord obj
-     */
-    private void performMove(Coord origin, Coord target) {
-        IPiece movedPiece = this.board[origin.getX()][origin.getY()];
-        if (movedPiece instanceof King
-                && Math.abs(origin.getX() - target.getX()) == 2
-                && !isInDangerBetween(origin, target)) {
-            this.executeCastle(origin, target);
-        } else if ( this.isValidEnPassant(origin, target)){
-            this.board[target.getX()][origin.getY()] = null;
-        }
-        movedPiece.makeMove(target.getX(), target.getY());
-        this.removePiece(this.board[target.getX()][target.getY()]);
-        this.board[target.getX()][target.getY()] = movedPiece;
-        this.board[origin.getX()][origin.getY()] = null;
-    }
-
-    /**
-     *  Tests a move in an isolated clone ChessBoard to see if it will result in king in check.
-     * @param origin - origin Coord obj
-     * @param target - target Coord obj
-     * @return True if move results in no check, false otherwise
-     */
-    private boolean testMove(Coord origin, Coord target){
-        ChessBoard temp = new ChessBoard(this.getBoard(), this.isWhiteTurn());
-        temp.performMove(origin, target);
-        return !temp.isInCheck();
-    }
-
-    private boolean isCheckMate(){
-        if (isInCheck()){
-            for (IPiece p : this.isWhiteTurn() ? this.whitePieces : this.blackPieces){
-                for (Coord c : p.getPossibleMoves(this.board, moves)){
-                    if (testMove(new Coord(p.getX(), p.getY()), c)){
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-
-    private boolean isGameOver(){
-        return isCheckMate();
-    }
-
-    /**
      *  Checks if the current turn's king is in check
      * @return - True if in check, false otherwise
      */
@@ -275,6 +247,18 @@ public class ChessBoard {
             }
         }
         return true;
+    }
+
+    /**
+     * @param origin - origin Coord obj
+     * @param target - target Coord obj
+     * @return - true if is in danger, false otherwise
+     */
+    private boolean isInDangerBetween(Coord origin, Coord target) {
+        for ( Coord coord : origin.calculatePointsBetweenInclusiveEnd((target))) {
+            if (this.isInDanger(coord)) return true;
+        }
+        return false;
     }
 
     /**
@@ -290,15 +274,33 @@ public class ChessBoard {
     }
 
     /**
+     * Checks if the given piece is allowed to move to the given coordinate on the board.
      * @param origin - origin Coord obj
      * @param target - target Coord obj
-     * @return - true if is in danger, false otherwise
+     * @return - true if given move can be made, false otherwise
      */
-    private boolean isInDangerBetween(Coord origin, Coord target) {
-        for ( Coord coord : origin.calculatePointsBetweenInclusiveEnd((target))) {
-            if (this.isInDanger(coord)) return true;
+    private boolean isValidMovePiece(Coord origin, Coord target){
+        return this.board[origin.getX()][origin.getY()].isValidMove(this.board, origin.getX(), origin.getY(), target.getX(), target.getY()); //TODO: update this method to use Coords
+    }
+
+    /**
+     * Makes sure:
+     * - Both coordinates are inside board.
+     * - From coordinate contains a piece.
+     * - Coordinates are not the same.
+     * - It is the correct player's turn.
+     * - Not moving to a space occupied by space of same color.
+     * - Delegates to individual piece logic.
+     * @param origin - origin Coord obj
+     * @param target - target Coord obj
+     * @return will return true if the given move is valid, and false otherwise.
+     */
+    private boolean isValidMoveBoolean(Coord origin, Coord target) {
+        try {
+            return this.isValidMove(origin, target);
+        } catch (Exception e) {
+            return false;
         }
-        return false;
     }
 
     /**
@@ -332,7 +334,7 @@ public class ChessBoard {
                 throw new IllegalArgumentException("Cannot move to square occupied by piece of same color");
             } else if (!from.isValidMove(this.board, origin.getX(), origin.getY(), target.getX(), target.getY()) && !this.isValidEnPassant(origin, target)) {   //TODO: update IPiece.isValidMove method to take Coord as params
                 throw new IllegalArgumentException("Invalid move");
-            } else if (this.isInCheck() && !this.testMove(origin, target)) {
+            } else if (this.isInCheck() && !this.tryMove(origin, target)) {
                 throw new IllegalStateException("Move results with King in check");
             }
             return true;
@@ -340,33 +342,31 @@ public class ChessBoard {
     }
 
     /**
-     * Makes sure:
-     * - Both coordinates are inside board.
-     * - From coordinate contains a piece.
-     * - Coordinates are not the same.
-     * - It is the correct player's turn.
-     * - Not moving to a space occupied by space of same color.
-     * - Delegates to individual piece logic.
-     * @param origin - origin Coord obj
-     * @param target - target Coord obj
-     * @return will return true if the given move is valid, and false otherwise.
+     *  Generates a new default IPiece[][] board with all pieces in their starting positions
+     * @return - new default IPiece[][] board
      */
-    private boolean isValidMoveBoolean(Coord origin, Coord target) {
-        try {
-            return this.isValidMove(origin, target);
-        } catch (Exception e) {
-            return false;
-        }
+    private IPiece[][] generateChessBoard() {
+        return new IPiece[][] {
+                {this.addPiece(new Rook(0, 0, false)), this.addPiece(new Pawn(0, 1, false)), null, null, null, null, this.addPiece(new Pawn(0, 6, true)), this.addPiece(new Rook(0, 7, true))},
+                {this.addPiece(new Knight(1, 0, false)), this.addPiece(new Pawn(1, 1, false)), null, null, null, null, this.addPiece(new Pawn(1, 6, true)), this.addPiece(new Knight(1, 7, true))},
+                {this.addPiece(new Bishop(2, 0, false)), this.addPiece(new Pawn(2, 1, false)), null, null, null, null, this.addPiece(new Pawn(2, 6, true)), this.addPiece(new Bishop(2, 7, true))},
+                {this.addPiece(new Queen(3, 0, false)), this.addPiece(new Pawn(3, 1, false)), null, null, null, null, this.addPiece(new Pawn(3, 6, true)), this.addPiece(new Queen(3, 7, true))},
+                {this.addPiece(new King(4, 0, false)), this.addPiece(new Pawn(4, 1, false)), null, null, null, null, this.addPiece(new Pawn(4, 6, true)), this.addPiece(new King(4, 7, true))},
+                {this.addPiece(new Bishop(5, 0, false)), this.addPiece(new Pawn(5, 1, false)), null, null, null, null, this.addPiece(new Pawn(5, 6, true)), this.addPiece(new Bishop(5, 7, true))},
+                {this.addPiece(new Knight(6, 0, false)), this.addPiece(new Pawn(6, 1, false)), null, null, null, null, this.addPiece(new Pawn(6, 6, true)), this.addPiece(new Knight(6, 7, true))},
+                {this.addPiece(new Rook(7, 0, false)), this.addPiece(new Pawn(7, 1, false)), null, null, null, null, this.addPiece(new Pawn(7, 6, true)), this.addPiece(new Rook(7, 7, true))}
+        };
     }
 
     /**
-     * Checks if the given piece is allowed to move to the given coordinate on the board.
-     * @param origin - origin Coord obj
-     * @param target - target Coord obj
-     * @return - true if given move can be made, false otherwise
+     * Adds an IPiece to list of pieces
+     * @param p - IPiece to be added
+     * @return - added IPiece
      */
-    private boolean isValidMovePiece(Coord origin, Coord target){
-        return this.board[origin.getX()][origin.getY()].isValidMove(this.board, origin.getX(), origin.getY(), target.getX(), target.getY()); //TODO: update this method to use Coords
+    private IPiece addPiece(IPiece p) {
+        if (p == null) throw new IllegalArgumentException("Piece cannot be null");
+        (p.getIsBlack() ? this.blackPieces : this.whitePieces).add(p);
+        return p;
     }
 
     /**
@@ -379,8 +379,8 @@ public class ChessBoard {
     /**
      * Updates the Move List with the most recent move
      */
-    private void updateMoveList(Coord origin, IPiece p) {
-        this.moves.add(new Move(origin, p));
+    private void updateMoveList(IPiece[][] board, Coord origin, Coord target) {
+        this.moves.add(new Move(board, origin, target));
     }
 
     /**
