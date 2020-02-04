@@ -7,9 +7,7 @@ import java.util.List;
 
 public interface IPiece {
 
-    int getX();
-
-    int getY();
+    Coord getCoord();
 
     boolean getIsBlack();
 
@@ -17,13 +15,13 @@ public interface IPiece {
 
     boolean getIsFirstMove();
 
-    void makeMove(int x, int y);
+    void makeMove(Coord c);
 
     String toString();
 
-    boolean isValidMove(IPiece[][] board, int fromX, int fromY, int toX, int toY);
+    boolean isValidMove(IPiece[][] board, Coord origin, Coord target);
 
-    boolean movePiece(IPiece[][] board, int fromX, int fromY, int toX, int toY);
+    boolean movePiece(IPiece[][] board, Coord origin, Coord target);
 
     List<Coord> getPossibleMoves(IPiece[][] board, List<Move> move_history);
 

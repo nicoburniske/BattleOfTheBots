@@ -11,28 +11,36 @@ public class Knight extends AbstractPiece {
         super(x, y, isBlack);
     }
 
-    public Knight(int x, int y, boolean isBlack, boolean firstMove, int moveCount) {
+    private Knight(int x, int y, boolean isBlack, boolean firstMove, int moveCount) {
         super(x, y, isBlack, firstMove, moveCount);
     }
 
-    public IPiece copy() {
-        return new Knight(super.getX(), super.getY(),super.getIsBlack(), super.getIsFirstMove(), super.getMoveCount());
-    }
+    /*
+        ################################
+            PUBLIC METHODS
+        ################################
+     */
 
+    /**
+     * Checks if the move is a valid Knight move
+     * @param board - current IPiece[][] board
+     * @param origin - origin coordinates
+     * @param target - target coordinates
+     * @return - true if valid Knight move, false otherwise
+     */
     @Override
-    public boolean isValidMove(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
-        return (Math.abs(toX - fromX) != 0 && Math.abs(toY - fromY) != 0 && Math.abs(toX - fromX) + Math.abs(toY - fromY) == 3);
+    public boolean isValidMove(IPiece[][] board, Coord origin, Coord target) {
+        return (Math.abs(target.getX() - origin.getX()) != 0 && Math.abs(target.getY() - origin.getY()) != 0 && Math.abs(target.getX() - origin.getX()) + Math.abs(target.getY() - origin.getY()) == 3);
     }
 
     /**
-     *
-     * If the given Coord is inside the board, and it is not moving to a position occupied by a piece of the same color
-     * @param board
-     * @return
+     * Returns a list of all possible moves for this instance of Knight (including moves that danger King)
+     * @param board - current IPiece[][] board
+     * @param move_history - previous moves during current game
+     * @return - List<Coord> where Coord is target
      */
     @Override
     public List<Coord> getPossibleMoves(IPiece[][] board, List<Move> move_history) {
-        Coord self = new Coord(super.getX(), super.getY());
         Coord[] skeleton = {
                 new Coord(-1, 2), new Coord(1, 2),
                 new Coord(2, -1), new Coord(2, 1),
@@ -41,16 +49,26 @@ public class Knight extends AbstractPiece {
         };
         List<Coord> moves = new ArrayList<>();
         for (Coord c : skeleton){
-            Coord temp = c.addCoords(self);
-            addValidMove(board, temp, moves);
+            addValidMove(board, c.addCoords(super.getCoord()), moves);
         }
         return moves;
     }
 
+    /**
+     * Creates a copy of this piece
+     * @return - copy of current instance of Knight
+     */
+    public IPiece copy() {
+        return new Knight(super.getCoord().getX(), super.getCoord().getY(),super.getIsBlack(), super.getIsFirstMove(), super.getMoveCount());
+    }
+
+    /**
+     * toString
+     * @return - "WN" if Knight is white, "BN" if Knight is black
+     */
     @Override
     public String toString() {
         return super.toString() + "N";
     }
-
 
 }
