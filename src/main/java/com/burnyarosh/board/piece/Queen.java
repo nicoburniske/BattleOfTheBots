@@ -24,7 +24,9 @@ public class Queen extends AbstractPiece {
 
     @Override
     public List<Coord> getPossibleMoves(IPiece[][] board, List<Move> move_history) {
-        return null;
+        List<Coord> moves = super.getPossibleMovesRook(board);
+        moves.addAll(super.getPossibleMovesBishop(board));
+        return moves;
     }
 
     public IPiece copy() {
