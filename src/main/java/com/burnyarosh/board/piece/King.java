@@ -48,7 +48,7 @@ public class King extends AbstractPiece {
         List<Coord> moves = new ArrayList<>();
         for (Coord c : skeleton){
             Coord temp = c.addCoords(self);
-            if ( temp.isInsideBoard() && (super.getIsBlack() != board[temp.getX()][temp.getY()].getIsBlack()) ) moves.add(temp);
+            addValidMove(board, temp, moves);
         }
         return moves;
     }

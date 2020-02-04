@@ -42,23 +42,27 @@ public class Pawn extends AbstractPiece {
     @Override
     public List<Coord> getPossibleMoves(IPiece[][] board, List<Move> move_history) {
         Coord self = new Coord(super.getX(), super.getY());
+        Coord[] skeleton = {
+                new Coord(0, (super.getIsBlack() ? -1 : 1)),
+                new Coord(0, (super.getIsBlack() ? -2 : 2)),
+                new Coord(-1, (super.getIsBlack() ? -1 : 1)),
+                new Coord(1, (super.getIsBlack() ? -1 : 1))
+        };
         List<Coord> moves = new ArrayList<>();
-        Coord temp1 = new Coord(self.getX(), (super.getIsBlack() ? -1 : 1)).addCoords(self);
-        if (board[temp1.getX()][temp1.getY()] == null){
-            moves.add(temp1);
-        }
-        //  move 2
-        Coord temp2 = new Coord(self.getX(), (super.getIsBlack() ? -2 : 2)).addCoords(self);
-        if (super.getIsFirstMove() && isFirstMoveValid(self.getX(), self.getY(), temp2.getX(), temp2.getY(), (super.getIsBlack() ? -1 : 1), board[temp2.getX()][temp2.getY()])){
-            moves.add(temp2);
-        }
-        Coord temp3 = new Coord(-1, (super.getIsBlack() ? -1 : 1)).addCoords(self);
-        if (temp3.isInsideBoard() && (this.isValidPawnMove(self.getX(), self.getY(), temp3.getX(), temp3.getY(), (super.getIsBlack() ? -1 : 1), board[temp3.getX()][temp3.getY()]) || isValidEnPassant(self, temp3, board, move_history))){
-            moves.add(temp3);
-        }
-        Coord temp4 = new Coord(1, (super.getIsBlack() ? -1 : 1)).addCoords(self);
-        if (temp4.isInsideBoard() && (this.isValidPawnMove(self.getX(), self.getY(), temp4.getX(), temp4.getY(), (super.getIsBlack() ? -1 : 1), board[temp4.getX()][temp4.getY()]) || isValidEnPassant(self, temp4, board, move_history))){
-            moves.add(temp4);
+        for (Coord c : skeleton){
+            Coord temp = c.addCoords(self);
+            if (temp.isInsideBoard()){
+                if (super.getIsFirstMove()){
+                    if (this.isFirstMoveValid(self.getX(), self.getY(), temp.getX(), temp.getY(),(super.getIsBlack() ? -1 : 1), board[temp.getX()][temp.getY()])){
+                        moves.add(temp);
+                    }
+                } else {
+                    if (this.isValidPawnMove(self.getX(), self.getY(), temp.getX(), temp.getY(),(super.getIsBlack() ? -1 : 1), board[temp.getX()][temp.getY()])
+                            || isValidEnPassant(self, temp, board, move_history)){
+                        moves.add(temp);
+                    }
+                }
+            }
         }
         return moves;
     }
@@ -74,7 +78,6 @@ public class Pawn extends AbstractPiece {
         return false;
     }
 
-
     @Override
     public String toString() {
         return super.toString() + "P";
@@ -86,6 +89,6 @@ public class Pawn extends AbstractPiece {
     }
 
     private boolean isFirstMoveValid(int fromX, int fromY, int toX, int toY, int direction, IPiece to) {
-        return (fromX == toX) && (toY == fromY + 2 * direction) && (to == null);
+        return ((fromX == toX) && (toY == fromY + 2 * direction) && (to == null)) || isValidPawnMove(fromX, fromY, toX, toY, direction, to);
     }
 }

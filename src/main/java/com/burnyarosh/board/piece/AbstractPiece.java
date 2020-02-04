@@ -3,6 +3,7 @@ package com.burnyarosh.board.piece;
 import com.burnyarosh.board.common.Coord;
 import com.burnyarosh.board.common.Move;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractPiece implements IPiece {
@@ -71,6 +72,20 @@ public abstract class AbstractPiece implements IPiece {
         return this.isBlack ? "B" : "W";
     }
 
+    protected boolean addValidMove(IPiece[][] board, Coord c, List<Coord> moves){
+        if (c.isInsideBoard()){
+            if (board[c.getX()][c.getY()] == null){
+                moves.add(c);
+            } else {
+                if (this.getIsBlack() != board[c.getX()][c.getY()].getIsBlack()){
+                    moves.add(c);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * checks if coordinates are aligned diagonally
      *
@@ -110,6 +125,58 @@ public abstract class AbstractPiece implements IPiece {
         }
         return true;
     }
+
+    protected List<Coord> getPossibleMovesRook(IPiece[][] board) {
+        Coord self = new Coord(this.getX(), this.getY());
+        boolean upBlocked = false;
+        boolean rightBlocked = false;
+        boolean downBlocked = false;
+        boolean leftBlocked = false;
+        List<Coord> moves = new ArrayList<>();
+        for (int i = 1; i < 8; i++){
+            if (!upBlocked){
+                upBlocked = this.addValidMove(board, new Coord(self.getX(), i).addCoords(self), moves);
+            }
+            if (!rightBlocked){
+                rightBlocked = this.addValidMove(board, new Coord(i, self.getY()).addCoords(self), moves);
+            }
+            if (!downBlocked){
+                downBlocked = this.addValidMove(board, new Coord(self.getX(), -i).addCoords(self), moves);
+            }
+            if (!leftBlocked){
+                leftBlocked = this.addValidMove(board, new Coord(-i, self.getY()).addCoords(self), moves);
+            }
+            if (upBlocked && rightBlocked && downBlocked && leftBlocked){
+                break;
+            }
+        }
+        return moves;
+    }
+
+    protected List<Coord> getPossibleMovesBishop(IPiece[][] board) {
+        Coord self = new Coord(this.getX(), this.getY());
+        boolean upRightBlocked = false;
+        boolean downRightBlocked = false;
+        boolean downLeftBlocked = false;
+        boolean upLeftBlocked = false;
+        List<Coord> moves = new ArrayList<>();
+        for (int i = 1; i < 8; i++){
+            if (!upRightBlocked){
+                upRightBlocked = this.addValidMove(board, new Coord(i, i).addCoords(self), moves);
+            }
+            if (!downRightBlocked){
+                downRightBlocked = this.addValidMove(board, new Coord(i, -i).addCoords(self), moves);
+            }
+            if (!downLeftBlocked){
+                downLeftBlocked = this.addValidMove(board, new Coord(-i, -i).addCoords(self), moves);
+            }
+            if (!upLeftBlocked){
+                upLeftBlocked = this.addValidMove(board, new Coord(-i, i).addCoords(self), moves);
+            }
+        }
+        return moves;
+    }
+
 
 
 }

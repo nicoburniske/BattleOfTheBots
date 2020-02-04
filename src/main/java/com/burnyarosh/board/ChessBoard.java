@@ -56,18 +56,20 @@ public class ChessBoard {
      * @return - true if valid move*, false otherwise
      */
     public boolean playGame(int fromX, int fromY, int toX, int toY) {
-        Coord origin = new Coord(fromX, fromY);
-        Coord target = new Coord(toX, toY);
-        if (this.isValidMove(origin, target)) {
-            this.performMove(origin, target);
-            this.updateMoveList(origin, board[toX][toY]);
-            this.nextTurn();
-            if (isCheckMate()){
-                throw new IllegalStateException("Current player is in Checkmate");
-            }
-            return true;
-        } else {
+        if (isGameOver()){
+            //GAME IS OVER HERE BECAUSE CHECKMATE DETECTED
             return false;
+        } else {
+            Coord origin = new Coord(fromX, fromY);
+            Coord target = new Coord(toX, toY);
+            if (this.isValidMove(origin, target)) {
+                this.performMove(origin, target);
+                this.updateMoveList(origin, board[toX][toY]);
+                this.nextTurn();
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 
@@ -248,11 +250,18 @@ public class ChessBoard {
         if (isInCheck()){
             for (IPiece p : this.isWhiteTurn() ? this.whitePieces : this.blackPieces){
                 for (Coord c : p.getPossibleMoves(this.board, moves)){
-                    if (testMove(new Coord(p.getX(), p.getY()), c)) return true;
+                    if (testMove(new Coord(p.getX(), p.getY()), c)){
+                        return false;
+                    }
                 }
             }
+            return true;
         }
         return false;
+    }
+
+    private boolean isGameOver(){
+        return isCheckMate();
     }
 
     /**
