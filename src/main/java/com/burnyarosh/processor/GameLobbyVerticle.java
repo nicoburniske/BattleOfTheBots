@@ -64,8 +64,20 @@ public class GameLobbyVerticle extends AbstractVerticle {
         promise.complete();
     }
 
-    private void newMove(Message<JsonObject> voidMessage) {
-
+    private void newMove(Message<JsonObject> message) {
+        JsonObject body = message.body();
+        String lobbyGUID = body.getString(GAME_GUID);
+        String playerGUID = body.getString(PLAYER_GUID);
+        if (lobbyGUID == null || playerGUID == null) message.fail(400, ERROR_MALFORMED_REQUEST);
+        Game currGame = activeGamesById.get(lobbyGUID);
+        Player currPlayer = activePlayersById.get(playerGUID);
+        if (currGame != null && currPlayer != null) {
+            body.put("type", "move");
+            super.vertx.eventBus().publish(String.format(LOBBY_BASE_ADDRESS.getAddress(), verticleDeploymentByGUID.get(lobbyGUID)), body);
+            message.reply(new Success());
+        } else {
+            message.fail(400, ERROR_CANNOT_ADD_PLAYER_TO_GAME);
+        }
     }
 
     private void newPlayer(Message<JsonObject> message) {
@@ -77,6 +89,7 @@ public class GameLobbyVerticle extends AbstractVerticle {
         Player temp = new Player(body.getString("username"), Player.generateGUID());
         this.activePlayers.add(temp);
         this.activePlayersById.put(temp.getId(), temp);
+        this.activePlayersByName.put(temp.getName(), temp);
         message.reply(new Success().put(PLAYER_GUID, temp.getId()));
     }
 

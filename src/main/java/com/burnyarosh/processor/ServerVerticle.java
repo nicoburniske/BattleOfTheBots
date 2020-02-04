@@ -62,6 +62,8 @@ public class ServerVerticle extends AbstractVerticle {
         this.requestToEventBusAddress.put(LIST_PLAYERS_REQUEST.getType(), LIST_PLAYER_ADDRESS.getAddress());
         this.requestToEventBusAddress.put(LIST_LOBBIES_REQUEST.getType(), LIST_LOBBY_ADDRESS.getAddress());
         this.requestToEventBusAddress.put(JOIN_LOBBY_REQUEST.getType(), JOIN_LOBBY_ADDRESS.getAddress());
+        this.requestToEventBusAddress.put(NEW_MOVE_REQUEST.getType(), NEW_MOVE_ADDRESS.getAddress());
+
 
         MessageConsumer<JsonObject> updateClients = vertx.eventBus().consumer(UPDATE_PLAYERS_ADDRESS.getAddress());
         updateClients.handler(this::updateClients);

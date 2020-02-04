@@ -16,8 +16,10 @@ import java.util.Random;
 import static com.burnyarosh.processor.EventBusAddress.LOBBY_BASE_ADDRESS;
 import static com.burnyarosh.processor.EventBusAddress.UPDATE_PLAYERS_ADDRESS;
 import static com.burnyarosh.processor.GameLobbyVerticle.GAME_GUID;
+import static com.burnyarosh.processor.GameLobbyVerticle.PLAYER_GUID;
 
 public class GameVerticle extends AbstractVerticle {
+    private static final String ERROR_PLAYER_NOT_IN_GAME = "Error: Player not in game";
     private String lobbyID;
     private Player[] players = new Player[2];
     private ChessBoard board;
@@ -33,17 +35,48 @@ public class GameVerticle extends AbstractVerticle {
 
     private void handleInput(Message<JsonObject> message) {
         JsonObject messageJSON = message.body();
-        String type = jsonValue(messageJSON, "type");
+        String type = jsonGetStringValue(messageJSON, "type");
         if (type.equals("setup")) {
-            this.lobbyID = jsonValue(messageJSON, GAME_GUID);
-            JsonArray players = jsonArrayValue(messageJSON, "players");
+            this.lobbyID = jsonGetStringValue(messageJSON, GAME_GUID);
+            JsonArray players = jsonGetArrayValue(messageJSON, "players");
             JsonObject player1 = players.getJsonObject(0);
             this.players[0] = new Player(player1.getString("username"), player1.getString("id"));
-            JsonObject player2 = players.getJsonObject(0);
+            JsonObject player2 = players.getJsonObject(1);
             this.players[1] = new Player(player2.getString("username"), player2.getString("id"));
             this.newGame();
             message.reply(new Success());
             this.sendGameUpdate();
+            this.randomColor();
+        } else if (type.equals("move")) {
+            String playerid = jsonGetStringValue(messageJSON, PLAYER_GUID);
+            int player = this.getPlayerIndex(playerid);
+            if (player < 0) message.fail(400, ERROR_PLAYER_NOT_IN_GAME);
+            JsonArray origin = jsonGetArrayValue(messageJSON, "origin");
+            JsonArray target = jsonGetArrayValue(messageJSON, "target");
+            if (origin.size() == 2 && target.size() == 2 && this.isPlayerTurn(player)) {
+                try {
+                    this.board.playGame(origin.getInteger(0), origin.getInteger(1), target.getInteger(0), target.getInteger(1));
+                    message.reply(new Success());
+                    this.sendGameUpdate();
+                } catch (Exception e) {
+                    message.fail(400, e.getMessage());
+                }
+            }
+        }
+    }
+
+    private boolean isPlayerTurn(int player) {
+        return this.whitePlayer == player && this.board.isWhiteTurn()
+                || this.whitePlayer != player && !this.board.isWhiteTurn();
+    }
+
+    private int getPlayerIndex(String playerid) {
+        if (this.players[0].getId().equals(playerid)) {
+            return 0;
+        } else if (this.players[1].getId().equals(playerid)) {
+            return 1;
+        } else {
+            return -1;
         }
     }
 
@@ -61,25 +94,25 @@ public class GameVerticle extends AbstractVerticle {
         this.board = new ChessBoard();
     }
 
-    public void randomColor() {
+    private void randomColor() {
         this.whitePlayer = new Random().nextInt(2);
     }
 
     /**
      * @param whitePlayer should be 1 or 2.
      */
-    public void setWhitePlayer(int whitePlayer) {
+    private void setWhitePlayer(int whitePlayer) {
         this.whitePlayer = whitePlayer - 1;
     }
 
-    public String jsonValue(JsonObject json, String key) {
+    private String jsonGetStringValue(JsonObject json, String key) {
         Objects.requireNonNull(key);
         String value = json.getString(key);
         if (value == null) throw new IllegalArgumentException("Given key does not have a value");
         return value;
     }
 
-    public JsonArray jsonArrayValue(JsonObject json, String key) {
+    private JsonArray jsonGetArrayValue(JsonObject json, String key) {
         Objects.requireNonNull(key);
         JsonArray value = json.getJsonArray(key);
         if (value == null) throw new IllegalArgumentException("Given key does not have a value");
