@@ -1,6 +1,6 @@
 package com.burnyarosh.processor;
 
-import com.burnyarosh.dto.out.Success;
+import com.burnyarosh.dto.out.*;
 import com.burnyarosh.entity.Entity;
 import com.burnyarosh.entity.Game;
 import com.burnyarosh.entity.Player;
@@ -74,7 +74,7 @@ public class GameLobbyVerticle extends AbstractVerticle {
         if (currGame != null && currPlayer != null) {
             body.put("type", "move");
             super.vertx.eventBus().publish(String.format(LOBBY_BASE_ADDRESS.getAddress(), verticleDeploymentByGUID.get(lobbyGUID)), body);
-            message.reply(new Success());
+            message.reply(new SuccessDTO());
         } else {
             message.fail(400, ERROR_CANNOT_ADD_PLAYER_TO_GAME);
         }
@@ -90,7 +90,7 @@ public class GameLobbyVerticle extends AbstractVerticle {
         this.activePlayers.add(temp);
         this.activePlayersById.put(temp.getId(), temp);
         this.activePlayersByName.put(temp.getName(), temp);
-        message.reply(new Success().put(PLAYER_GUID, temp.getId()));
+        message.reply(new PlayerCreatedDTO(temp.getId(), temp.getName()).toJson());
     }
 
     private void listPlayers(Message<Void> message) {
@@ -98,15 +98,14 @@ public class GameLobbyVerticle extends AbstractVerticle {
         this.activePlayers.forEach(player -> {
             body.add(player.getName());
         });
-        message.reply(new Success().put("players", body));
-    }
+        message.reply(new ListPlayersDTO(body).toJson());    }
 
     private void listLobbies(Message<Void> message) {
-        JsonArray result = new JsonArray();
+        JsonArray availableLobbies = new JsonArray();
         this.activeGames.stream().filter(game -> !game.gameIsReady()).forEach(game -> {
-            result.add(game.toJson());
+            availableLobbies.add(game.toJson());
         });
-        message.reply(new Success().put("lobbies", result));
+        message.reply(new ListLobbiesDTO(availableLobbies).toJson());
     }
 
     private void joinLobby(Message<JsonObject> message) {
@@ -114,7 +113,6 @@ public class GameLobbyVerticle extends AbstractVerticle {
         String lobbyGUID = body.getString(GAME_GUID);
         String playerGUID = body.getString(PLAYER_GUID);
         if (lobbyGUID == null || playerGUID == null) message.fail(400, ERROR_MALFORMED_REQUEST);
-        //TODO: add logic here. is lobby full? how much info do you actually need in gameVerticle? do we need player info? yes probably.
         Game currGame = activeGamesById.get(lobbyGUID);
         Player currPlayer = activePlayersById.get(playerGUID);
         if (currGame != null && currPlayer != null && !currGame.gameIsReady() && this.playerIsAvailable(currPlayer)) {
@@ -122,7 +120,7 @@ public class GameLobbyVerticle extends AbstractVerticle {
             JsonObject json = activeGamesById.get(lobbyGUID).toJson();
             json.put("type", "setup");
             super.vertx.eventBus().publish(String.format(LOBBY_BASE_ADDRESS.getAddress(), verticleDeploymentByGUID.get(lobbyGUID)), json);
-            message.reply(new Success());
+            message.reply(new SuccessDTO());
         } else {
             message.fail(400, ERROR_CANNOT_ADD_PLAYER_TO_GAME);
         }
@@ -153,7 +151,7 @@ public class GameLobbyVerticle extends AbstractVerticle {
             if (ar.succeeded()) {
                 verticleDeploymentByGUID.put(guid, ar.result());
                 LOGGER.info(String.format("Deployed verticle %s for game %s", ar.result(), guid));
-                request.reply(new Success().put(GAME_GUID, lobbyguid));
+                request.reply(new LobbyCreatedDTO(guid).toJson());
             } else {
                 request.fail(400, ERROR_MALFORMED_REQUEST);
             }

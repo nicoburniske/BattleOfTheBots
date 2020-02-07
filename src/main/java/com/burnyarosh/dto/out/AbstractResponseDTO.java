@@ -1,12 +1,20 @@
 package com.burnyarosh.dto.out;
 
-import io.vertx.core.json.JsonObject;
+import com.burnyarosh.dto.IDTO;
 
-public abstract class AbstractResponseDTO extends JsonObject {
+public abstract class AbstractResponseDTO implements IDTO {
 
-    public AbstractResponseDTO() {
-        this.put("status", getStatus());
+    String status;
+
+    public AbstractResponseDTO(String status) {
+        this.status = status;
     }
 
-    protected abstract String getStatus();
+   public String getStatus() {
+        return this.status;
+   }
+
+   public void setStatus(String status) {
+        this.status = status;
+   }
 }

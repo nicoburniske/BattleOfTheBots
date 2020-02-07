@@ -1,7 +1,7 @@
 package com.burnyarosh.processor;
 
 import com.burnyarosh.board.ChessBoard;
-import com.burnyarosh.dto.out.Success;
+import com.burnyarosh.dto.out.SuccessDTO;
 import com.burnyarosh.entity.Player;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
@@ -44,7 +44,7 @@ public class GameVerticle extends AbstractVerticle {
             JsonObject player2 = players.getJsonObject(1);
             this.players[1] = new Player(player2.getString("username"), player2.getString("id"));
             this.newGame();
-            message.reply(new Success());
+            message.reply(new SuccessDTO());
             this.sendGameUpdate();
             this.randomColor();
         } else if (type.equals("move")) {
@@ -56,7 +56,7 @@ public class GameVerticle extends AbstractVerticle {
             if (origin.size() == 2 && target.size() == 2 && this.isPlayerTurn(player)) {
                 try {
                     this.board.playGame(origin.getInteger(0), origin.getInteger(1), target.getInteger(0), target.getInteger(1));
-                    message.reply(new Success());
+                    message.reply(new SuccessDTO());
                     this.sendGameUpdate();
                 } catch (Exception e) {
                     message.fail(400, e.getMessage());
