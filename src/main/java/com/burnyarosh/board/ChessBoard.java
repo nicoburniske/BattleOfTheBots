@@ -100,6 +100,10 @@ public class ChessBoard {
         return newBoard;
     }
 
+    public List<Move> getHistory(){
+        return this.moves;
+    }
+
     /**
      * Provides a String representation of the game-state
      * @return - String of Chessboard
@@ -153,10 +157,17 @@ public class ChessBoard {
 
     private void executePromotion(Coord target, char p){
        if ((this.board[target.getX()][target.getY()] instanceof Pawn) && (target.getY() == (this.board[target.getX()][target.getY()].getIsBlack() ? 0 : 7))){
+           //System.out.println("PROMO");
             if (p == 'q'){
-                this.board[target.getX()][target.getY()].promote(false);
+                IPiece tmp = this.board[target.getX()][target.getY()].promote(false);
+                this.removePiece(this.board[target.getX()][target.getY()]);
+                this.addPiece(tmp);
+                this.board[target.getX()][target.getY()] = tmp;
             } else if (p == 'n'){
-                this.board[target.getX()][target.getY()].promote(true);
+                IPiece tmp = this.board[target.getX()][target.getY()].promote(true);
+                this.removePiece(this.board[target.getX()][target.getY()]);
+                this.addPiece(tmp);
+                this.board[target.getX()][target.getY()] = tmp;
             }
         }
     }
@@ -203,6 +214,7 @@ public class ChessBoard {
                 && !isInDangerBetween(origin, target)) {
             this.executeCastle(origin, target);
         } else if ( this.isValidEnPassant(origin, target)){
+            this.removePiece(this.board[target.getX()][origin.getY()]);
             this.board[target.getX()][origin.getY()] = null;
             this.moves.get(this.moves.size()-1).setEnPassant();
         }
@@ -295,6 +307,7 @@ public class ChessBoard {
      * @return - true if given move can be made, false otherwise
      */
     private boolean isValidMovePiece(Coord origin, Coord target){
+        //System.out.println(origin +" " +(origin == null));
         return this.board[origin.getX()][origin.getY()].isValidMove(this.board, origin, target);
     }
 
