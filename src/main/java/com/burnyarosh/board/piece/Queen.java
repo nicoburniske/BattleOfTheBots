@@ -11,7 +11,7 @@ public class Queen extends AbstractPiece {
         super(x, y, isBlack);
     }
 
-    private Queen(int x, int y, boolean isBlack, boolean firstMove, int moveCount) {
+    public Queen(int x, int y, boolean isBlack, boolean firstMove, int moveCount) {
         super(x, y, isBlack, firstMove, moveCount);
     }
 
@@ -54,6 +54,15 @@ public class Queen extends AbstractPiece {
      */
     public IPiece copy() {
         return new Queen(super.getCoord().getX(), super.getCoord().getY(), super.getIsBlack(), super.getIsFirstMove(), super.getMoveCount());
+    }
+
+    /**
+     * Piece cannot promote --> return copy of itself
+     * @return - copy of self
+     */
+    @Override
+    public IPiece promote(boolean toKnight) {
+        return this.copy();
     }
 
     /**

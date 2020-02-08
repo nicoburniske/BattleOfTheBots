@@ -22,6 +22,16 @@ public class Pawn extends AbstractPiece {
         ################################
      */
 
+    public IPiece promote(boolean toKnight){
+        if (super.getCoord().getY() == (super.getIsBlack() ? 0 : 7)){
+            if (toKnight){
+                return new Knight(super.getCoord().getX(), super.getCoord().getY(),super.getIsBlack(), this.getIsFirstMove(), this.getMoveCount());
+            }
+            return new Queen(super.getCoord().getX(), super.getCoord().getY(),super.getIsBlack(), this.getIsFirstMove(), this.getMoveCount());
+        }
+        return this.copy();
+    }
+
     /**
      * Checks if the move is a valid Pawn move
      * @param board - current IPiece[][] board

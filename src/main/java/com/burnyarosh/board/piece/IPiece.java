@@ -19,6 +19,8 @@ public interface IPiece {
 
     String toString();
 
+    IPiece promote(boolean toKnight);
+
     boolean isValidMove(IPiece[][] board, Coord origin, Coord target);
 
     boolean movePiece(IPiece[][] board, Coord origin, Coord target);

@@ -54,6 +54,15 @@ public class Bishop extends AbstractPiece {
     }
 
     /**
+     * Piece cannot promote --> return copy of itself
+     * @return - copy of self
+     */
+    @Override
+    public IPiece promote(boolean toKnight) {
+        return this.copy();
+    }
+
+    /**
      * toString
      * @return - "WB" if Bishop is white, "BB" if Bishop is black
      */

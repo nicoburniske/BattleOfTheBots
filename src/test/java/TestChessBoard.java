@@ -63,9 +63,11 @@ public class TestChessBoard {
 
         //  [WHITE] - move knight
         assertTrue(board1.playGame(4, 4, 2, 5));
+        System.out.println(board1);
 
         //  [BLACK] - move knight
         assertTrue(board1.playGame(3, 3, 5, 2));
+        System.out.println(board1);
     }
 
     @Test

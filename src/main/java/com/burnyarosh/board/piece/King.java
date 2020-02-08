@@ -75,6 +75,15 @@ public class King extends AbstractPiece {
         return super.toString() + "K";
     }
 
+    /**
+     * Piece cannot promote --> return copy of itself
+     * @return - copy of self
+     */
+    @Override
+    public IPiece promote(boolean toKnight) {
+        return this.copy();
+    }
+
     /*
         ################################
             PRIVATE METHODS

@@ -54,6 +54,15 @@ public class Rook extends AbstractPiece {
     }
 
     /**
+     * Piece cannot promote --> return copy of itself
+     * @return - copy of self
+     */
+    @Override
+    public IPiece promote(boolean toKnight) {
+        return this.copy();
+    }
+
+    /**
      * toString
      * @return - "WR" if Rook is white, "BR" if Rook is black
      */

@@ -56,6 +56,7 @@ public class ChessBoard {
             if (this.isValidMove(origin, target)) {
                 this.updateMoveList(board, origin, target);
                 this.performMove(origin, target);
+                this.executePromotion(target, promotion);
                 this.nextTurn();
                 this.updatePreviousMove();
                 return true;
@@ -73,22 +74,7 @@ public class ChessBoard {
      * @return - true if valid move*, false otherwise
      */
     public boolean playGame(int fromX, int fromY, int toX, int toY) {
-        if (isGameOver()){
-            //GAME IS OVER HERE BECAUSE CHECKMATE DETECTED
-            return false;
-        } else {
-            Coord origin = new Coord(fromX, fromY);
-            Coord target = new Coord(toX, toY);
-            if (this.isValidMove(origin, target)) {
-                this.updateMoveList(board, origin, target);
-                this.performMove(origin, target);
-                this.nextTurn();
-                this.updatePreviousMove();
-                return true;
-            } else {
-                return false;
-            }
-        }
+        return this.playGame(fromX, fromY, toX, toY, 'q');
     }
 
     /**
@@ -165,8 +151,14 @@ public class ChessBoard {
         ################################
      */
 
-    private void executePromotion(char p){
-
+    private void executePromotion(Coord target, char p){
+       if ((this.board[target.getX()][target.getY()] instanceof Pawn) && (target.getY() == (this.board[target.getX()][target.getY()].getIsBlack() ? 0 : 7))){
+            if (p == 'q'){
+                this.board[target.getX()][target.getY()].promote(false);
+            } else if (p == 'n'){
+                this.board[target.getX()][target.getY()].promote(true);
+            }
+        }
     }
 
     private boolean isGameOver(){
