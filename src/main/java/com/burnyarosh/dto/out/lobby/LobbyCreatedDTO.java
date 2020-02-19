@@ -3,7 +3,7 @@ package com.burnyarosh.dto.out.lobby;
 import com.burnyarosh.dto.IDTO;
 
 public class LobbyCreatedDTO implements IDTO {
-    String gameGUID;
+    private String gameGUID;
 
     public LobbyCreatedDTO(String gameGUID) {
         this.gameGUID = gameGUID;

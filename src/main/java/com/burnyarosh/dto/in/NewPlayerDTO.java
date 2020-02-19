@@ -1,16 +1,10 @@
 package com.burnyarosh.dto.in;
 
-import com.burnyarosh.dto.IDTO;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Objects;
 
-public class NewPlayerDTO implements IDTO {
-    private String username;
 
-    public NewPlayerDTO(@JsonProperty("username") String username) {
-        this.username = username;
-    }
+public class NewPlayerDTO extends AbstractRequestDTO {
+    private String username;
 
     @Override
     public boolean equals(Object o) {

@@ -1,19 +1,21 @@
 package com.burnyarosh.dto.out.lobby;
 
 import com.burnyarosh.dto.IDTO;
-import io.vertx.core.json.JsonArray;
+
+import java.util.List;
 
 public class ListLobbiesDTO implements IDTO {
-    JsonArray lobbies;
-    public ListLobbiesDTO(JsonArray lobbies){
-        this.lobbies = this.lobbies;
+    private List<LobbyDTO> lobbies;
+
+    public ListLobbiesDTO(List<LobbyDTO> lobbies) {
+        this.lobbies = lobbies;
     }
 
-    public JsonArray getLobbies() {
+    public List<LobbyDTO> getLobbies() {
         return lobbies;
     }
 
-    public void setLobbies(JsonArray lobbies) {
+    public void setLobbies(List<LobbyDTO> lobbies) {
         this.lobbies = lobbies;
     }
 }

@@ -1,19 +1,20 @@
 package com.burnyarosh.dto.out.lobby;
 
 import com.burnyarosh.dto.IDTO;
-import io.vertx.core.json.JsonArray;
+
+import java.util.List;
 
 public class ListPlayersDTO implements IDTO {
-    JsonArray players;
-    public ListPlayersDTO(JsonArray players){
+    List<String> players;
+    public ListPlayersDTO(List<String> players){
         this.players = players;
     }
 
-    public JsonArray getPlayers() {
+    public List<String> getPlayers() {
         return players;
     }
 
-    public void setPlayers(JsonArray players) {
+    public void setPlayers(List<String> players) {
         this.players = players;
     }
 }

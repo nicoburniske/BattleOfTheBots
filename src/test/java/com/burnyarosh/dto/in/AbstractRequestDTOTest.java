@@ -16,14 +16,13 @@ public class AbstractRequestDTOTest {
         this.validNewPlayerJson =  new JsonObject();
         //this.validNewPlayerJson.put("type", "new_player");
         this.validNewPlayerJson.put("username", "a_username");
-        this.validNewPlayerObject = new NewPlayerDTO( "a_username");
+        this.validNewPlayerObject = new NewPlayerDTO();
+        this.validNewPlayerObject.setUsername("a_username");
     }
 
     @Test
     public void isValidRequest() {
-
         // JsonObject test = new JsonObject(Json.encode(new NewPlayerDTO("ausername")));
-        System.out.println(this.validNewPlayerObject.toJson());
         NewPlayerDTO dto = this.validNewPlayerJson.mapTo(com.burnyarosh.dto.in.NewPlayerDTO.class);
         assertTrue(dto.equals(validNewPlayerObject));
     }

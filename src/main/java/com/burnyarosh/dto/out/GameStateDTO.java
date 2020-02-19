@@ -8,5 +8,4 @@ public class GameStateDTO {
     JsonObject board;
     JsonObject possibleMove;
     String playerGUID;
-
 }

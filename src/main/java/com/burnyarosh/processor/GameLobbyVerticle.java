@@ -1,6 +1,9 @@
 package com.burnyarosh.processor;
 
-import com.burnyarosh.dto.out.*;
+import com.burnyarosh.dto.in.JoinLobbyDTO;
+import com.burnyarosh.dto.in.NewPlayerDTO;
+import com.burnyarosh.dto.out.SuccessDTO;
+import com.burnyarosh.dto.out.lobby.*;
 import com.burnyarosh.entity.Entity;
 import com.burnyarosh.entity.Game;
 import com.burnyarosh.entity.Player;
@@ -9,7 +12,6 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -19,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.burnyarosh.MainVerticle.getJsonAsClass;
 import static com.burnyarosh.processor.EventBusAddress.*;
 
 public class GameLobbyVerticle extends AbstractVerticle {
@@ -60,69 +63,90 @@ public class GameLobbyVerticle extends AbstractVerticle {
         MessageConsumer<JsonObject> newMove = vertx.eventBus().consumer(NEW_MOVE_ADDRESS.getAddress());
         newMove.handler(this::newMove);
 
+        //TODO: Centralized error handling.
+
         LOGGER.info("Successfully deployed GameLobbyVerticle");
         promise.complete();
     }
 
     private void newMove(Message<JsonObject> message) {
-        JsonObject body = message.body();
-        String lobbyGUID = body.getString(GAME_GUID);
-        String playerGUID = body.getString(PLAYER_GUID);
-        if (lobbyGUID == null || playerGUID == null) message.fail(400, ERROR_MALFORMED_REQUEST);
-        Game currGame = activeGamesById.get(lobbyGUID);
-        Player currPlayer = activePlayersById.get(playerGUID);
-        if (currGame != null && currPlayer != null) {
-            body.put("type", "move");
-            super.vertx.eventBus().publish(String.format(LOBBY_BASE_ADDRESS.getAddress(), verticleDeploymentByGUID.get(lobbyGUID)), body);
-            message.reply(new SuccessDTO());
-        } else {
-            message.fail(400, ERROR_CANNOT_ADD_PLAYER_TO_GAME);
+        try {
+            JsonObject body = message.body();
+            String lobbyGUID = body.getString(GAME_GUID);
+            String playerGUID = body.getString(PLAYER_GUID);
+            if (lobbyGUID == null || playerGUID == null) message.fail(400, ERROR_MALFORMED_REQUEST);
+            Game currGame = activeGamesById.get(lobbyGUID);
+            Player currPlayer = activePlayersById.get(playerGUID);
+            if (currGame != null && currPlayer != null) {
+                body.put("type", "move");
+                super.vertx.eventBus().publish(String.format(LOBBY_BASE_ADDRESS.getAddress(), verticleDeploymentByGUID.get(lobbyGUID)), body);
+                message.reply(new SuccessDTO());
+            } else {
+                message.fail(400, ERROR_CANNOT_ADD_PLAYER_TO_GAME);
+            }
+        } catch (Exception e) {
+
         }
     }
 
+    /**
+     * Given a properly formed message, this will create a new active Player. Replies to the message with the players GUID and username if there is no conflict.
+     */
     private void newPlayer(Message<JsonObject> message) {
         JsonObject body = message.body();
-        if (!body.containsKey("username")) message.fail(400, ERROR_MALFORMED_REQUEST);
-        for (Player p : activePlayers) {
-            if (body.getString("username").equals(p.getName())) message.fail(409, ERROR_PLAYER_NAME_EXISTS);
+        try {
+            NewPlayerDTO dto = getJsonAsClass(body, com.burnyarosh.dto.in.NewPlayerDTO.class);
+            for (Player p : activePlayers) {
+                if (dto.getUsername().equals(p.getName())) message.fail(409, ERROR_PLAYER_NAME_EXISTS);
+            }
+            Player temp = new Player(dto.getUsername(), Player.generateGUID());
+            this.activePlayers.add(temp);
+            this.activePlayersById.put(temp.getId(), temp);
+            this.activePlayersByName.put(temp.getName(), temp);
+            message.reply(new PlayerCreatedDTO(temp.getId(), temp.getName()).toJson());
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            message.fail(400, ERROR_MALFORMED_REQUEST);
         }
-        Player temp = new Player(body.getString("username"), Player.generateGUID());
-        this.activePlayers.add(temp);
-        this.activePlayersById.put(temp.getId(), temp);
-        this.activePlayersByName.put(temp.getName(), temp);
-        message.reply(new PlayerCreatedDTO(temp.getId(), temp.getName()).toJson());
     }
 
     private void listPlayers(Message<Void> message) {
-        JsonArray body = new JsonArray();
+        List<String> players = new ArrayList<>();
         this.activePlayers.forEach(player -> {
-            body.add(player.getName());
+            players.add(player.getName());
         });
-        message.reply(new ListPlayersDTO(body).toJson());    }
+        message.reply(new ListPlayersDTO(players).toJson());
+    }
 
     private void listLobbies(Message<Void> message) {
-        JsonArray availableLobbies = new JsonArray();
+        List<LobbyDTO> availableLobbies = new ArrayList<>();
         this.activeGames.stream().filter(game -> !game.gameIsReady()).forEach(game -> {
-            availableLobbies.add(game.toJson());
+            availableLobbies.add(new LobbyDTO(game.getId(), game.getPlayer(1).getName()));
         });
         message.reply(new ListLobbiesDTO(availableLobbies).toJson());
     }
 
     private void joinLobby(Message<JsonObject> message) {
         JsonObject body = message.body();
-        String lobbyGUID = body.getString(GAME_GUID);
-        String playerGUID = body.getString(PLAYER_GUID);
-        if (lobbyGUID == null || playerGUID == null) message.fail(400, ERROR_MALFORMED_REQUEST);
-        Game currGame = activeGamesById.get(lobbyGUID);
-        Player currPlayer = activePlayersById.get(playerGUID);
-        if (currGame != null && currPlayer != null && !currGame.gameIsReady() && this.playerIsAvailable(currPlayer)) {
-            activeGamesById.get(lobbyGUID).addSecondPlayer(activePlayersById.get(playerGUID));
-            JsonObject json = activeGamesById.get(lobbyGUID).toJson();
-            json.put("type", "setup");
-            super.vertx.eventBus().publish(String.format(LOBBY_BASE_ADDRESS.getAddress(), verticleDeploymentByGUID.get(lobbyGUID)), json);
-            message.reply(new SuccessDTO());
-        } else {
-            message.fail(400, ERROR_CANNOT_ADD_PLAYER_TO_GAME);
+        try {
+            JoinLobbyDTO dto = getJsonAsClass(body, JoinLobbyDTO.class);
+            String gameID = dto.getGameGUID();
+            String playerID = dto.getPlayerGUID();
+
+            Game currGame = activeGamesById.get(gameID);
+            Player currPlayer = activePlayersById.get(playerID);
+
+            if (currGame != null && currPlayer != null && !currGame.gameIsReady() && this.playerIsAvailable(currPlayer)) {
+                activeGamesById.get(gameID).addSecondPlayer(activePlayersById.get(playerID));
+                JsonObject json = activeGamesById.get(gameID).toJson();
+                json.put("type", "setup");
+                super.vertx.eventBus().publish(String.format(LOBBY_BASE_ADDRESS.getAddress(), verticleDeploymentByGUID.get(gameID)), json);
+                message.reply(new SuccessDTO());
+            } else {
+                message.fail(400, ERROR_CANNOT_ADD_PLAYER_TO_GAME);
+            }
+        } catch (Exception e) {
+            message.fail(400, ERROR_MALFORMED_REQUEST);
         }
     }
 

@@ -3,10 +3,6 @@ package com.burnyarosh.dto.in;
 public abstract class AbstractRequestDTO {
     String type;
 
-    public AbstractRequestDTO(String type) {
-        this.type = type;
-    }
-
     public String getType() {
         return type;
     }
@@ -15,5 +11,4 @@ public abstract class AbstractRequestDTO {
         this.type = type;
     }
 
-    public abstract boolean isValidRequest();
 }

@@ -1,6 +1,7 @@
 package com.burnyarosh.processor;
 
 import com.burnyarosh.board.ChessBoard;
+import com.burnyarosh.dto.in.PlayerTurnDTO;
 import com.burnyarosh.dto.out.SuccessDTO;
 import com.burnyarosh.entity.Player;
 import io.vertx.core.AbstractVerticle;
@@ -29,6 +30,7 @@ public class GameVerticle extends AbstractVerticle {
     public void start(Promise<Void> promise) throws Exception {
         JsonObject config = this.config();
         MessageConsumer<JsonObject> entryPoint = vertx.eventBus().consumer(String.format(LOBBY_BASE_ADDRESS.getAddress(), super.deploymentID()));
+        MessageConsumer<PlayerTurnDTO> playerTurn = vertx.eventBus().consumer((String.format(LOBBY_BASE_ADDRESS.getAddress(), super.deploymentID())));
         entryPoint.handler(this::handleInput);
         promise.complete();
     }

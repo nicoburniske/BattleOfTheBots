@@ -15,7 +15,7 @@ public class Game extends Entity {
     }
 
     public Player getPlayer(int index) {
-        if (index != 1 || index != 2) throw new IllegalArgumentException("Invalid player number");
+        if (index != 1 && index != 2) throw new IllegalArgumentException("Invalid player number");
         return this.players[index - 1];
     }
 
