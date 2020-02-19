@@ -1,6 +1,6 @@
 package com.burnyarosh;
 
-import com.burnyarosh.processor.ServerVerticle;
+import com.burnyarosh.api.processor.ServerVerticle;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -28,20 +28,6 @@ public class MainVerticle extends AbstractVerticle {
         return config;
     }
 
-    /**
-     * Attempts to map a given JsonObject to the given class.
-     * @throws  IllegalArgumentException if the object cannot be converted, or the jsonObject is empty.
-     */
-    public static <T> T getJsonAsClass(JsonObject json, Class<T> clazz) {
-        if (json != null && !json.isEmpty()) {
-            try {
-                return json.mapTo(clazz);
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Cannot map to given class");
-            }
-        } else {
-            throw new IllegalArgumentException("Empty json");
-        }
-    }
+
 
 }
