@@ -1,6 +1,6 @@
-package com.burnyarosh.dto.out.lobby;
+package com.burnyarosh.api.dto.out.lobby;
 
-import com.burnyarosh.dto.IDTO;
+import com.burnyarosh.api.dto.IDTO;
 
 public class LobbyCreatedDTO implements IDTO {
     private String gameGUID;

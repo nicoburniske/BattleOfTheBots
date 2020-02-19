@@ -1,4 +1,4 @@
-package com.burnyarosh.dto.in;
+package com.burnyarosh.api.dto.in;
 
 public class JoinLobbyDTO extends AbstractRequestDTO {
     private String playerGUID;

@@ -1,7 +1,7 @@
-package com.burnyarosh.dto.in;
+package com.burnyarosh.api.dto.in;
 
 public abstract class AbstractRequestDTO {
-    String type;
+    private String type;
 
     public String getType() {
         return type;

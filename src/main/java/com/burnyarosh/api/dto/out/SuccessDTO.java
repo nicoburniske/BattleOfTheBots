@@ -1,4 +1,4 @@
-package com.burnyarosh.dto.out;
+package com.burnyarosh.api.dto.out;
 
 public class SuccessDTO extends AbstractResponseDTO {
     public SuccessDTO() {

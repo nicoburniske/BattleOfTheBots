@@ -1,6 +1,6 @@
-package com.burnyarosh.dto.out;
+package com.burnyarosh.api.dto.out;
 
-import com.burnyarosh.dto.IDTO;
+import com.burnyarosh.api.dto.IDTO;
 
 public abstract class AbstractResponseDTO implements IDTO {
 

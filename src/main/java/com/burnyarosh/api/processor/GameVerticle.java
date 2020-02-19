@@ -1,8 +1,8 @@
-package com.burnyarosh.processor;
+package com.burnyarosh.api.processor;
 
+import com.burnyarosh.api.dto.in.PlayerTurnDTO;
 import com.burnyarosh.board.ChessBoard;
-import com.burnyarosh.dto.in.PlayerTurnDTO;
-import com.burnyarosh.dto.out.SuccessDTO;
+import com.burnyarosh.api.dto.out.SuccessDTO;
 import com.burnyarosh.entity.Player;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
@@ -14,10 +14,10 @@ import io.vertx.core.json.JsonObject;
 import java.util.Objects;
 import java.util.Random;
 
-import static com.burnyarosh.processor.EventBusAddress.LOBBY_BASE_ADDRESS;
-import static com.burnyarosh.processor.EventBusAddress.UPDATE_PLAYERS_ADDRESS;
-import static com.burnyarosh.processor.GameLobbyVerticle.GAME_GUID;
-import static com.burnyarosh.processor.GameLobbyVerticle.PLAYER_GUID;
+import static com.burnyarosh.api.processor.utils.Constants.GAME_GUID;
+import static com.burnyarosh.api.processor.utils.Constants.PLAYER_GUID;
+import static com.burnyarosh.api.processor.utils.EventBusAddress.LOBBY_BASE_ADDRESS;
+import static com.burnyarosh.api.processor.utils.EventBusAddress.UPDATE_PLAYERS_ADDRESS;
 
 public class GameVerticle extends AbstractVerticle {
     private static final String ERROR_PLAYER_NOT_IN_GAME = "Error: Player not in game";

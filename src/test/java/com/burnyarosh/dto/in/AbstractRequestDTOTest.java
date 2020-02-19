@@ -1,5 +1,6 @@
 package com.burnyarosh.dto.in;
 
+import com.burnyarosh.api.dto.in.NewPlayerDTO;
 import io.vertx.core.json.JsonObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +24,7 @@ public class AbstractRequestDTOTest {
     @Test
     public void isValidRequest() {
         // JsonObject test = new JsonObject(Json.encode(new NewPlayerDTO("ausername")));
-        NewPlayerDTO dto = this.validNewPlayerJson.mapTo(com.burnyarosh.dto.in.NewPlayerDTO.class);
+        NewPlayerDTO dto = this.validNewPlayerJson.mapTo(com.burnyarosh.api.dto.in.NewPlayerDTO.class);
         assertTrue(dto.equals(validNewPlayerObject));
     }
 }

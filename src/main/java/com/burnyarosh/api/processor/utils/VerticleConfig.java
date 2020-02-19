@@ -1,14 +1,14 @@
-package com.burnyarosh.processor;
+package com.burnyarosh.api.processor.utils;
 
 import io.vertx.core.json.JsonObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class Configuration {
+public class VerticleConfig {
     private Map<String, JsonObject> verticleIDtoConfig;
 
-    public Configuration() {
+    public VerticleConfig() {
         this.verticleIDtoConfig = new HashMap<>();
     }
 

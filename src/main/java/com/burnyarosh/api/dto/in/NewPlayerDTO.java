@@ -1,7 +1,6 @@
-package com.burnyarosh.dto.in;
+package com.burnyarosh.api.dto.in;
 
 import java.util.Objects;
-
 
 public class NewPlayerDTO extends AbstractRequestDTO {
     private String username;

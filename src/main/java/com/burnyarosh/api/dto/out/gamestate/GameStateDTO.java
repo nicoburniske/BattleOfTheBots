@@ -1,4 +1,4 @@
-package com.burnyarosh.dto.out;
+package com.burnyarosh.api.dto.out.gamestate;
 
 import io.vertx.core.json.JsonObject;
 

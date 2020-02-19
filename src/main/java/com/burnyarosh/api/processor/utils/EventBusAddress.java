@@ -1,4 +1,4 @@
-package com.burnyarosh.processor;
+package com.burnyarosh.api.processor.utils;
 
 public enum EventBusAddress {
     NEW_PLAYER_ADDRESS("new.player"),

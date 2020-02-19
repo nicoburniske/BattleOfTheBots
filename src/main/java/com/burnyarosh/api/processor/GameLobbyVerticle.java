@@ -1,9 +1,10 @@
-package com.burnyarosh.processor;
+package com.burnyarosh.api.processor;
 
-import com.burnyarosh.dto.in.JoinLobbyDTO;
-import com.burnyarosh.dto.in.NewPlayerDTO;
-import com.burnyarosh.dto.out.SuccessDTO;
-import com.burnyarosh.dto.out.lobby.*;
+
+import com.burnyarosh.api.dto.in.NewPlayerDTO;
+import com.burnyarosh.api.dto.out.*;
+import com.burnyarosh.api.dto.out.lobby.*;
+import com.burnyarosh.api.dto.in.JoinLobbyDTO;
 import com.burnyarosh.entity.Entity;
 import com.burnyarosh.entity.Game;
 import com.burnyarosh.entity.Player;
@@ -21,20 +22,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.burnyarosh.MainVerticle.getJsonAsClass;
-import static com.burnyarosh.processor.EventBusAddress.*;
+import static com.burnyarosh.api.processor.utils.Constants.GAME_GUID;
+import static com.burnyarosh.api.processor.utils.Constants.PLAYER_GUID;
+import static com.burnyarosh.api.processor.utils.EventBusAddress.*;
+import static com.burnyarosh.api.processor.utils.Mapper.getJsonAsClass;
 
 public class GameLobbyVerticle extends AbstractVerticle {
     private static final Logger LOGGER = LoggerFactory.getLogger(GameLobbyVerticle.class);
-    private static final String ERROR_PLAYER_NAME_EXISTS = "Conflict: Username already taken";
+    private static final String ERROR_CONFLICT_USERNAME_ALREADY_TAKEN = "Conflict: Username already taken";
     private static final String ERROR_NO_PLAYER_EXISTS = "Error: Player does not exist";
     private static final String ERROR_MALFORMED_REQUEST = "Malformed request";
     private static final String ERROR_MALFORMED_REQUEST_TEMPLATE = "Malformed request: %s";
     private static final String ERROR_CANNOT_ADD_PLAYER_TO_GAME = "Error: cannot add player to game";
-
-    static final String GAME_GUID = "gameGUID";
-    static final String PLAYER_GUID = "playerGUID";
-    static final String PLAYER_NAME = "playerNAME";
 
     List<Player> activePlayers = new ArrayList();
     List<Game> activeGames = new ArrayList<>();
@@ -95,9 +94,9 @@ public class GameLobbyVerticle extends AbstractVerticle {
     private void newPlayer(Message<JsonObject> message) {
         JsonObject body = message.body();
         try {
-            NewPlayerDTO dto = getJsonAsClass(body, com.burnyarosh.dto.in.NewPlayerDTO.class);
+            NewPlayerDTO dto = getJsonAsClass(body, com.burnyarosh.api.dto.in.NewPlayerDTO.class);
             for (Player p : activePlayers) {
-                if (dto.getUsername().equals(p.getName())) message.fail(409, ERROR_PLAYER_NAME_EXISTS);
+                if (dto.getUsername().equals(p.getName())) message.fail(409, ERROR_CONFLICT_USERNAME_ALREADY_TAKEN);
             }
             Player temp = new Player(dto.getUsername(), Player.generateGUID());
             this.activePlayers.add(temp);
@@ -110,6 +109,11 @@ public class GameLobbyVerticle extends AbstractVerticle {
         }
     }
 
+    /**
+     * Responds with a list of all currently active players.
+     *
+     * @param message
+     */
     private void listPlayers(Message<Void> message) {
         List<String> players = new ArrayList<>();
         this.activePlayers.forEach(player -> {
@@ -118,6 +122,11 @@ public class GameLobbyVerticle extends AbstractVerticle {
         message.reply(new ListPlayersDTO(players).toJson());
     }
 
+    /**
+     * Responds to the message with a list of all currently available (non-full) games.
+     *
+     * @param message
+     */
     private void listLobbies(Message<Void> message) {
         List<LobbyDTO> availableLobbies = new ArrayList<>();
         this.activeGames.stream().filter(game -> !game.gameIsReady()).forEach(game -> {
@@ -126,6 +135,9 @@ public class GameLobbyVerticle extends AbstractVerticle {
         message.reply(new ListLobbiesDTO(availableLobbies).toJson());
     }
 
+    /**
+     * @param message
+     */
     private void joinLobby(Message<JsonObject> message) {
         JsonObject body = message.body();
         try {

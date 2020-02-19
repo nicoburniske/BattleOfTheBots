@@ -1,5 +1,7 @@
 package com.burnyarosh.dto.out.lobby;
 
+import com.burnyarosh.api.dto.out.lobby.ListLobbiesDTO;
+import com.burnyarosh.api.dto.out.lobby.LobbyDTO;
 import com.burnyarosh.entity.Entity;
 import com.burnyarosh.entity.Game;
 import com.burnyarosh.entity.Player;
@@ -18,6 +20,6 @@ public class ListLobbiesDTOTest {
         Game g1 = new Game(gameGUID, gameGUID, p1);
         LobbyDTO lobby1 = new LobbyDTO(g1.getId(), g1.getPlayer(1).getName());
         ListLobbiesDTO dto = new ListLobbiesDTO(Arrays.asList(lobby1));
-        assertEquals(String.format("{\"lobbies\":[{\"gameGUID\":\"%s\",\"player1\":\"%s\"}]}", gameGUID, p1.getName()), dto.toJson());
+        assertEquals(String.format("{\"lobbies\":[{\"gameGUID\":\"%s\",\"player1\":\"%s\"}]}", gameGUID, p1.getName()), dto.toJsonString());
     }
 }

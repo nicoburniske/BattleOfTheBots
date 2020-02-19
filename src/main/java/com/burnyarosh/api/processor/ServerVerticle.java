@@ -1,6 +1,6 @@
-package com.burnyarosh.processor;
+package com.burnyarosh.api.processor;
 
-import com.burnyarosh.dto.in.Request;
+import com.burnyarosh.api.dto.in.Request;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
@@ -16,15 +16,17 @@ import io.vertx.core.logging.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.burnyarosh.Config.PORT_NUMBER;
-import static com.burnyarosh.dto.in.Request.*;
-import static com.burnyarosh.processor.EventBusAddress.*;
+import static com.burnyarosh.ServerConfig.PORT_NUMBER;
+import static com.burnyarosh.api.dto.in.Request.*;
+import static com.burnyarosh.api.processor.utils.Constants.ERROR_INVALID_REQUEST;
+import static com.burnyarosh.api.processor.utils.EventBusAddress.*;
 
 /**
  * Verticle to comprise of the backend WebSocket server.
  */
 public class ServerVerticle extends AbstractVerticle {
     private final static Logger LOGGER = LoggerFactory.getLogger(ServerVerticle.class);
+    private final FailureHandler failureHandler = new FailureHandler();
     private Map<String, String> addressToGuidMap = new HashMap<>();
     private Map<String, String> requestToEventBusAddress;
     private Map<String, ServerWebSocket> playerIDtoSocket;
@@ -83,7 +85,7 @@ public class ServerVerticle extends AbstractVerticle {
 
     private void onPlayerConnection(ServerWebSocket websocket) {
         websocket
-                .exceptionHandler(Throwable::printStackTrace)
+                .exceptionHandler(throwable -> this.failureHandler.handleFailure(websocket, throwable))
                 .frameHandler(frame -> this.newConnectionHandler(frame, websocket))
                 .closeHandler(v -> this.dropConnectionHandler(websocket));
     }
@@ -100,9 +102,8 @@ public class ServerVerticle extends AbstractVerticle {
     private void newConnectionHandler(WebSocketFrame frame, ServerWebSocket websocket) {
         JsonObject request = this.toJson(frame);
         boolean isValid = (request.getString("type").equals(NEW_PLAYER_REQUEST.getType()));
-        // || request.getString("type").equals(LIST_PLAYERS_REQUEST.getType()));
         if (isValid) {
-            super.vertx.eventBus().request(this.requestToEventBusAddress.get(request.getString("type")), request,
+            super.vertx.eventBus().request(String.valueOf(NEW_PLAYER_ADDRESS), request,
                     ar -> {
                         if (ar.failed()) {
                             LOGGER.error("Refusing connection", ar.cause());
@@ -117,7 +118,7 @@ public class ServerVerticle extends AbstractVerticle {
                         }
                     });
         } else {
-            websocket.writeTextMessage("Invalid Request.");
+            websocket.writeTextMessage(ERROR_INVALID_REQUEST);
         }
     }
 
@@ -134,7 +135,7 @@ public class ServerVerticle extends AbstractVerticle {
                         }
                     });
         } else {
-            websocket.writeTextMessage("Invalid Request.");
+            websocket.writeTextMessage(ERROR_INVALID_REQUEST);
         }
     }
 
