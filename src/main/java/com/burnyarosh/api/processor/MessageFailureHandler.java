@@ -18,4 +18,7 @@ public class MessageFailureHandler {
         message.fail(400, new FailureDTO("Error: Unauthorized user").toJsonString());
     }
 
+    public void handleInvalidMove(Message message) {
+        message.fail(400, new FailureDTO("Error: Invalid Move").toJsonString());
+    }
 }

@@ -3,6 +3,7 @@ package com.burnyarosh.api.processor;
 
 import com.burnyarosh.api.dto.in.NewLobbyDTO;
 import com.burnyarosh.api.dto.in.NewPlayerDTO;
+import com.burnyarosh.api.dto.in.PlayerTurnDTO;
 import com.burnyarosh.api.dto.out.*;
 import com.burnyarosh.api.dto.out.lobby.*;
 import com.burnyarosh.api.dto.in.JoinLobbyDTO;
@@ -33,6 +34,7 @@ import static com.burnyarosh.api.processor.utils.EventBusAddress.*;
 public class GameLobbyVerticle extends AbstractVerticle {
     private static final Logger LOGGER = LoggerFactory.getLogger(GameLobbyVerticle.class);
     private final MessageFailureHandler failureHandler = new MessageFailureHandler();
+    // TODO: remove useless constants
     private static final String ERROR_CONFLICT_USERNAME_ALREADY_TAKEN = "Conflict: Username already taken";
     private static final String ERROR_NO_PLAYER_EXISTS = "Error: Player does not exist";
     private static final String ERROR_MALFORMED_REQUEST = "Malformed request";
@@ -63,7 +65,7 @@ public class GameLobbyVerticle extends AbstractVerticle {
         MessageConsumer<Void> listPlayers = vertx.eventBus().consumer(LIST_PLAYER_ADDRESS.getAddressString());
         listPlayers.handler(this::listPlayers);
 
-        MessageConsumer<JsonObject> newMove = vertx.eventBus().consumer(NEW_MOVE_ADDRESS.getAddressString());
+        MessageConsumer<PlayerTurnDTO> newMove = vertx.eventBus().consumer(NEW_MOVE_ADDRESS.getAddressString());
         newMove.handler(this::newMove);
 
         super.vertx.exceptionHandler(this::handleException);
@@ -72,6 +74,9 @@ public class GameLobbyVerticle extends AbstractVerticle {
         promise.complete();
     }
 
+    /**
+     * Verticle Exception handler
+     */
     private void handleException(Throwable throwable) {
         if (throwable instanceof HandledLobbyException) {
             ((HandledLobbyException) throwable).callLobbyFailureHandler(this.failureHandler);
@@ -80,20 +85,20 @@ public class GameLobbyVerticle extends AbstractVerticle {
         }
     }
 
-    // TODO: DTO THIS
-    private void newMove(Message<JsonObject> message) {
-        JsonObject body = message.body();
-        String lobbyGUID = body.getString(GAME_GUID);
-        String playerGUID = body.getString(PLAYER_GUID);
-        if (lobbyGUID == null || playerGUID == null) message.fail(400, ERROR_MALFORMED_REQUEST);
+    /**
+     * @param message
+     */
+    private void newMove(Message<PlayerTurnDTO> message) {
+        PlayerTurnDTO body = message.body();
+        String lobbyGUID = body.getGameGUID();
+        String playerGUID = body.getPlayerGUID();
         Game currGame = activeGamesById.get(lobbyGUID);
         Player currPlayer = activePlayersById.get(playerGUID);
         if (currGame != null && currPlayer != null) {
-            body.put("type", "move");
-            super.vertx.eventBus().publish(String.format(LOBBY_BASE_ADDRESS.getAddressString(), verticleDeploymentByGUID.get(lobbyGUID)), body);
-            message.reply(new SuccessDTO());
+            super.vertx.eventBus().publish(String.format(NEW_MOVE_ADDRESS.getAddressString(), verticleDeploymentByGUID.get(lobbyGUID)), body);
+            message.reply(new SuccessDTO().toJson());
         } else {
-            message.fail(400, ERROR_CANNOT_ADD_PLAYER_TO_GAME);
+            throw new UnauthorizedPlayerException(message);
         }
     }
 
@@ -112,12 +117,10 @@ public class GameLobbyVerticle extends AbstractVerticle {
         this.activePlayersByName.put(temp.getName(), temp);
         LOGGER.info(String.format("Registered player %s with id %s", temp.getName(), temp.getId()));
         message.reply(new PlayerCreatedDTO(temp.getId(), temp.getName()).toJson());
-}
+    }
 
     /**
      * Responds with a list of all currently active players.
-     *
-     * @param message
      */
     private void listPlayers(Message<Void> message) {
         List<String> players = new ArrayList<>();
@@ -129,8 +132,6 @@ public class GameLobbyVerticle extends AbstractVerticle {
 
     /**
      * Responds to the message with a list of all currently available (non-full) games.
-     *
-     * @param message
      */
     private void listLobbies(Message<Void> message) {
         List<LobbyDTO> availableLobbies = new ArrayList<>();
@@ -141,7 +142,7 @@ public class GameLobbyVerticle extends AbstractVerticle {
     }
 
     /**
-     * @param message
+     * Attempts to have the given player in the JoinLobbyDTO join the given game.
      */
     private void joinLobby(Message<JoinLobbyDTO> message) {
         JoinLobbyDTO dto = message.body();
@@ -156,7 +157,7 @@ public class GameLobbyVerticle extends AbstractVerticle {
             // TODO: make this a specific endpoint/address
             json.put("type", "setup");
             super.vertx.eventBus().publish(String.format(LOBBY_BASE_ADDRESS.getAddressString(), verticleDeploymentByGUID.get(gameID)), json);
-            message.reply(new SuccessDTO());
+            message.reply(new SuccessDTO().toJson());
         } else {
             throw new GameFullException(message);
         }
@@ -181,7 +182,7 @@ public class GameLobbyVerticle extends AbstractVerticle {
             if (ar.succeeded()) {
                 verticleDeploymentByGUID.put(guid, ar.result());
                 LOGGER.info(String.format("Deployed verticle %s for game %s", ar.result(), guid));
-                request.reply(new LobbyCreatedDTO(guid).toJson());
+                request.reply(new LobbyCreatedDTO(lobbyguid).toJson());
             } else {
                 // should never happen
                 LOGGER.error("Game Verticle Deployment failed");
@@ -190,6 +191,10 @@ public class GameLobbyVerticle extends AbstractVerticle {
         });
     }
 
+    /**
+     * @param currPlayer
+     * @return
+     */
     private boolean playerIsAvailable(Player currPlayer) {
         for (Game g : this.activeGames) {
             if (g.includesPlayer(currPlayer.getId())) return false;

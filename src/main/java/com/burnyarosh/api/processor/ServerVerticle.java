@@ -1,6 +1,5 @@
 package com.burnyarosh.api.processor;
 
-import com.burnyarosh.api.dto.IDTO;
 import com.burnyarosh.api.dto.in.InDTO;
 import com.burnyarosh.api.dto.in.NewPlayerDTO;
 import com.burnyarosh.api.dto.in.Request;
@@ -70,7 +69,7 @@ public class ServerVerticle extends AbstractVerticle {
         this.addressToGuidMap = new HashMap<>();
         this.playerIDtoSocket = new HashMap<>();
         super.vertx.exceptionHandler();
-        getStandardCodecs().stream().forEach(codec -> super.vertx.eventBus().registerDefaultCodec(codec.getClazz(), codec));
+        getStandardCodecs().forEach(codec -> super.vertx.eventBus().registerDefaultCodec(codec.getClazz(), codec));
         MessageConsumer<JsonObject> updateClients = super.vertx.eventBus().consumer(UPDATE_PLAYERS_ADDRESS.getAddressString());
         updateClients.handler(this::updateClients);
     }
@@ -106,10 +105,6 @@ public class ServerVerticle extends AbstractVerticle {
         closeQuietly(websocket);
     }
 
-    private void handlerConnectionExceptions(ServerWebSocket socket, Throwable throwable) {
-
-    }
-
     private void newConnectionHandler(WebSocketFrame frame, ServerWebSocket websocket) {
         try {
             JsonObject request = this.toJson(frame);
@@ -133,7 +128,8 @@ public class ServerVerticle extends AbstractVerticle {
             if (e instanceof HandledException) {
                 this.websocketFailureHandler.handleFailure(websocket, (HandledException) e);
             } else {
-                LOGGER.error(e.getMessage(), (Object[]) e.getStackTrace());
+                websocket.writeTextMessage(new FailureDTO("Invalid JSON").toJsonString());
+                LOGGER.error(e);
             }
         }
     }

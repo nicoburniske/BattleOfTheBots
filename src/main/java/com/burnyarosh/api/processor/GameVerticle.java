@@ -1,5 +1,6 @@
 package com.burnyarosh.api.processor;
 
+import com.burnyarosh.api.dto.common.CoordDTO;
 import com.burnyarosh.api.dto.in.PlayerTurnDTO;
 import com.burnyarosh.board.ChessBoard;
 import com.burnyarosh.api.dto.out.SuccessDTO;
@@ -15,56 +16,60 @@ import java.util.Objects;
 import java.util.Random;
 
 import static com.burnyarosh.api.processor.utils.Constants.GAME_GUID;
-import static com.burnyarosh.api.processor.utils.Constants.PLAYER_GUID;
-import static com.burnyarosh.api.processor.utils.EventBusAddress.LOBBY_BASE_ADDRESS;
-import static com.burnyarosh.api.processor.utils.EventBusAddress.UPDATE_PLAYERS_ADDRESS;
+import static com.burnyarosh.api.processor.utils.EventBusAddress.*;
 
 public class GameVerticle extends AbstractVerticle {
     private static final String ERROR_PLAYER_NOT_IN_GAME = "Error: Player not in game";
     private String lobbyID;
-    private Player[] players = new Player[2];
+    private Player[] players;
     private ChessBoard board;
     private int whitePlayer; // which player is white. corresponds to array index.
+    MessageConsumer<JsonObject> entryPoint;
+    MessageConsumer<PlayerTurnDTO> playerTurn;
 
     @Override
-    public void start(Promise<Void> promise) throws Exception {
+    public void start(Promise<Void> promise) {
         JsonObject config = this.config();
-        MessageConsumer<JsonObject> entryPoint = vertx.eventBus().consumer(String.format(LOBBY_BASE_ADDRESS.getAddressString(), super.deploymentID()));
-        MessageConsumer<PlayerTurnDTO> playerTurn = vertx.eventBus().consumer((String.format(LOBBY_BASE_ADDRESS.getAddressString(), super.deploymentID())));
-        entryPoint.handler(this::handleInput);
+        this.players = new Player[2];
+
+        entryPoint = vertx.eventBus().consumer(String.format(LOBBY_BASE_ADDRESS.getAddressString(), super.deploymentID()));
+        entryPoint.handler(this::handleSetup);
+        playerTurn = vertx.eventBus().consumer((String.format(NEW_MOVE_ADDRESS.getAddressString(), super.deploymentID())));
+        playerTurn.handler(this::handleNewMove);
         promise.complete();
     }
 
-    private void handleInput(Message<JsonObject> message) {
-        JsonObject messageJSON = message.body();
-        String type = jsonGetStringValue(messageJSON, "type");
-        if (type.equals("setup")) {
-            this.lobbyID = jsonGetStringValue(messageJSON, GAME_GUID);
-            JsonArray players = jsonGetArrayValue(messageJSON, "players");
-            JsonObject player1 = players.getJsonObject(0);
-            this.players[0] = new Player(player1.getString("username"), player1.getString("id"));
-            JsonObject player2 = players.getJsonObject(1);
-            this.players[1] = new Player(player2.getString("username"), player2.getString("id"));
-            this.newGame();
-            message.reply(new SuccessDTO());
-            this.sendGameUpdate();
-            this.randomColor();
-        } else if (type.equals("move")) {
-            String playerid = jsonGetStringValue(messageJSON, PLAYER_GUID);
-            int player = this.getPlayerIndex(playerid);
-            if (player < 0) message.fail(400, ERROR_PLAYER_NOT_IN_GAME);
-            JsonArray origin = jsonGetArrayValue(messageJSON, "origin");
-            JsonArray target = jsonGetArrayValue(messageJSON, "target");
-            if (origin.size() == 2 && target.size() == 2 && this.isPlayerTurn(player)) {
-                try {
-                    this.board.playGame(origin.getInteger(0), origin.getInteger(1), target.getInteger(0), target.getInteger(1));
-                    message.reply(new SuccessDTO());
-                    this.sendGameUpdate();
-                } catch (Exception e) {
-                    message.fail(400, e.getMessage());
-                }
+    private void handleNewMove(Message<PlayerTurnDTO> message) {
+        PlayerTurnDTO dto = message.body();
+        int player = this.getPlayerIndex(dto.getPlayerGUID());
+        if (player < 0) message.fail(400, ERROR_PLAYER_NOT_IN_GAME);
+        if (this.isPlayerTurn(player)) {
+            try {
+                CoordDTO origin = dto.getOrigin();
+                CoordDTO target = dto.getTarget();
+                this.board.playGame(origin.getX(), origin.getY(), target.getX(), target.getY());
+                message.reply(new SuccessDTO());
+                this.sendGameUpdate();
+            } catch (Exception e) {
+                message.fail(400, e.getMessage());
             }
         }
+    }
+
+    private void handleSetup(Message<JsonObject> message) {
+        JsonObject messageJSON = message.body();
+        String type = jsonGetStringValue(messageJSON, "type");
+        this.lobbyID = jsonGetStringValue(messageJSON, GAME_GUID);
+        JsonArray players = jsonGetArrayValue(messageJSON, "players");
+        JsonObject player1 = players.getJsonObject(0);
+        this.players[0] = new Player(player1.getString("username"), player1.getString("id"));
+        JsonObject player2 = players.getJsonObject(1);
+        this.players[1] = new Player(player2.getString("username"), player2.getString("id"));
+        this.newGame();
+        message.reply(new SuccessDTO());
+        this.sendGameUpdate();
+        this.randomColor();
+        // TODO: make sure no more players can join. remove consumer?
     }
 
     private boolean isPlayerTurn(int player) {

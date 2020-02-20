@@ -2,7 +2,7 @@ package com.burnyarosh.api.processor.utils;
 
 public enum EventBusAddress {
     NEW_PLAYER_ADDRESS("new.player"),
-    NEW_MOVE_ADDRESS("new.move"),
+    NEW_MOVE_ADDRESS("burnyarosh.lobby.move."),
     JOIN_LOBBY_ADDRESS("join.lobby"),
     JOIN_ANY_LOBBY("join.any.lobby"),
     NEW_LOBBY_ADDRESS("new.lobby"),
