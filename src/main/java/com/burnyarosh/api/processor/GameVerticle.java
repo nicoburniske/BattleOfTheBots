@@ -53,6 +53,8 @@ public class GameVerticle extends AbstractVerticle {
             } catch (Exception e) {
                 message.fail(400, e.getMessage());
             }
+        } else {
+            //TODO: error message saying it is not the player's turn
         }
     }
 
