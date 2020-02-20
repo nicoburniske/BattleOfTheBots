@@ -18,26 +18,6 @@ public class TestChessBoard {
     }
 
     @Test
-    public void testEnPassant(){
-        //  [WHITE]
-        assertTrue(board1.playGame(1, 1, 1, 3));
-
-        //  [BLACK]
-        assertTrue(board1.playGame(0, 6, 0, 5));
-
-        //  [WHITE]
-        assertTrue(board1.playGame(1, 3, 1, 4));
-
-        //  [BLACK]
-        assertTrue(board1.playGame(2, 6, 2, 4));
-
-        //  [WHITE], En Passant
-        assertTrue(board1.playGame(1, 4, 2, 5));
-        System.out.println(board1);
-
-    }
-
-    @Test
     public void testMoveKnights() {
         //  [WHITE] - move queen-side knight
         assertTrue(board1.playGame(1, 0, 2, 2));
@@ -47,7 +27,6 @@ public class TestChessBoard {
 
         //  [WHITE] - move previous knight
         assertTrue(board1.playGame(2, 2, 4, 3));
-
 
         //  [BLACK] - move king-side knight
         assertTrue(board1.playGame(6, 7, 5, 5));
@@ -74,83 +53,82 @@ public class TestChessBoard {
     @Test
     public void testMoveKnights_Capture() {
         //  [WHITE] - move queen-side knight
-        assertEquals(true, board1.playGame(1, 0, 2, 2));
+        assertTrue(board1.playGame(1, 0, 2, 2));
 
         //  [BLACK] - move queen-side knight
-        assertEquals(true, board1.playGame(1, 7, 2, 5));
+        assertTrue(board1.playGame(1, 7, 2, 5));
 
         //  [WHITE] - move previous knight
-        assertEquals(true, board1.playGame(2, 2, 4, 3));
+        assertTrue(board1.playGame(2, 2, 4, 3));
 
         //  [BLACK] - move king-side knight
-        assertEquals(true, board1.playGame(6, 7, 5, 5));
+        assertTrue(board1.playGame(6, 7, 5, 5));
 
         //  [WHITE] - move king-side knight
-        assertEquals(true, board1.playGame(6, 0, 5, 2));
+        assertTrue(board1.playGame(6, 0, 5, 2));
 
         //  [BLACK] - move previous knight
-        assertEquals(true, board1.playGame(5, 5, 3, 4));
+        assertTrue(board1.playGame(5, 5, 3, 4));
 
         //  [WHITE] - move knight
-        assertEquals(true, board1.playGame(5, 2, 4, 4));
+        assertTrue(board1.playGame(5, 2, 4, 4));
 
         //  [BLACK] - move knight
-        assertEquals(true, board1.playGame(2, 5, 3, 3));
+        assertTrue(board1.playGame(2, 5, 3, 3));
 
         //  [WHITE] - move knight
-        assertEquals(true, board1.playGame(4, 4, 2, 5));
+        assertTrue(board1.playGame(4, 4, 2, 5));
 
         //  [BLACK] - move knight
-        assertEquals(true, board1.playGame(3, 4, 2, 2));
+        assertTrue(board1.playGame(3, 4, 2, 2));
 
         //  [WHITE] - move knight, capture black knight
-        assertEquals(true, board1.playGame(4, 3, 2, 2));
+        assertTrue(board1.playGame(4, 3, 2, 2));
 
         //  [BLACK] - move knight, capture white knight
-        assertEquals(true, board1.playGame(3, 3, 2, 5));
+        assertTrue(board1.playGame(3, 3, 2, 5));
 
         //  [WHITE] - move knight
-        assertEquals(true, board1.playGame(2, 2, 3, 4));
+        assertTrue(board1.playGame(2, 2, 3, 4));
 
         //  [BLACK] - move knight
-        assertEquals(true, board1.playGame(2, 5, 3, 3));
+        assertTrue(board1.playGame(2, 5, 3, 3));
 
         //  [WHITE] - move knight, capture pawn
-        assertEquals(true, board1.playGame(3, 4, 4, 6));
+        assertTrue(board1.playGame(3, 4, 4, 6));
 
         //  [BLACK] - move knight, capture pawn
-        assertEquals(true, board1.playGame(3, 3, 4, 1));
+        assertTrue(board1.playGame(3, 3, 4, 1));
 
         //  [WHITE] - move knight, capture bishop
-        assertEquals(true, board1.playGame(4, 6, 2, 7));
+        assertTrue(board1.playGame(4, 6, 2, 7));
 
         //  [BLACK] - move knight, capture bishop
-        assertEquals(true, board1.playGame(4, 1, 2, 0));
+        assertTrue(board1.playGame(4, 1, 2, 0));
 
         //  [WHITE] - move knight, capture pawn
-        assertEquals(true, board1.playGame(2, 7, 0, 6));
+        assertTrue(board1.playGame(2, 7, 0, 6));
 
         //  [BLACK] - move knight, capture bishop
-        assertEquals(true, board1.playGame(2, 0, 0, 1));
+        assertTrue(board1.playGame(2, 0, 0, 1));
     }
 
     @Test
     public void testCastle() {
         // move king side horse
-        board1.playGame(6, 0, 5, 2);
+        assertTrue(board1.playGame(6, 0, 5, 2));
         // move black pawn
-        board1.playGame(3, 6, 3, 4);
+        assertTrue(board1.playGame(3, 6, 3, 4));
         // move white king pawn
-        board1.playGame(4, 1, 4, 2);
+        assertTrue(board1.playGame(4, 1, 4, 2));
         // move black pawn
-        board1.playGame(4, 6, 4, 4);
+        assertTrue(board1.playGame(4, 6, 4, 4));
         // move white bishop out of the way in order to castle
-        board1.playGame(5, 0, 3, 2);
+        assertTrue(board1.playGame(5, 0, 3, 2));
         // move black pawn again
-        board1.playGame(3, 4, 3, 3);
+        assertTrue(board1.playGame(3, 4, 3, 3));
         // castle
-        board1.playGame(4, 0, 6, 0);
-
+        assertTrue(board1.playGame(4, 0, 6, 0));
     }
 
     // King in Check exception unit test.
@@ -190,57 +168,6 @@ public class TestChessBoard {
         }
     }
 
-    @Test
-    public void testMovePawns() {
-        assertEquals(true, board1.isWhiteTurn());
-        // move white King pawn
-        assertEquals(true, board1.playGame(4, 1, 4, 3));
-
-        assertEquals(false, board1.isWhiteTurn());
-        // move black Queen pawn
-        assertEquals(true, board1.playGame(3, 6, 3, 4));
-
-        assertEquals(true, board1.isWhiteTurn());
-        // move white king pawn again
-        assertEquals(true, board1.playGame(4, 3, 4, 4));
-    }
-
-    @Test
-    public void testWhitePawnStartMoveTwice() {
-        try {
-            // move white King pawn
-            assertTrue(board1.playGame(4, 1, 4, 3));
-            assertTrue(board1.playGame(3, 6, 3, 5));
-            // move white King pawn twice again. Should result in IllegalArgumentException
-            board1.playGame(4, 3, 4, 5);
-            fail("Exception not thrown");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Invalid move", e.getMessage());
-        }
-
-    }
-
-    @Test
-    public void testWhitePawnMoveThreeSquares() {
-        try {
-            this.board1.playGame(4, 1, 4, 4);
-            fail("Exception not thrown");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Invalid move", e.getMessage());
-        }
-    }
-
-    @Test
-    public void testWhitePawnMoveSideways() {
-        try {
-            this.board1.playGame(4, 1, 4, 3);
-            this.board1.playGame(4, 6, 4, 4);
-            this.board1.playGame(4, 3, 5, 3);
-            fail("Exception not thrown");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Invalid move", e.getMessage());
-        }
-    }
 
     @Test
     public void testMoveQueenThroughPawn() {
@@ -284,6 +211,10 @@ public class TestChessBoard {
 
     @Test
     public void testEntireGame() {
+        /*
+         * White: Peter Yarosh
+         * Black: Nick Burniske
+         */
         board1.playGame(4, 1, 4, 3);
         board1.playGame(4, 6, 4, 4);
         board1.playGame(5, 0, 2, 3);
@@ -332,26 +263,6 @@ public class TestChessBoard {
         board1.playGame(0, 7, 4, 7);
         board1.playGame(4, 1, 5, 2);
         board1.playGame(5, 7, 6, 6);
-
-        /**
-         * Petey White, Nick Black.
-         */
-    }
-
-    @Test
-    public void testToJson() {
-        System.out.println(board1.toJson().toString());
-        //TODO: test toJson
-    }
-
-    @Test
-    public void testGetScore(){
-        assertEquals(0, this.board1.getScore(), 0.0001);
-        this.board1.playGame(4, 1, 4,3);
-        this.board1.playGame(5, 6, 5, 4);
-        this.board1.playGame(4,3, 5, 4);
-        assertEquals(1, this.board1.getScore(), 0.0001);
-        //TODO: test getScore
     }
 
 }

@@ -1,16 +1,13 @@
 package com.burnyarosh.board.piece;
 
 import com.burnyarosh.board.common.Coord;
-import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
+import com.burnyarosh.board.common.Move;
 
 import java.util.List;
 
 public interface IPiece {
 
-    int getX();
-
-    int getY();
+    Coord getCoord();
 
     boolean getIsBlack();
 
@@ -18,18 +15,17 @@ public interface IPiece {
 
     boolean getIsFirstMove();
 
-    void makeMove(int x, int y);
+    void makeMove(Coord c);
 
     String toString();
 
-    boolean isValidMove(IPiece[][] board, int fromX, int fromY, int toX, int toY);
+    IPiece promote(boolean toKnight);
 
-    boolean movePiece(IPiece[][] board, int fromX, int fromY, int toX, int toY);
+    boolean isValidMove(IPiece[][] board, Coord origin, Coord target);
 
-    List<Coord> getPossibleMoves(IPiece[][] board);
+    boolean movePiece(IPiece[][] board, Coord origin, Coord target);
+
+    List<Coord> getPossibleMoves(IPiece[][] board, List<Move> move_history);
 
     IPiece copy();
-
-    JsonObject toJson();
-
 }
