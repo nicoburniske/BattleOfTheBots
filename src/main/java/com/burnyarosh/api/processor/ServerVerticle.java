@@ -36,6 +36,7 @@ public class ServerVerticle extends AbstractVerticle {
     private Map<String, String> addressToGuidMap;
     private Map<String, ServerWebSocket> playerIDtoSocket;
 
+    // Entry points
     @Override
     public void start(Promise<Void> promise) throws Exception {
         //TODO: figure out rest api requests
@@ -61,19 +62,31 @@ public class ServerVerticle extends AbstractVerticle {
         promise.complete();
     }
 
+    /**
+     * Doesn't do anything special yet. Prints stacktrace.
+     * @param throwable to be handled
+     */
     private void handlerServerExceptions(Throwable throwable) {
-        System.out.println("HECK");
+        LOGGER.error(throwable);
     }
 
+    /**
+     * Initializes server configuration, registers default codecs for eventBus transmission, and initializes consumer for updating clients/players
+     */
     private void initialize() {
         this.addressToGuidMap = new HashMap<>();
         this.playerIDtoSocket = new HashMap<>();
-        super.vertx.exceptionHandler();
+        super.vertx.exceptionHandler(this::handlerServerExceptions);
         getStandardCodecs().forEach(codec -> super.vertx.eventBus().registerDefaultCodec(codec.getClazz(), codec));
         MessageConsumer<JsonObject> updateClients = super.vertx.eventBus().consumer(UPDATE_PLAYERS_ADDRESS.getAddressString());
         updateClients.handler(this::updateClients);
     }
 
+    /**
+     * Updates clients with a JsonObject
+     * TODO: DTO THIS
+     * @param jsonObjectMessage the message to be sent. Also contains list of players.
+     */
     private void updateClients(Message<JsonObject> jsonObjectMessage) {
         JsonObject update = jsonObjectMessage.body();
         JsonObject state = update.getJsonObject("state");
@@ -83,10 +96,19 @@ public class ServerVerticle extends AbstractVerticle {
         }
     }
 
+    /**
+     * Sends the message to the appropriate Websocket
+     * @param message message to be sent
+     * @param playerGUID players GUID
+     */
     private void sendMessageToClient(JsonObject message, String playerGUID) {
         this.playerIDtoSocket.get(playerGUID).writeTextMessage(message.toString());
     }
 
+    /**
+     * Initializes websocket handlers on new connection
+     * @param websocket web socket to be handled
+     */
     private void onPlayerConnection(ServerWebSocket websocket) {
         websocket
                 //.exceptionHandler(throwable -> this.failureHandler.handleFailure(websocket, throwable))
@@ -95,6 +117,11 @@ public class ServerVerticle extends AbstractVerticle {
                 .closeHandler(v -> this.dropConnectionHandler(websocket));
     }
 
+    /**
+     * Handles a dropped connection.
+     * TODO: Clean up lobby and game verticles on player disconnection
+     * @param websocket the websocket whose connection was dropped
+     */
     private void dropConnectionHandler(ServerWebSocket websocket) {
         String address = websocket.remoteAddress().toString();
         String guid = addressToGuidMap.get(address);
@@ -105,6 +132,12 @@ public class ServerVerticle extends AbstractVerticle {
         closeQuietly(websocket);
     }
 
+    /**
+     * Handles websocket frames.
+     * Initially forces player to register.
+     * @param frame contains json data from client
+     * @param websocket associated with a given client
+     */
     private void newConnectionHandler(WebSocketFrame frame, ServerWebSocket websocket) {
         try {
             JsonObject request = this.toJson(frame);
@@ -134,11 +167,15 @@ public class ServerVerticle extends AbstractVerticle {
         }
     }
 
+    /**
+     * Connection handler for players who have already been registered.
+      * @param frame the frame containing json data.
+     * @param websocket the websocket associated with a given client
+     */
     private void establishedConnectionHandler(WebSocketFrame frame, ServerWebSocket websocket) {
         try {
             JsonObject json = this.toJson(frame);
             Request type = this.getRequestType(json);
-            // TODO: is cast necessary
             super.vertx.eventBus().request(type.getAddress().getAddressString(), mapAndVerify(type.getClazz(), json),
                     ar -> {
                         if (ar.failed()) {
@@ -161,7 +198,7 @@ public class ServerVerticle extends AbstractVerticle {
     private  <T extends InDTO> T mapAndVerify(Class<T> clazz, JsonObject json) {
         T result = Mapper.getJsonAsClass(json, clazz);
         if (!result.isValidRequest()) throw new InvalidRequestException();
-        return clazz.cast(Mapper.getJsonAsClass(json, clazz));
+        return clazz.cast(result);
     }
 
     private Request getRequestType(JsonObject json) {
