@@ -1,25 +1,18 @@
-package com.burnyarosh.api.exception;
+package com.burnyarosh.api.exception.lobby;
 
 import com.burnyarosh.api.processor.MessageFailureHandler;
-import com.burnyarosh.api.processor.WebsocketFailureHandler;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.http.ServerWebSocket;
 
-public class NewPlayerConflictException extends RuntimeException implements HandledException {
+public class NewPlayerConflictException extends RuntimeException implements HandledLobbyException {
 
-    Message message;
+    private Message message;
 
     public NewPlayerConflictException(Message message) {
         this.message = message;
     }
 
     @Override
-    public void callSocketHandler(WebsocketFailureHandler handler, ServerWebSocket socket) {
-        handler.handleNewPlayerConflict(socket, this);
-    }
-
-    @Override
-    public void callMessageHandler(MessageFailureHandler handler) {
-        handler.handleNewPlayerConflict(message, this);
+    public void callLobbyFailureHandler(MessageFailureHandler handler) {
+        handler.handleNewPlayerConflict(this.message, this);
     }
 }
