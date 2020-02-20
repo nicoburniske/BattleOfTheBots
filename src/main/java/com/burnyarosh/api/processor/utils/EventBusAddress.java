@@ -17,7 +17,7 @@ public enum EventBusAddress {
         this.address = type;
     }
 
-    public String getAddress() {
+    public String getAddressString() {
         return this.address;
     }
 }

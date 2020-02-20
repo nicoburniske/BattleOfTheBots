@@ -2,15 +2,15 @@ package com.burnyarosh.api.processor;
 
 import com.burnyarosh.api.dto.out.FailureDTO;
 import com.burnyarosh.api.exception.HandledException;
-import com.burnyarosh.api.exception.NewPlayerConflictException;
+import com.burnyarosh.api.exception.lobby.NewPlayerConflictException;
 import io.vertx.core.http.ServerWebSocket;
 
 
 
-public class FailureHandler {
+public class WebsocketFailureHandler {
 
     public void handleFailure(ServerWebSocket websocket, HandledException throwable) {
-            throwable.callHandlerSocket(this, websocket);
+            throwable.callSocketHandler(this, websocket);
     }
 
     public void handleInvalidJsonMapping(ServerWebSocket socket) {

@@ -29,8 +29,8 @@ public class GameVerticle extends AbstractVerticle {
     @Override
     public void start(Promise<Void> promise) throws Exception {
         JsonObject config = this.config();
-        MessageConsumer<JsonObject> entryPoint = vertx.eventBus().consumer(String.format(LOBBY_BASE_ADDRESS.getAddress(), super.deploymentID()));
-        MessageConsumer<PlayerTurnDTO> playerTurn = vertx.eventBus().consumer((String.format(LOBBY_BASE_ADDRESS.getAddress(), super.deploymentID())));
+        MessageConsumer<JsonObject> entryPoint = vertx.eventBus().consumer(String.format(LOBBY_BASE_ADDRESS.getAddressString(), super.deploymentID()));
+        MessageConsumer<PlayerTurnDTO> playerTurn = vertx.eventBus().consumer((String.format(LOBBY_BASE_ADDRESS.getAddressString(), super.deploymentID())));
         entryPoint.handler(this::handleInput);
         promise.complete();
     }
@@ -89,7 +89,7 @@ public class GameVerticle extends AbstractVerticle {
         players.add(this.players[0].getId());
         players.add(this.players[1].getId());
         update.put("players", players);
-        super.vertx.eventBus().publish(UPDATE_PLAYERS_ADDRESS.getAddress(), update);
+        super.vertx.eventBus().publish(UPDATE_PLAYERS_ADDRESS.getAddressString(), update);
     }
 
     private void newGame() {
