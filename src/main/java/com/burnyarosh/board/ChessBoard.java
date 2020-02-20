@@ -307,7 +307,6 @@ public class ChessBoard {
      * @return - true if given move can be made, false otherwise
      */
     private boolean isValidMovePiece(Coord origin, Coord target){
-        //System.out.println(origin +" " +(origin == null));
         return this.board[origin.getX()][origin.getY()].isValidMove(this.board, origin, target);
     }
 
