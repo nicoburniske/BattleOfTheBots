@@ -2,6 +2,7 @@ package com.burnyarosh.board.piece;
 
 import com.burnyarosh.board.common.Coord;
 import com.burnyarosh.board.common.Move;
+import io.vertx.core.json.JsonObject;
 
 import java.util.List;
 
@@ -28,4 +29,6 @@ public interface IPiece {
     List<Coord> getPossibleMoves(IPiece[][] board, List<Move> move_history);
 
     IPiece copy();
+
+    JsonObject toJson();
 }

@@ -3,9 +3,10 @@ package com.burnyarosh.board;
 import com.burnyarosh.board.common.Coord;
 import com.burnyarosh.board.common.Move;
 import com.burnyarosh.board.piece.*;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 // represents a chess board
 public class ChessBoard {
@@ -14,6 +15,7 @@ public class ChessBoard {
     private List<IPiece> blackPieces;
     private boolean whiteTurn;
     private List<Move> moves;
+    private Map<Class, Double> defaultValues;
 
     /*
         ################################
@@ -27,6 +29,14 @@ public class ChessBoard {
         this.board = generateChessBoard();
         this.whiteTurn = true;
         this.moves = new ArrayList<>();
+        this.defaultValues = new HashMap<>() {{
+            put(King.class, 1000.0);
+            put(Queen.class, 9.0);
+            put(Rook.class, 5.0);
+            put(Bishop.class, 3.0);
+            put(Knight.class, 3.0);
+            put(Pawn.class, 1.0);
+        }};
     }
 
     public ChessBoard(IPiece[][] board, boolean whiteTurn) {
@@ -39,6 +49,14 @@ public class ChessBoard {
         this.whiteTurn = whiteTurn;
         this.moves = new ArrayList<>();
         this.initPieces();
+        this.defaultValues = new HashMap<>() {{
+            put(King.class, 1000.0);
+            put(Queen.class, 9.0);
+            put(Rook.class, 5.0);
+            put(Bishop.class, 3.0);
+            put(Knight.class, 3.0);
+            put(Pawn.class, 1.0);
+        }};
     }
 
     /*
@@ -83,6 +101,33 @@ public class ChessBoard {
      */
     public boolean isWhiteTurn() {
         return this.whiteTurn;
+    }
+
+    public double getScore() {
+        return this.getScore(this.defaultValues);
+    }
+
+    /**
+     * Computes the score representing material differential between the two players.
+     * Positive values mean the white in up by x points, and negative values mean that black is up by x points.
+     */
+    public double getScore(Map<Class, Double> values) {
+        if (!this.isValidPieceValueMap(values)) throw new IllegalArgumentException("Invalid values map");
+        double score = 0;
+        for (IPiece b : this.blackPieces) {
+            score -= values.get(b.getClass());
+        }
+        for (IPiece w : this.whitePieces) {
+            score += values.get(w.getClass());
+        }
+        return (double) Math.round(score * 100) / 100;
+    }
+
+    private boolean isValidPieceValueMap(Map<Class, Double> values) {
+        if (values == null) return false;
+        Set<Class> set = new HashSet<>();
+        set.addAll(Arrays.asList(King.class, Queen.class, Rook.class, Bishop.class, Knight.class, Pawn.class));
+        return values.keySet().containsAll(set);
     }
 
     /**
@@ -442,5 +487,21 @@ public class ChessBoard {
                 }
             }
         }
+    }
+
+    public JsonObject toJson() {
+        JsonObject ret = new JsonObject();
+        JsonArray whitePieces = new JsonArray();
+        for (IPiece w : this.whitePieces) {
+            whitePieces.add(w.toJson());
+        }
+        JsonArray blackPieces = new JsonArray();
+        for (IPiece b : this.blackPieces) {
+            blackPieces.add(b.toJson());
+        }
+        ret.put("white", whitePieces);
+        ret.put("black", blackPieces);
+
+        return ret;
     }
 }
