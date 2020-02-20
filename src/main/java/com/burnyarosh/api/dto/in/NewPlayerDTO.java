@@ -25,4 +25,9 @@ public class NewPlayerDTO extends AbstractRequestDTO {
     public void setUsername(String username) {
         this.username = username;
     }
+
+    @Override
+    public boolean isValidRequest() {
+        return username != null;
+    }
 }

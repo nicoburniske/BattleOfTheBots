@@ -1,6 +1,6 @@
 package com.burnyarosh.api.dto.in;
 
-public abstract class AbstractRequestDTO {
+public abstract class AbstractRequestDTO implements InDTO {
     private String type;
 
     public String getType() {

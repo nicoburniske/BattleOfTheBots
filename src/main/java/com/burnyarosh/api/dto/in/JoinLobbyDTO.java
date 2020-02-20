@@ -19,4 +19,9 @@ public class JoinLobbyDTO extends AbstractRequestDTO {
     public void setGameGUID(String gameGUID) {
         this.gameGUID = gameGUID;
     }
+
+    @Override
+    public boolean isValidRequest() {
+        return this.playerGUID != null && this.gameGUID != null;
+    }
 }
