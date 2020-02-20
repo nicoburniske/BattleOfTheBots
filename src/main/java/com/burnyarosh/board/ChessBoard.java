@@ -16,6 +16,7 @@ public class ChessBoard {
     private boolean whiteTurn;
     private List<Move> moves;
     private int movesSoFar;
+    private Map<Class, Double> defaultValues;
 
     /*
         ################################
@@ -30,6 +31,14 @@ public class ChessBoard {
         this.whiteTurn = true;
         this.moves = new ArrayList<>();
         this.movesSoFar = 0;
+        this.defaultValues = new HashMap<>() {{
+            put(King.class, 1000.0);
+            put(Queen.class, 9.0);
+            put(Rook.class, 5.0);
+            put(Bishop.class, 3.0);
+            put(Knight.class, 3.0);
+            put(Pawn.class, 1.0);
+        }};
     }
 
     public ChessBoard(IPiece[][] board, boolean whiteTurn) {
@@ -161,18 +170,12 @@ public class ChessBoard {
     }
 
     public double getScore() {
-        Map<Class, Double> values = new HashMap<>();
-        values.put(King.class, 1000.0);
-        values.put(Queen.class, 9.0);
-        values.put(Rook.class, 5.0);
-        values.put(Bishop.class, 3.0);
-        values.put(Knight.class, 3.0);
-        values.put(Pawn.class, 1.0);
-        return this.getScore(values);
+        return this.getScore(this.defaultValues);
     }
 
     /**
-     * TODO: Reilly purpose statement and tests.
+     * Computes the score representing material differential between the two players.
+     * Positive values mean the white in up by x points, and negative values mean that black is up by x points.
      */
     public double getScore(Map<Class, Double> values) {
         if (!this.isValidPieceValueMap(values)) throw new IllegalArgumentException("Invalid values map");
