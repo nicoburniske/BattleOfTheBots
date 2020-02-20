@@ -420,8 +420,6 @@ public class ChessBoard {
         }
     }
 
-
-
     /**
      * Will remove the given piece from the appropriate list of pieces. Depends on the color/team of the IPiece parameter.
      *  If p is null, nothing will happen.
