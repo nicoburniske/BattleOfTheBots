@@ -1,51 +1,46 @@
 package com.burnyarosh.board.piece;
 
 import com.burnyarosh.board.common.Coord;
-import com.burnyarosh.board.common.Move;
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class King extends AbstractPiece {
-
     public King(int x, int y, boolean isBlack) {
         super(x, y, isBlack);
     }
 
-    private King(int x, int y, boolean isBlack, boolean isFirstMove, int moveCount) {
+    public King(int x, int y, boolean isBlack, boolean isFirstMove, int moveCount) {
         super(x, y, isBlack, isFirstMove, moveCount);
     }
 
-    /*
-        ################################
-            PUBLIC METHODS
-        ################################
-     */
+    public IPiece copy() {
+        return new King(super.getX(), super.getY(), super.getIsBlack(), super.getIsFirstMove(), super.getMoveCount());
+    }
 
-    /**
-     * Checks if the move is a valid King move
-     * @param board - current IPiece[][] board
-     * @param origin - origin coordinates
-     * @param target - target coordinates
-     * @return - true if valid move, false otherwise
-     */
-    public boolean isValidMove(IPiece[][] board, Coord origin, Coord target) {
+
+    public boolean isValidMove(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
         if (!super.getIsFirstMove()) {
-            return isValidKingMove(board, origin, target);
+            return isValidKingMove(board, fromX, fromY, toX, toY);
         } else {
-            return isCastlingValid(board, target)
-                    || this.isValidKingMove(board, origin, target);
+            return isCastlingValid(board, fromX, fromY, toX, toY)
+                    || this.isValidKingMove(board, fromX, fromY, toX, toY);
         }
     }
 
     /**
-     * Returns a list of all possible moves for this instance of King (including moves that danger King)
-     * @param board - current IPiece[][] board
-     * @param move_history - previous moves during current game
-     * @return - List<Coord> where Coord is target
+     * Possible Moves (King)
+     *  - Coordinate on board (in-bounds)
+     *  - Coordinate not occupied by piece of same color
+     *
+     * @param board
+     * @return
      */
     @Override
-    public List<Coord> getPossibleMoves(IPiece[][] board, List<Move> move_history) {
+    public List<Coord> getPossibleMoves(IPiece[][] board) {
+        Coord self = new Coord(super.getX(), super.getY());
         Coord[] skeleton = {
                 new Coord(0, 1), new Coord(1, 1),
                 new Coord(1, 0), new Coord(1, -1),
@@ -54,61 +49,37 @@ public class King extends AbstractPiece {
         };
         List<Coord> moves = new ArrayList<>();
         for (Coord c : skeleton){
-            addValidMove(board, c.addCoords(super.getCoord()), moves);
+            Coord temp = c.addCoords(self);
+            if ( temp.isInsideBoard() && (super.getIsBlack() != board[temp.getX()][temp.getY()].getIsBlack()) ) moves.add(temp);
         }
         return moves;
     }
 
-    /**
-     * Creates a copy of this piece
-     * @return - copy of current instance of King
-     */
-    public IPiece copy() {
-        return new King(super.getCoord().getX(), super.getCoord().getY(), super.getIsBlack(), super.getIsFirstMove(), super.getMoveCount());
-    }
-
-    /**
-     * King's toString method
-     * @return - "WK" if King is white, "BK" if King is black
-     */
     public String toString() {
         return super.toString() + "K";
     }
 
-    /*
-        ################################
-            PRIVATE METHODS
-        ################################
-     */
 
-    /**
-     * Checks if the move from the given coordinates is a valid King move
-     * @param board - current IPiece[][] board
-     * @param origin - origin coordinate
-     * @param target - target coordinate
-     * @return - true if valid king move, false otherwise
-     */
-    private boolean isValidKingMove(IPiece[][] board, Coord origin, Coord target) {
-        return (super.validDiagonalMove(origin, target)
-                || super.validInlineMove(origin, target))
-                && super.validLineMove(board, origin, target, 1);
+    private boolean isValidKingMove(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
+        return (super.validDiagonalMove(fromX, fromY, toX, toY)
+                || super.validInlineMove(fromX, fromY, toX, toY))
+                && super.validLineMove(board, fromX, fromY, toX, toY, 1);
     }
 
-    /**
-     * Checks if the given move is a valid Castle move.
-     * @param board - current IPiece[][] board
-     * @param target - target coordinate
-     * @return - true if valid castle, false otherwise
-     */
-    private boolean isCastlingValid(IPiece[][] board, Coord target) {
-        int direction = target.getX() - super.getCoord().getX();
+    private boolean isCastlingValid(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
+        // checks if king is attempting to move 2 places to either side.
+        // if the castle of the appropriate side hasn't moved.
+        // if there is nothing in between.
+        // TODO: check that there are no enemy pieces threatening the squares in between king and rook
+        int direction = toX - super.getX();
         IPiece castle;
-        if ((Math.abs(direction) == 2) && (super.getCoord().getY() == target.getY())) { //  checks if king is attempting to move 2 places to either side.
-            castle = board[direction < 0 ? super.getCoord().getX() - 4 : super.getCoord().getX() + 3][target.getY()];
+
+        if ((Math.abs(direction) == 2) && (super.getY() == toY)) {
+            castle = board[direction < 0 ? super.getX() - 4 : super.getX() + 3][toY];
             if (castle == null) {
                 return false;
-            } else if (castle instanceof Rook && castle.getIsFirstMove()) { //  checks if chosen rook has previously moved
-                return super.notObstructed(board, super.getCoord(), castle.getCoord()); //  checks if there are no pieces between the king and the chosen rook
+            } else if (castle instanceof Rook && castle.getIsFirstMove()) {
+                return super.notObstructed(board, super.getX(), super.getY(), castle.getX(), castle.getY());
             }
         }
         return false;

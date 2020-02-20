@@ -1,8 +1,9 @@
 package com.burnyarosh.board.common;
 
+import io.vertx.core.json.JsonObject;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class Coord {
     private int x;
@@ -61,17 +62,15 @@ public class Coord {
         return res;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Coord coord = (Coord) o;
-        return this.x == coord.getX() &&
-                this.y == coord.getY();
+    public JsonObject toJson() {
+        JsonObject ret = new JsonObject();
+        ret.put("file", this.getFile());
+        ret.put("rank", this.y + 1);
+        return ret;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(x, y);
+    private String getFile() {
+        String[] file = new String[]{"a", "b", "c", "d", "e", "f", "g", "h"};
+        return file[this.x];
     }
 }

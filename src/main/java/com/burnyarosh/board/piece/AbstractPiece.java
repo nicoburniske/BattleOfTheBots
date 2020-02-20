@@ -1,13 +1,12 @@
 package com.burnyarosh.board.piece;
 
 import com.burnyarosh.board.common.Coord;
-import com.burnyarosh.board.common.Move;
+import io.vertx.core.json.JsonObject;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractPiece implements IPiece {
-    private Coord c;
+    private int x, y;
     private boolean isBlack, isFirstMove;
     private int moveCount;
 
@@ -16,7 +15,8 @@ public abstract class AbstractPiece implements IPiece {
     }
 
     AbstractPiece(int x, int y, boolean isBlack, boolean isFirstMove, int moveCount) {
-        this.c = new Coord(x, y);
+        this.x = x;
+        this.y = y;
         this.isBlack = isBlack;
         this.moveCount = moveCount;
         this.isFirstMove = isFirstMove;
@@ -29,8 +29,12 @@ public abstract class AbstractPiece implements IPiece {
         return this.isBlack;
     }
 
-    public Coord getCoord(){
-        return this.c;
+    public int getX() {
+        return this.x;
+    }
+
+    public int getY() {
+        return this.y;
     }
 
     public int getMoveCount() {
@@ -41,24 +45,25 @@ public abstract class AbstractPiece implements IPiece {
         return this.isFirstMove;
     }
 
-    public void makeMove(Coord c) {
-        this.c = c;
+    public void makeMove(int x, int y) {
+        this.x = x;
+        this.y = y;
         this.isFirstMove = false;
         this.moveCount++;
     }
 
-    public boolean movePiece(IPiece[][] board, Coord origin, Coord target) {
-        if (this.isValidMove(board, origin, target)) {
-            this.makeMove(target);
+    public boolean movePiece(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
+        if (this.isValidMove(board, fromX, fromY, toX, toY)) {
+            this.makeMove(toX, toY);
             return true;
         } else {
             return false;
         }
     }
 
-    public abstract boolean isValidMove(IPiece[][] board, Coord origin, Coord target);
+    public abstract boolean isValidMove(IPiece[][] board, int fromX, int fromY, int toX, int toY);
 
-    public abstract List<Coord> getPossibleMoves(IPiece[][] board, List<Move> move_history);
+    public abstract List<Coord> getPossibleMoves(IPiece[][] board);
 
     public abstract IPiece copy();
 
@@ -66,108 +71,51 @@ public abstract class AbstractPiece implements IPiece {
         return this.isBlack ? "B" : "W";
     }
 
-    /**
-     * Checks if the given move is valid, if so adds it to List<Coord>
-     * @param board - current IPiece[][] board
-     * @param c - target coordinate
-     * @param moves - List<Coord> of potential target coordinates for an individual piece
-     * @return - true if move results in a Line of Sight block, false otherwise
-     */
-    protected boolean addValidMove(IPiece[][] board, Coord c, List<Coord> moves){
-        if (c.isInsideBoard()){
-            if (board[c.getX()][c.getY()] == null){
-                moves.add(c);
-            } else {
-                if (this.getIsBlack() != board[c.getX()][c.getY()].getIsBlack()){
-                    moves.add(c);
-                }
-                return true;
-            }
-        }
-        return false;
+    public JsonObject toJson() {
+        JsonObject ret = new JsonObject();
+        ret.put(this.toString(), new Coord(this.x, this.y).toJson());
+        return ret;
     }
 
     /**
-     * Checks if coordinates are aligned diagonally
-     * @param origin - origin coordinate
-     * @param target - target coordinate
-     * @return - true if valid diagonal move, false otherwise
+     * checks if coordinates are aligned diagonally
+     *
+     * @param fromX
+     * @param fromY
+     * @param toX
+     * @param toY
+     * @return
      */
-    protected boolean validDiagonalMove(Coord origin, Coord target) {
-        return Math.abs(origin.getX() - target.getX()) == Math.abs(origin.getY() - target.getY());
+    protected boolean validDiagonalMove(int fromX, int fromY, int toX, int toY) {
+        return Math.abs(fromX - toX) == Math.abs(fromY - toY);
     }
 
     /**
-     * Checks if coordinates are in same horizontal or vertical line
-     * @param origin - origin coordinate
-     * @param target - target coordinate
-     * @return - true if valid in-line move, false otherwise
+     * checks if coordinates are in same horizontal or vertical line
+     *
+     * @param fromX
+     * @param fromY
+     * @param toX
+     * @param toY
+     * @return
      */
-    protected boolean validInlineMove(Coord origin, Coord target) {
-        return (origin.getX() == target.getX() || origin.getY() == target.getY());
+    protected boolean validInlineMove(int fromX, int fromY, int toX, int toY) {
+        return (fromX == toX || fromY == toY);
     }
 
-    protected boolean validLineMove(IPiece[][] board, Coord origin, Coord target, int maxDistance) {
+    protected boolean validLineMove(IPiece[][] board, int fromX, int fromY, int toX, int toY, int maxDistance) {
         //checks if the distance between the points is within range
-        return Math.max(Math.abs(origin.getX() - target.getX()), Math.abs(origin.getY() - target.getY())) <= maxDistance
+        return Math.max(Math.abs(fromX - toX), Math.abs(fromY - toY)) <= maxDistance
                 //checks if there is nothing obstructing the coordinates, not the case if the distance is one
-                && (maxDistance == 1 || this.notObstructed(board, origin, target));
+                && (maxDistance == 1 || this.notObstructed(board, fromX, fromY, toX, toY));
     }
 
-    protected boolean notObstructed(IPiece[][] board, Coord origin, Coord target) {
-        for (Coord c : origin.calculatePointsBetweenExclusive(target)) {
+    protected boolean notObstructed(IPiece[][] board, int fromX, int fromY, int toX, int toY) {
+        for (Coord c : new Coord(fromX, fromY).calculatePointsBetweenExclusive(new Coord(toX, toY))) {
             if (board[c.getX()][c.getY()] != null) return false;
         }
         return true;
     }
 
-    protected List<Coord> getPossibleMovesRook(IPiece[][] board) {
-        boolean upBlocked = false;
-        boolean rightBlocked = false;
-        boolean downBlocked = false;
-        boolean leftBlocked = false;
-        List<Coord> moves = new ArrayList<>();
-        for (int i = 1; i < 8; i++){
-            if (!upBlocked){
-                upBlocked = this.addValidMove(board, new Coord(this.c.getX(), i).addCoords(this.c), moves);
-            }
-            if (!rightBlocked){
-                rightBlocked = this.addValidMove(board, new Coord(i, this.c.getY()).addCoords(this.c), moves);
-            }
-            if (!downBlocked){
-                downBlocked = this.addValidMove(board, new Coord(this.c.getX(), -i).addCoords(this.c), moves);
-            }
-            if (!leftBlocked){
-                leftBlocked = this.addValidMove(board, new Coord(-i, this.c.getY()).addCoords(this.c), moves);
-            }
-            if (upBlocked && rightBlocked && downBlocked && leftBlocked){
-                break;
-            }
-        }
-        return moves;
-    }
-
-    protected List<Coord> getPossibleMovesBishop(IPiece[][] board) {
-        boolean upRightBlocked = false;
-        boolean downRightBlocked = false;
-        boolean downLeftBlocked = false;
-        boolean upLeftBlocked = false;
-        List<Coord> moves = new ArrayList<>();
-        for (int i = 1; i < 8; i++){
-            if (!upRightBlocked){
-                upRightBlocked = this.addValidMove(board, new Coord(i, i).addCoords(this.c), moves);
-            }
-            if (!downRightBlocked){
-                downRightBlocked = this.addValidMove(board, new Coord(i, -i).addCoords(this.c), moves);
-            }
-            if (!downLeftBlocked){
-                downLeftBlocked = this.addValidMove(board, new Coord(-i, -i).addCoords(this.c), moves);
-            }
-            if (!upLeftBlocked){
-                upLeftBlocked = this.addValidMove(board, new Coord(-i, i).addCoords(this.c), moves);
-            }
-        }
-        return moves;
-    }
 
 }
