@@ -1,4 +1,4 @@
-package com.burnyarosh.entity;
+package com.burnyarosh.api.dto.entity;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
