@@ -4,7 +4,7 @@ import com.burnyarosh.api.dto.common.CoordDTO;
 import com.burnyarosh.api.dto.in.PlayerTurnDTO;
 import com.burnyarosh.board.ChessBoard;
 import com.burnyarosh.api.dto.out.SuccessDTO;
-import com.burnyarosh.entity.Player;
+import com.burnyarosh.api.dto.entity.Player;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
@@ -24,14 +24,15 @@ public class GameVerticle extends AbstractVerticle {
     private Player[] players;
     private ChessBoard board;
     private int whitePlayer; // which player is white. corresponds to array index.
-    MessageConsumer<JsonObject> entryPoint;
-    MessageConsumer<PlayerTurnDTO> playerTurn;
+    private MessageConsumer<JsonObject> entryPoint;
+    private MessageConsumer<PlayerTurnDTO> playerTurn;
 
     @Override
     public void start(Promise<Void> promise) {
         JsonObject config = this.config();
         this.players = new Player[2];
 
+        // Message Consumer Entry points
         entryPoint = vertx.eventBus().consumer(String.format(LOBBY_BASE_ADDRESS.getAddressString(), super.deploymentID()));
         entryPoint.handler(this::handleSetup);
         playerTurn = vertx.eventBus().consumer((String.format(NEW_MOVE_ADDRESS.getAddressString(), super.deploymentID())));
@@ -69,9 +70,10 @@ public class GameVerticle extends AbstractVerticle {
         this.players[1] = new Player(player2.getString("username"), player2.getString("id"));
         this.newGame();
         message.reply(new SuccessDTO());
-        this.sendGameUpdate();
         this.randomColor();
-        // TODO: make sure no more players can join. remove consumer?
+        this.sendGameUpdate();
+        // unregisters consumer so that no more players can be added. Think about adding possibility for spectators.
+        playerTurn.unregister();
     }
 
     private boolean isPlayerTurn(int player) {

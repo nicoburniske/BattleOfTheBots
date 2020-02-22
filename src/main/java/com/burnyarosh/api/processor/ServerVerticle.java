@@ -4,8 +4,10 @@ import com.burnyarosh.api.dto.in.InDTO;
 import com.burnyarosh.api.dto.in.NewPlayerDTO;
 import com.burnyarosh.api.dto.in.Request;
 import com.burnyarosh.api.dto.out.FailureDTO;
-import com.burnyarosh.api.exception.HandledException;
-import com.burnyarosh.api.exception.InvalidRequestException;
+
+import com.burnyarosh.api.exception.HandledSocketException;
+import com.burnyarosh.api.exception.handler.WebsocketFailureHandler;
+import com.burnyarosh.api.exception.socket.InvalidRequestException;
 import com.burnyarosh.api.processor.utils.Mapper;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
@@ -140,7 +142,7 @@ public class ServerVerticle extends AbstractVerticle {
      */
     private void newConnectionHandler(WebSocketFrame frame, ServerWebSocket websocket) {
         try {
-            JsonObject request = this.toJson(frame);
+            JsonObject request = this.frameToJson(frame);
             NewPlayerDTO dto = Mapper.getJsonAsClass(request, NewPlayerDTO.class);
             super.vertx.eventBus().request(NEW_PLAYER_ADDRESS.getAddressString(), dto,
                     ar -> {
@@ -158,9 +160,10 @@ public class ServerVerticle extends AbstractVerticle {
                         }
                     });
         } catch (Exception e) {
-            if (e instanceof HandledException) {
-                this.websocketFailureHandler.handleFailure(websocket, (HandledException) e);
+            if (e instanceof HandledSocketException) {
+                this.websocketFailureHandler.handleFailure(websocket, (HandledSocketException) e);
             } else {
+                // Make this a constant figure out how to
                 websocket.writeTextMessage(new FailureDTO("Invalid JSON").toJsonString());
                 LOGGER.error(e);
             }
@@ -174,7 +177,7 @@ public class ServerVerticle extends AbstractVerticle {
      */
     private void establishedConnectionHandler(WebSocketFrame frame, ServerWebSocket websocket) {
         try {
-            JsonObject json = this.toJson(frame);
+            JsonObject json = this.frameToJson(frame);
             Request type = this.getRequestType(json);
             super.vertx.eventBus().request(type.getAddress().getAddressString(), mapAndVerify(type.getClazz(), json),
                     ar -> {
@@ -186,8 +189,8 @@ public class ServerVerticle extends AbstractVerticle {
                         }
                     });
         } catch (Exception e) {
-            if (e instanceof HandledException) {
-                this.websocketFailureHandler.handleFailure(websocket, (HandledException) e);
+            if (e instanceof HandledSocketException) {
+                this.websocketFailureHandler.handleFailure(websocket, (HandledSocketException) e);
             } else {
                 websocket.writeTextMessage(new FailureDTO("Invalid JSON").toJsonString());
                 LOGGER.error(e);
@@ -211,14 +214,10 @@ public class ServerVerticle extends AbstractVerticle {
     }
 
 
-    private JsonObject toJson(WebSocketFrame frame) {
+    private JsonObject frameToJson(WebSocketFrame frame) {
         String str = frame.textData();
         if (str.equals("null")) throw new InvalidRequestException();
         return new JsonObject(str);
-    }
-
-    private void closeLoudly(ServerWebSocket socket) throws Exception {
-        socket.close();
     }
 
     private void closeQuietly(ServerWebSocket socket) {
@@ -228,4 +227,5 @@ public class ServerVerticle extends AbstractVerticle {
 
         }
     }
+
 }
