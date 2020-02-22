@@ -2,7 +2,7 @@ package com.burnyarosh.dto.in;
 
 import com.burnyarosh.api.dto.in.JoinLobbyDTO;
 import com.burnyarosh.api.dto.in.NewPlayerDTO;
-import com.burnyarosh.api.exception.JsonMappingException;
+import com.burnyarosh.api.exception.socket.JsonMappingException;
 import com.burnyarosh.api.processor.utils.Mapper;
 import io.vertx.core.json.JsonObject;
 import org.junit.Before;
