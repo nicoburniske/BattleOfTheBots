@@ -2,9 +2,9 @@ package com.burnyarosh.dto.out.lobby;
 
 import com.burnyarosh.api.dto.out.lobby.ListLobbiesDTO;
 import com.burnyarosh.api.dto.out.lobby.LobbyDTO;
-import com.burnyarosh.entity.Entity;
-import com.burnyarosh.entity.Game;
-import com.burnyarosh.entity.Player;
+import com.burnyarosh.api.dto.entity.Entity;
+import com.burnyarosh.api.dto.entity.Game;
+import com.burnyarosh.api.dto.entity.Player;
 import org.junit.Test;
 
 import java.util.Arrays;
