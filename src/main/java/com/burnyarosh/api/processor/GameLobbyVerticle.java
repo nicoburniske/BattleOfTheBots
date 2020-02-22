@@ -1,19 +1,19 @@
 package com.burnyarosh.api.processor;
 
 
+import com.burnyarosh.api.dto.entity.Entity;
+import com.burnyarosh.api.dto.entity.Game;
+import com.burnyarosh.api.dto.entity.Player;
 import com.burnyarosh.api.dto.in.NewLobbyDTO;
 import com.burnyarosh.api.dto.in.NewPlayerDTO;
 import com.burnyarosh.api.dto.in.PlayerTurnDTO;
 import com.burnyarosh.api.dto.out.*;
 import com.burnyarosh.api.dto.out.lobby.*;
 import com.burnyarosh.api.dto.in.JoinLobbyDTO;
-import com.burnyarosh.api.exception.lobby.GameFullException;
-import com.burnyarosh.api.exception.lobby.HandledLobbyException;
-import com.burnyarosh.api.exception.lobby.NewPlayerConflictException;
-import com.burnyarosh.api.exception.lobby.UnauthorizedPlayerException;
-import com.burnyarosh.entity.Entity;
-import com.burnyarosh.entity.Game;
-import com.burnyarosh.entity.Player;
+import com.burnyarosh.api.exception.HandledMessageException;
+import com.burnyarosh.api.exception.handler.MessageFailureHandler;
+import com.burnyarosh.api.exception.message.*;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
@@ -27,8 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.burnyarosh.api.processor.utils.Constants.GAME_GUID;
-import static com.burnyarosh.api.processor.utils.Constants.PLAYER_GUID;
 import static com.burnyarosh.api.processor.utils.EventBusAddress.*;
 
 public class GameLobbyVerticle extends AbstractVerticle {
@@ -78,8 +76,8 @@ public class GameLobbyVerticle extends AbstractVerticle {
      * Verticle Exception handler
      */
     private void handleException(Throwable throwable) {
-        if (throwable instanceof HandledLobbyException) {
-            ((HandledLobbyException) throwable).callLobbyFailureHandler(this.failureHandler);
+        if (throwable instanceof HandledMessageException) {
+            ((HandledMessageException) throwable).callLobbyFailureHandler(this.failureHandler);
         } else {
             throwable.printStackTrace();
         }
@@ -151,8 +149,9 @@ public class GameLobbyVerticle extends AbstractVerticle {
         Game currGame = activeGamesById.get(gameID);
         Player currPlayer = activePlayersById.get(playerID);
 
-        if (currGame != null && currPlayer != null && !currGame.gameIsReady() && this.playerIsAvailable(currPlayer)) {
-            activeGamesById.get(gameID).addSecondPlayer(activePlayersById.get(playerID));
+        if (currGame != null && currPlayer != null && !currGame.gameIsReady() && !currPlayer.getIsBusy()){
+            currPlayer.setBusy(true);
+            currGame.addSecondPlayer(activePlayersById.get(playerID));
             JsonObject json = activeGamesById.get(gameID).toJson();
             // TODO: make this a specific endpoint/address
             json.put("type", "setup");
@@ -165,18 +164,19 @@ public class GameLobbyVerticle extends AbstractVerticle {
 
     /**
      * Message should have param guid
-     * TODO: ensure player is not currently part of existing lobby.
      */
     private void newLobby(Message<NewLobbyDTO> request) {
         NewLobbyDTO dto = request.body();
         String guid = dto.getPlayerGUID();
         Player player = this.activePlayersById.get(guid);
         if (player == null) throw new UnauthorizedPlayerException(request);
+        if (player.getIsBusy()) throw new InvalidGameCreationException(request);
 
         String lobbyguid = Entity.generateGUID();
         Game game = new Game(lobbyguid, lobbyguid, player);
         this.activeGamesById.put(lobbyguid, game);
         this.activeGames.add(game);
+        player.setBusy(true);
 
         super.vertx.deployVerticle(GameVerticle.class.getName(), ar -> {
             if (ar.succeeded()) {

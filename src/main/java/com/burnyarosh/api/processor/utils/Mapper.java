@@ -1,7 +1,6 @@
 package com.burnyarosh.api.processor.utils;
 
-import com.burnyarosh.api.exception.JsonMappingException;
-import io.vertx.core.json.Json;
+import com.burnyarosh.api.exception.socket.JsonMappingException;
 import io.vertx.core.json.JsonObject;
 
 public class Mapper {
