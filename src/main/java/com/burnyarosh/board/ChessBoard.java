@@ -120,6 +120,7 @@ public class ChessBoard {
         for (IPiece w : this.whitePieces) {
             score += values.get(w.getClass());
         }
+        // limits return to only contain one decimal point.
         return (double) Math.round(score * 100) / 100;
     }
 
@@ -501,7 +502,7 @@ public class ChessBoard {
         }
         ret.put("white", whitePieces);
         ret.put("black", blackPieces);
-
+        ret.put("score", this.getScore());
         return ret;
     }
 }
