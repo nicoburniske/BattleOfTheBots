@@ -233,7 +233,7 @@ public class ServerVerticle extends AbstractVerticle {
 
     String getCurrPlayerGUID(ServerWebSocket socket) {
         for (Map.Entry<String, ServerWebSocket> entry : this.playerIDtoSocket.entrySet()) {
-            if (socket.uri().equals(entry.getValue().uri())) {
+            if (socket.equals(entry.getValue())) {
                 return entry.getKey();
             }
         }
