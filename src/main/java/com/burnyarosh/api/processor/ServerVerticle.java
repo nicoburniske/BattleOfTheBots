@@ -3,6 +3,7 @@ package com.burnyarosh.api.processor;
 import com.burnyarosh.api.dto.in.InDTO;
 import com.burnyarosh.api.dto.in.NewPlayerDTO;
 import com.burnyarosh.api.dto.in.Request;
+import com.burnyarosh.api.dto.internal.PlayerUpdateDTO;
 import com.burnyarosh.api.dto.out.FailureDTO;
 
 import com.burnyarosh.api.exception.HandledSocketException;
@@ -80,22 +81,18 @@ public class ServerVerticle extends AbstractVerticle {
         this.playerIDtoSocket = new HashMap<>();
         super.vertx.exceptionHandler(this::handlerServerExceptions);
         getStandardCodecs().forEach(codec -> super.vertx.eventBus().registerDefaultCodec(codec.getClazz(), codec));
-        MessageConsumer<JsonObject> updateClients = super.vertx.eventBus().consumer(UPDATE_PLAYERS_ADDRESS.getAddressString());
+        MessageConsumer<PlayerUpdateDTO> updateClients = super.vertx.eventBus().consumer(UPDATE_PLAYERS_ADDRESS.getAddressString());
         updateClients.handler(this::updateClients);
     }
 
     /**
      * Updates clients with a JsonObject
      * TODO: DTO THIS
-     * @param jsonObjectMessage the message to be sent. Also contains list of players.
+     * @param updateMessage contains a PlayerUpdateDTO. Contains a playerGUID and a JsonObject
      */
-    private void updateClients(Message<JsonObject> jsonObjectMessage) {
-        JsonObject update = jsonObjectMessage.body();
-        JsonObject state = update.getJsonObject("state");
-        JsonArray players = update.getJsonArray("players");
-        for (int i = 0; i < players.size(); i++) {
-            sendMessageToClient(state, players.getString(i));
-        }
+    private void updateClients(Message<PlayerUpdateDTO> updateMessage) {
+        PlayerUpdateDTO update = updateMessage.body();
+        sendMessageToClient(update.getJson(), update.getPlayerGUID());
     }
 
     /**
@@ -179,7 +176,9 @@ public class ServerVerticle extends AbstractVerticle {
         try {
             JsonObject json = this.frameToJson(frame);
             Request type = this.getRequestType(json);
-            super.vertx.eventBus().request(type.getAddress().getAddressString(), mapAndVerify(type.getClazz(), json),
+            String currPlayer = this.getCurrPlayerGUID(websocket);
+            // TODO: ensure that users playerID matches the playerID stored in the map.
+            super.vertx.eventBus().request(type.getAddress().getAddressString(), mapAndVerify(type.getClazz(), json, currPlayer),
                     ar -> {
                         if (ar.failed()) {
                             LOGGER.error("Refusing connection", ar.cause());
@@ -198,9 +197,13 @@ public class ServerVerticle extends AbstractVerticle {
         }
     }
 
-    private  <T extends InDTO> T mapAndVerify(Class<T> clazz, JsonObject json) {
+    /**
+     * Ensures that the request maps to a DTO properly, and comes from the player that is bound to the specific connection
+     */
+    private  <T extends InDTO> T mapAndVerify(Class<T> clazz, JsonObject json, String player) {
         T result = Mapper.getJsonAsClass(json, clazz);
         if (!result.isValidRequest()) throw new InvalidRequestException();
+        if (!result.isAuthorizedPlayer(player)) throw new InvalidRequestException();
         return clazz.cast(result);
     }
 
@@ -226,6 +229,15 @@ public class ServerVerticle extends AbstractVerticle {
         } catch (Exception ignored) {
 
         }
+    }
+
+    String getCurrPlayerGUID(ServerWebSocket socket) {
+        for (Map.Entry<String, ServerWebSocket> entry : this.playerIDtoSocket.entrySet()) {
+            if (socket.uri().equals(entry.getValue().uri())) {
+                return entry.getKey();
+            }
+        }
+        throw new InvalidRequestException();
     }
 
 }
