@@ -24,4 +24,9 @@ public class JoinLobbyDTO extends AbstractRequestDTO {
     public boolean isValidRequest() {
         return this.playerGUID != null && this.gameGUID != null;
     }
+
+    @Override
+    public boolean isAuthorizedPlayer(String playerGUID) {
+        return this.playerGUID.equals(playerGUID);
+    }
 }
