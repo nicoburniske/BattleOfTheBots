@@ -2,6 +2,7 @@ package com.burnyarosh.api.processor;
 
 import com.burnyarosh.api.dto.common.CoordDTO;
 import com.burnyarosh.api.dto.in.PlayerTurnDTO;
+import com.burnyarosh.api.dto.internal.PlayerUpdateDTO;
 import com.burnyarosh.board.ChessBoard;
 import com.burnyarosh.api.dto.out.SuccessDTO;
 import com.burnyarosh.api.dto.entity.Player;
@@ -76,10 +77,6 @@ public class GameVerticle extends AbstractVerticle {
         playerTurn.unregister();
     }
 
-    private boolean isPlayerTurn(int player) {
-        return this.whitePlayer == player && this.board.isWhiteTurn()
-                || this.whitePlayer != player && !this.board.isWhiteTurn();
-    }
 
     private int getPlayerIndex(String playerid) {
         if (this.players[0].getId().equals(playerid)) {
@@ -92,13 +89,23 @@ public class GameVerticle extends AbstractVerticle {
     }
 
     private void sendGameUpdate() {
-        JsonObject update = new JsonObject();
-        update.put("state", this.board.toJson());
-        JsonArray players = new JsonArray();
-        players.add(this.players[0].getId());
-        players.add(this.players[1].getId());
-        update.put("players", players);
-        super.vertx.eventBus().publish(UPDATE_PLAYERS_ADDRESS.getAddressString(), update);
+        JsonObject chessJson = this.board.toJson();
+        for (Player p : players) {
+            JsonObject update = new JsonObject();
+            update.mergeIn(chessJson);
+            update.put("turn", this.isPlayerTurn(p));
+            update.put("blackPlayer", getPlayerUsername(false));
+            update.put("whitePlayer", getPlayerUsername(true));
+            update.put("player", p.getId());
+            this.sendPlayerGameUpdate(p, update);
+        }
+    }
+
+    private void sendPlayerGameUpdate(Player p, JsonObject update) {
+        PlayerUpdateDTO dto = new PlayerUpdateDTO();
+        dto.setJson(update);
+        dto.setPlayerGUID(p.getId());
+        super.vertx.eventBus().publish(UPDATE_PLAYERS_ADDRESS.getAddressString(), dto);
     }
 
     private void newGame() {
@@ -114,6 +121,28 @@ public class GameVerticle extends AbstractVerticle {
      */
     private void setWhitePlayer(int whitePlayer) {
         this.whitePlayer = whitePlayer - 1;
+    }
+
+    private String getPlayerUsername(boolean white) {
+        if (white) {
+            return this.players[this.whitePlayer].getName();
+        } else {
+            return this.players[this.whitePlayer == 0 ? 1 : 0].getName();
+        }
+    }
+
+    private boolean isPlayerTurn(Player p) {
+        for (int ii = 0; ii < this.players.length; ii++) {
+            if( players[ii].equals(p)) {
+                return isPlayerTurn(ii);
+            }
+        }
+        return false;
+    }
+
+    private boolean isPlayerTurn(int player) {
+        return this.whitePlayer == player && this.board.isWhiteTurn()
+                || this.whitePlayer != player && !this.board.isWhiteTurn();
     }
 
     private String jsonGetStringValue(JsonObject json, String key) {
