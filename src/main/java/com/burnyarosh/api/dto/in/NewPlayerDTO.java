@@ -30,4 +30,9 @@ public class NewPlayerDTO extends AbstractRequestDTO {
     public boolean isValidRequest() {
         return username != null;
     }
+
+    @Override
+    public boolean isAuthorizedPlayer(String playerGUID) {
+        return true;
+    }
 }

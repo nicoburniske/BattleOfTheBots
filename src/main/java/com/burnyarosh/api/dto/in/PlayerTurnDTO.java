@@ -48,4 +48,9 @@ public class PlayerTurnDTO extends AbstractRequestDTO {
             return true;
         }
     }
+
+    @Override
+    public boolean isAuthorizedPlayer(String playerGUID) {
+        return this.playerGUID.equals(playerGUID);
+    }
 }

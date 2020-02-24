@@ -4,4 +4,5 @@ import com.burnyarosh.api.dto.IDTO;
 
 public interface InDTO extends IDTO {
      boolean isValidRequest();
+     boolean isAuthorizedPlayer(String playerGUID);
 }

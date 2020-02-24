@@ -16,4 +16,9 @@ public class RequestDTOImpl extends AbstractRequestDTO {
     public void setPlayerGUID(String playerGUID) {
         this.playerGUID = playerGUID;
     }
+
+    @Override
+    public boolean isAuthorizedPlayer(String playerGUID) {
+        return this.playerGUID.equals(playerGUID);
+    }
 }

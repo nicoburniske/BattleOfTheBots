@@ -10,5 +10,4 @@ public abstract class AbstractRequestDTO implements InDTO {
     public void setType(String type) {
         this.type = type;
     }
-
 }
