@@ -62,10 +62,13 @@ public class Coord {
         return res;
     }
 
+    public String toChessString(){
+        return this.getFile() + this.getRank();
+    }
+
     public JsonObject toJson() {
         JsonObject ret = new JsonObject();
-        ret.put("file", this.getFile());
-        ret.put("rank", this.y + 1);
+        ret.put("pos", this.toChessString());
         return ret;
     }
 
@@ -76,9 +79,11 @@ public class Coord {
         Coord coord = (Coord) o;
         return this.x == coord.getX() && this.y == coord.getY();
     }
+    private String getRank(){
+        return ""+(this.y + 1);
+    }
 
     private String getFile() {
-        String[] file = new String[]{"a", "b", "c", "d", "e", "f", "g", "h"};
-        return file[this.x];
+        return ""+(char) (97 + this.x);
     }
 }
