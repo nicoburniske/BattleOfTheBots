@@ -30,13 +30,16 @@ public class GameVerticle extends AbstractVerticle {
 
     @Override
     public void start(Promise<Void> promise) {
-        JsonObject config = this.config();
         this.players = new Player[2];
-
         // Message Consumer Entry points
-        entryPoint = vertx.eventBus().consumer(String.format(LOBBY_BASE_ADDRESS.getAddressString(), super.deploymentID()));
+        // setup
+        String setupAddress = String.format(GAME_BASE_ADDRESS.getAddressString(), super.deploymentID());
+        entryPoint = vertx.eventBus().consumer(setupAddress);
         entryPoint.handler(this::handleSetup);
-        playerTurn = vertx.eventBus().consumer((String.format(NEW_MOVE_ADDRESS.getAddressString(), super.deploymentID())));
+        // new move
+        String newMoveAddress = String.format(GAME_MOVE_ADDRESS.getAddressString(), super.deploymentID());
+        System.out.println("GAME ADDRESS" + newMoveAddress);
+        playerTurn = vertx.eventBus().consumer(newMoveAddress);
         playerTurn.handler(this::handleNewMove);
         promise.complete();
     }
@@ -56,6 +59,8 @@ public class GameVerticle extends AbstractVerticle {
                 message.fail(400, e.getMessage());
             }
         } else {
+            message.fail(400, "Error: Not user turn");
+            System.out.println("ERROR");
             //TODO: error message saying it is not the player's turn
         }
     }

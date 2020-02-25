@@ -7,6 +7,7 @@ import com.burnyarosh.api.dto.entity.Player;
 import com.burnyarosh.api.dto.in.NewLobbyDTO;
 import com.burnyarosh.api.dto.in.NewPlayerDTO;
 import com.burnyarosh.api.dto.in.PlayerTurnDTO;
+import com.burnyarosh.api.dto.internal.RemovePlayerDTO;
 import com.burnyarosh.api.dto.out.*;
 import com.burnyarosh.api.dto.out.lobby.*;
 import com.burnyarosh.api.dto.in.JoinLobbyDTO;
@@ -39,7 +40,7 @@ public class GameLobbyVerticle extends AbstractVerticle {
     private static final String ERROR_MALFORMED_REQUEST_TEMPLATE = "Malformed request: %s";
     private static final String ERROR_CANNOT_ADD_PLAYER_TO_GAME = "Error: cannot add player to game";
 
-    List<Player> activePlayers = new ArrayList();
+    List<Player> activePlayers = new ArrayList<>();
     List<Game> activeGames = new ArrayList<>();
     private Map<String, Game> activeGamesById = new HashMap<>();
     private Map<String, Player> activePlayersById = new HashMap<>();
@@ -66,11 +67,15 @@ public class GameLobbyVerticle extends AbstractVerticle {
         MessageConsumer<PlayerTurnDTO> newMove = vertx.eventBus().consumer(NEW_MOVE_ADDRESS.getAddressString());
         newMove.handler(this::newMove);
 
+        MessageConsumer<RemovePlayerDTO> removePlayer = vertx.eventBus().consumer(REMOVE_PLAYER_ADDRESS.getAddressString());
+        removePlayer.handler(this::removePlayer);
+
         super.vertx.exceptionHandler(this::handleException);
 
         LOGGER.info("Successfully deployed GameLobbyVerticle");
         promise.complete();
     }
+
 
     /**
      * Verticle Exception handler
@@ -93,7 +98,8 @@ public class GameLobbyVerticle extends AbstractVerticle {
         Game currGame = activeGamesById.get(lobbyGUID);
         Player currPlayer = activePlayersById.get(playerGUID);
         if (currGame != null && currPlayer != null) {
-            super.vertx.eventBus().publish(String.format(NEW_MOVE_ADDRESS.getAddressString(), verticleDeploymentByGUID.get(lobbyGUID)), body);
+            String lobbyAddress = String.format(GAME_MOVE_ADDRESS.getAddressString(), verticleDeploymentByGUID.get(lobbyGUID));
+            super.vertx.eventBus().publish(lobbyAddress, body);
             message.reply(new SuccessDTO().toJson());
         } else {
             throw new UnauthorizedPlayerException(message);
@@ -149,13 +155,13 @@ public class GameLobbyVerticle extends AbstractVerticle {
         Game currGame = activeGamesById.get(gameID);
         Player currPlayer = activePlayersById.get(playerID);
 
-        if (currGame != null && currPlayer != null && !currGame.gameIsReady() && !currPlayer.getIsBusy()){
+        if (currGame != null && currPlayer != null && !currGame.gameIsReady() && !currPlayer.getIsBusy()) {
             currPlayer.setBusy(true);
             currGame.addSecondPlayer(activePlayersById.get(playerID));
             JsonObject json = activeGamesById.get(gameID).toJson();
-            // TODO: make this a specific endpoint/address
             json.put("type", "setup");
-            super.vertx.eventBus().publish(String.format(LOBBY_BASE_ADDRESS.getAddressString(), verticleDeploymentByGUID.get(gameID)), json);
+            String address = String.format(GAME_BASE_ADDRESS.getAddressString(), verticleDeploymentByGUID.get(gameID));
+            super.vertx.eventBus().publish(address, json);
             message.reply(new SuccessDTO().toJson());
         } else {
             throw new GameFullException(message);
@@ -180,7 +186,7 @@ public class GameLobbyVerticle extends AbstractVerticle {
 
         super.vertx.deployVerticle(GameVerticle.class.getName(), ar -> {
             if (ar.succeeded()) {
-                verticleDeploymentByGUID.put(guid, ar.result());
+                verticleDeploymentByGUID.put(lobbyguid, ar.result());
                 LOGGER.info(String.format("Deployed verticle %s for game %s", ar.result(), guid));
                 request.reply(new LobbyCreatedDTO(lobbyguid).toJson());
             } else {
@@ -189,6 +195,30 @@ public class GameLobbyVerticle extends AbstractVerticle {
                 request.fail(400, ERROR_MALFORMED_REQUEST);
             }
         });
+    }
+
+    private void removePlayer(Message<RemovePlayerDTO> removePlayerDTOMessage) {
+        RemovePlayerDTO dto = removePlayerDTOMessage.body();
+        // remove player from list of active players
+        Player p = this.activePlayersById.get(dto.getPlayerGUID());
+        if (p != null) this.activePlayers.remove(p);
+        // remove player from hashmaps
+        this.activePlayersById.remove(p.getId());
+        this.activePlayersByName.remove(p.getName());
+        // then remove player from the game
+        for (Game g : this.activeGames) {
+            if (g.includesPlayer(p.getId())) {
+                g.removePlayer(p);
+                String verticle = this.verticleDeploymentByGUID.get(g.getId());
+                if (verticle != null) {
+                    vertx.undeploy(verticle);
+                }
+                // successful removal of player
+                removePlayerDTOMessage.reply(new SuccessDTO().toJson());
+            }
+        }
+        // TODO: review this implementation
+        removePlayerDTOMessage.fail(400, "Player not in any active games");
     }
 
     /**
