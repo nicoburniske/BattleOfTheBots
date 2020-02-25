@@ -34,7 +34,7 @@ public class Chess {
     //  TODO: UNFINISHED
     public Chess(Board b, Color turn){
         // TODO: "Board is not regulation size exception"
-        this.b = b;
+        this.b = b;     //  TODO: Board.getBoard() or Board.copy()
         this.turn = turn;
         this.defaultValues = new HashMap<>() {{
             put(King.class, 1000.0);
@@ -137,7 +137,7 @@ public class Chess {
 
     //  TODO: UNFINISHED
     // TODO: change param names
-    private boolean isInDangerBetween(Coord target, Coord origin){
+    protected boolean isInDangerBetween(Coord target, Coord origin){
         return false;
     }
 

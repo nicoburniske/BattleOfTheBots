@@ -1,5 +1,6 @@
 package com.burnyarosh.board.common;
 
+import com.burnyarosh.board.Board;
 import com.burnyarosh.board.piece.IPiece;
 import com.burnyarosh.board.piece.King;
 import com.burnyarosh.board.piece.Pawn;
@@ -21,6 +22,15 @@ public class Move {
     private List<IPiece> teamPieces;
     private List<Move> history;
     private char promo;
+    private String an;
+
+    public enum Special
+    {
+        NONE,
+        CASTLE,
+        EN_PASSANT,
+        PROMOTION
+    }
 
 
     public Move(){
@@ -36,6 +46,22 @@ public class Move {
         this.history = history;
         classifyMove();
         this.buildPieceList();
+    }
+
+    private Move(IPiece p, Coord origin, Coord target, boolean isCapture, boolean isPromotion, boolean isCastle, boolean isCheck, boolean isCheckmate,
+                 IPiece[][] board, List<IPiece> teamPieces, List<Move> history, char promo){
+        this.p = p;
+        this.origin = origin;
+        this.target = target;
+        this.isCapture = isCapture;
+        this.isPromotion = isPromotion;
+        this.isCastle = isCastle;
+        this.isCheck = isCheck;
+        this.isCheckmate = isCheckmate;
+        this.board = board;
+        this.teamPieces = teamPieces;
+        this.history = history;
+        this.promo = promo;
     }
 
     public IPiece getPiece(){
@@ -66,8 +92,8 @@ public class Move {
         this.promo = p;
     }
 
-    public String toString(){
-
+    //  TODO: WHEN THIS METHOD IS CALLED THE MOVE IS FINALIZED AND WE CAN DELETE NONESSENTIAL MEMBERS
+    private String toAlgebraicNotation(){
         //  SPECIAL CONDITION: CASTLE
         if (this.isCastle){
             if (target.getX() > origin.getX()){
@@ -132,6 +158,18 @@ public class Move {
         return sb.toString();
     }
 
+    public String toString(){
+        if (this.an == null){
+            this.an = this.toAlgebraicNotation();
+        }
+        return this.an;
+    }
+
+    public Move copy(){
+        return new Move(this.p, this.origin, this.target, this.isCapture, this.isPromotion, this.isCastle, this.isCheck, this.isCheckmate, this.board, this.teamPieces, this.history, this.promo);
+    }
+
+
     private void buildPieceList(){
         this.teamPieces = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
@@ -152,5 +190,29 @@ public class Move {
         this.isCastle = this.p instanceof King && Math.abs(origin.getX() - target.getX()) == 2;
         this.isPromotion = this.p instanceof Pawn && target.getY() == (this.p.getIsBlack() ? 0 : 7);
     }
+
+    //  TODO: UNFINISHED
+    public static Special classifyMove(Board b, Coord origin, Coord target) {
+        //  TODO: FIX isInDangerBetween() check if isValid MoveBoolean necessary
+        //if (b.getPieceAtCoord(origin) instanceof King && Math.abs(origin.getX() - target.getX()) == 2 && !isInDangerBetween(origin, target)) {
+            //if (isValidMoveBoolean(new Coord(fromCastleX, y), new Coord(toCastleX, y))) {
+                //return Special.CASTLE;
+            //}
+        //}
+        if (b.getPieceAtCoord(origin) instanceof Pawn && Math.abs(origin.getY() - target.getY()) == 1 && Math.abs(origin.getX() - target.getX()) == 1 && b.getPieceAtCoord(origin) == null){
+            List<Move> temp_history = b.getMoveHistory();
+            if (origin.getY() == (b.getPieceAtCoord(origin).getIsBlack() ? 3 : 4) //  Condition #1
+            && temp_history.size() > 3  //  avoid OutOfBoundsException  (en passant impossible under 4 moves)
+            && temp_history.get(temp_history.size() - 2).getPiece() instanceof Pawn && (b.getPieceAtCoord(new Coord(target.getX(), origin.getY()))).getMoveCount() == 1){ //Conditions 2, 3, and 4
+                return Special.EN_PASSANT;
+            }
+        }
+        if (b.getPieceAtCoord(origin) instanceof Pawn && target.getY() == (b.getPieceAtCoord(origin).getIsBlack() ? 0 : 7)){
+            return Special.PROMOTION;
+        }
+        return Special.NONE;
+    }
+
+
 
 }
