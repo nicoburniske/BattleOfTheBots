@@ -17,7 +17,6 @@ import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.http.WebSocketFrame;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -67,6 +66,7 @@ public class ServerVerticle extends AbstractVerticle {
 
     /**
      * Doesn't do anything special yet. Prints stacktrace.
+     *
      * @param throwable to be handled
      */
     private void handlerServerExceptions(Throwable throwable) {
@@ -88,6 +88,7 @@ public class ServerVerticle extends AbstractVerticle {
     /**
      * Updates clients with a JsonObject
      * TODO: DTO THIS
+     *
      * @param updateMessage contains a PlayerUpdateDTO. Contains a playerGUID and a JsonObject
      */
     private void updateClients(Message<PlayerUpdateDTO> updateMessage) {
@@ -97,7 +98,8 @@ public class ServerVerticle extends AbstractVerticle {
 
     /**
      * Sends the message to the appropriate Websocket
-     * @param message message to be sent
+     *
+     * @param message    message to be sent
      * @param playerGUID players GUID
      */
     private void sendMessageToClient(JsonObject message, String playerGUID) {
@@ -106,6 +108,7 @@ public class ServerVerticle extends AbstractVerticle {
 
     /**
      * Initializes websocket handlers on new connection
+     *
      * @param websocket web socket to be handled
      */
     private void onPlayerConnection(ServerWebSocket websocket) {
@@ -119,6 +122,7 @@ public class ServerVerticle extends AbstractVerticle {
     /**
      * Handles a dropped connection.
      * TODO: Clean up lobby and game verticles on player disconnection
+     *
      * @param websocket the websocket whose connection was dropped
      */
     private void dropConnectionHandler(ServerWebSocket websocket) {
@@ -134,7 +138,8 @@ public class ServerVerticle extends AbstractVerticle {
     /**
      * Handles websocket frames.
      * Initially forces player to register.
-     * @param frame contains json data from client
+     *
+     * @param frame     contains json data from client
      * @param websocket associated with a given client
      */
     private void newConnectionHandler(WebSocketFrame frame, ServerWebSocket websocket) {
@@ -160,7 +165,6 @@ public class ServerVerticle extends AbstractVerticle {
             if (e instanceof HandledSocketException) {
                 this.websocketFailureHandler.handleFailure(websocket, (HandledSocketException) e);
             } else {
-                // Make this a constant figure out how to
                 websocket.writeTextMessage(new FailureDTO("Invalid JSON").toJsonString());
                 LOGGER.error(e);
             }
@@ -169,7 +173,8 @@ public class ServerVerticle extends AbstractVerticle {
 
     /**
      * Connection handler for players who have already been registered.
-      * @param frame the frame containing json data.
+     *
+     * @param frame     the frame containing json data.
      * @param websocket the websocket associated with a given client
      */
     private void establishedConnectionHandler(WebSocketFrame frame, ServerWebSocket websocket) {
@@ -177,7 +182,6 @@ public class ServerVerticle extends AbstractVerticle {
             JsonObject json = this.frameToJson(frame);
             Request type = this.getRequestType(json);
             String currPlayer = this.getCurrPlayerGUID(websocket);
-            // TODO: ensure that users playerID matches the playerID stored in the map.
             super.vertx.eventBus().request(type.getAddress().getAddressString(), mapAndVerify(type.getClazz(), json, currPlayer),
                     ar -> {
                         if (ar.failed()) {
@@ -200,10 +204,11 @@ public class ServerVerticle extends AbstractVerticle {
     /**
      * Ensures that the request maps to a DTO properly, and comes from the player that is bound to the specific connection
      */
-    private  <T extends InDTO> T mapAndVerify(Class<T> clazz, JsonObject json, String player) {
+    private <T extends InDTO> T mapAndVerify(Class<T> clazz, JsonObject json, String player) {
         T result = Mapper.getJsonAsClass(json, clazz);
         if (!result.isValidRequest()) throw new InvalidRequestException();
-        if (!result.isAuthorizedPlayer(player)) throw new InvalidRequestException();
+        if (!result.isAuthorizedPlayer(player))
+            throw new InvalidRequestException(); // should this be another exception that shows unauthorized request (401).
         return clazz.cast(result);
     }
 
