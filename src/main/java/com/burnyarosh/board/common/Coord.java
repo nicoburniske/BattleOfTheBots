@@ -74,8 +74,7 @@ public class Coord {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Coord coord = (Coord) o;
-        return this.x == coord.getX() &&
-                this.y == coord.getY();
+        return this.x == coord.getX() && this.y == coord.getY();
     }
 
     private String getFile() {

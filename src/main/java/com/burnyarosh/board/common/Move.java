@@ -15,24 +15,25 @@ public class Move {
     private boolean isCapture;
     private boolean isPromotion;
     private boolean isCastle;
-    private boolean isEnPassant;
     private boolean isCheck;
     private boolean isCheckmate;
     private IPiece[][] board;
     private List<IPiece> teamPieces;
+    private List<Move> history;
+    private char promo;
 
 
     public Move(){
     }
 
-    public Move(IPiece[][] board, Coord origin, Coord target){
+    public Move(IPiece[][] board, List<Move> history, Coord origin, Coord target){
         this.p = board[origin.getX()][origin.getY()];
         this.target = target;
         this.origin = origin;
-        this.isEnPassant = false;
         this.isCheck = false;
         this.isCheckmate = false;
         this.board = board;
+        this.history = history;
         classifyMove();
         this.buildPieceList();
     }
@@ -58,35 +59,36 @@ public class Move {
     }
 
     public void setEnPassant(){
-        this.isEnPassant = true;
         this.isCapture = true;
     }
 
+    public void setPromotionPiece(char p){
+        this.promo = p;
+    }
+
     public String toString(){
-        StringBuilder sb = new StringBuilder();
+
+        //  SPECIAL CONDITION: CASTLE
         if (this.isCastle){
             if (target.getX() > origin.getX()){
-                sb.append("O-O");
-            } else {
-                sb.append("O-O-O");
+                return "O-O";
             }
-        } else {
-            if (!(this.p instanceof Pawn)){
-                //  initial piece identifier
-                sb.append(this.p.toString().charAt(1));
-            }
-            {   //  disambiguating moves
-                if (!((this.p instanceof Pawn) || (this.p instanceof King))){
-                    boolean requiresDisambiguation, sameFile, sameRank = false;
-                    for ()
-                }
+            return "O-O-O";
+        }
+        StringBuilder sb = new StringBuilder();
+        if (!(this.p instanceof Pawn)){
+            //  initial piece identifier
+            sb.append(this.p.toString().charAt(1));
+        }
+        {   //  DISAMBIGUATING MOVES
+            if (!((this.p instanceof Pawn) || (this.p instanceof King))){
+                boolean requiresDisambiguation = false;
                 boolean sameFile = false;
                 boolean sameRank = false;
-                boolean sameMoveExists = false;
                 for (IPiece t : this.teamPieces){
-                    if (t.getClass() == this.p.getClass() ){
-                        if (t.getPossibleMoves(this.board, null).contains(this.target)) {  //  TODO: THIS WILL BREAK WITH PAWNS
-                            sameMoveExists = true;
+                    if (t.toString().charAt(1) == this.p.toString().charAt(1)){
+                        if (t.getPossibleMoves(this.board, this.history).contains(this.target)){
+                            requiresDisambiguation = true;
                             if (t.getCoord().getX() == this.origin.getX()){
                                 sameFile = true;
                             }
@@ -96,11 +98,10 @@ public class Move {
                         }
                     }
                 }
-                if (sameMoveExists){
-                    System.out.println("DB" +this.p);
+                if (requiresDisambiguation){
                     if (!sameFile){
                         sb.append((char) (97 + this.origin.getX()));
-                    } else if (sameFile && !sameRank){
+                    } else if (!sameRank){
                         sb.append(this.origin.getY()+1);
                     } else {
                         sb.append((char) (97 + this.origin.getX()));
@@ -108,29 +109,26 @@ public class Move {
                     }
                 }
             }
-            if (this.isCapture){
-                if (this.p instanceof Pawn){
-                    sb.append((char) (97 + this.origin.getX()));
-                }
-                sb.append("x");
+        }   //  END OF DISAMBIGUATING MOVES
+        if (this.isCapture){
+            if (this.p instanceof Pawn){
+                sb.append((char) (97 + this.origin.getX()));
             }
-            {   //  Coordinate of destination square
-                sb.append((char) (97 + this.target.getX()));
-                sb.append(this.target.getY()+1);
-            }
-            if (this.isPromotion){
-                sb.append("=");
-                //TODO: followed by the uppercase letter of the piece promoted to.
-            }
-            if (this.isEnPassant){
-                sb.append("e.p.");
-            }
-            if (this.isCheck){
-                if (this.isCheckmate){
-                    sb.append("#");
-                } else {
-                    sb.append("+");
-                }
+            sb.append("x");
+        }
+        {   //  DESTINATION COORDINATES
+            sb.append((char) (97 + this.target.getX()));
+            sb.append(this.target.getY()+1);
+        }   //  END OF DESTINATION COORDINATES
+        if (this.isPromotion){
+            sb.append("=");
+            sb.append((char) (this.promo-32));
+        }
+        if (this.isCheck){
+            if (this.isCheckmate){
+                sb.append("#");
+            } else {
+                sb.append("+");
             }
         }
         return sb.toString();
