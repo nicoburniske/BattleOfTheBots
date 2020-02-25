@@ -22,6 +22,8 @@ public class TestPieces {
         board1 = new ChessBoard();
     }
 
+    //  GENERAL PAWN MOVES
+
     @Test
     public void testMovePawns() {
         assertTrue(board1.isWhiteTurn());
@@ -38,7 +40,7 @@ public class TestPieces {
     }
 
     @Test
-    public void testEnPassant(){
+    public void testEnPassant() {
         //  [WHITE]
         assertTrue(board1.playGame(1, 1, 1, 3));
 
@@ -56,7 +58,7 @@ public class TestPieces {
     }
 
     @Test
-    public void testPawnPromotion(){
+    public void testPawnPromotion() {
         //  [WHITE]
         assertTrue(board1.playGame(1, 1, 1, 3));
 
@@ -90,9 +92,9 @@ public class TestPieces {
     }
 
     @Test
-    public void testPawnPossibleMoves(){
-        Coord p1_c1 = new Coord(0,2);
-        Coord p1_c2 = new Coord(0,3);
+    public void testPawnPossibleMoves() {
+        Coord p1_c1 = new Coord(0, 2);
+        Coord p1_c2 = new Coord(0, 3);
         assertTrue(board1.getBoard()[0][1].getPossibleMoves(board1.getBoard(), board1.getHistory()).size() == 2);
         assertTrue(board1.getBoard()[0][1].getPossibleMoves(board1.getBoard(), board1.getHistory()).contains(p1_c1));
         assertTrue(board1.getBoard()[0][1].getPossibleMoves(board1.getBoard(), board1.getHistory()).contains(p1_c2));
@@ -102,6 +104,8 @@ public class TestPieces {
         //  TODO: Test Pawn Capture possible moves
 
     }
+
+    //  SPECIAL PAWN MOVES
 
     @Test
     public void testWhitePawnStartMoveTwice() {
@@ -139,7 +143,6 @@ public class TestPieces {
             assertEquals("Invalid move", e.getMessage());
         }
     }
-
 
     //Test Pawn
     //Test Promotion
