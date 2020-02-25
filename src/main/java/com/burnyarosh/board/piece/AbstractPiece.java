@@ -65,7 +65,8 @@ public abstract class AbstractPiece implements IPiece {
 
     public JsonObject toJson() {
         JsonObject ret = new JsonObject();
-        ret.put(this.toString(), this.c.toJson());
+        ret.put("piece", this.toString());
+        ret.put("pos", this.c.toChessString());
         return ret;
     }
 

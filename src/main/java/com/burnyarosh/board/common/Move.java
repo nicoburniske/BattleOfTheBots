@@ -104,8 +104,7 @@ public class Move {
                     } else if (!sameRank){
                         sb.append(this.origin.getY()+1);
                     } else {
-                        sb.append((char) (97 + this.origin.getX()));
-                        sb.append(this.origin.getY() + 1);
+                        sb.append(this.origin.toChessString());
                     }
                 }
             }
@@ -117,8 +116,7 @@ public class Move {
             sb.append("x");
         }
         {   //  DESTINATION COORDINATES
-            sb.append((char) (97 + this.target.getX()));
-            sb.append(this.target.getY()+1);
+            sb.append(this.target.toChessString());
         }   //  END OF DESTINATION COORDINATES
         if (this.isPromotion){
             sb.append("=");

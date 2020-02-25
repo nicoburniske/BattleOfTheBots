@@ -1,7 +1,4 @@
 import com.burnyarosh.board.ChessBoard;
-
-import com.burnyarosh.board.common.Coord;
-import com.burnyarosh.board.common.Move;
 import org.junit.Before;
 import org.junit.Test;
 
