@@ -36,6 +36,18 @@ public class Game extends Entity {
                 || this.players[1] != null && this.players[1].getId().equals(playerGUID);
     }
 
+    public boolean removePlayer(Player player) {
+        if (this.players[0].equals(player)) {
+            this.players[0] = this.players[1];
+            return true;
+        } else if (this.players[1].equals(player)) {
+            this.players[1] = null;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     @Override
     public JsonObject toJson() {
         JsonObject game = new JsonObject();
