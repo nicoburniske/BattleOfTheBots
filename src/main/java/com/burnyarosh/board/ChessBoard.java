@@ -453,6 +453,7 @@ public class ChessBoard {
      * Updates the Move List with the most recent move
      */
     private void updateMoveList(IPiece[][] board, Coord origin, Coord target) {
+        Move temp = new Move(board, origin, target);
         this.moves.add(new Move(board, origin, target));
     }
 

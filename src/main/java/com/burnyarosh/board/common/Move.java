@@ -4,6 +4,9 @@ import com.burnyarosh.board.piece.IPiece;
 import com.burnyarosh.board.piece.King;
 import com.burnyarosh.board.piece.Pawn;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Move {
 
     private IPiece p;
@@ -15,6 +18,8 @@ public class Move {
     private boolean isEnPassant;
     private boolean isCheck;
     private boolean isCheckmate;
+    private IPiece[][] board;
+    private List<IPiece> teamPieces;
 
 
     public Move(){
@@ -27,7 +32,9 @@ public class Move {
         this.isEnPassant = false;
         this.isCheck = false;
         this.isCheckmate = false;
-        classifyMove(board);
+        this.board = board;
+        classifyMove();
+        this.buildPieceList();
     }
 
     public IPiece getPiece(){
@@ -58,24 +65,48 @@ public class Move {
     public String toString(){
         StringBuilder sb = new StringBuilder();
         if (this.isCastle){
-            if (target.getX() < origin.getX()){
-                sb.append("0-0");
+            if (target.getX() > origin.getX()){
+                sb.append("O-O");
             } else {
-                sb.append("0-0-0");
+                sb.append("O-O-O");
             }
         } else {
             if (!(this.p instanceof Pawn)){
                 //  initial piece identifier
                 sb.append(this.p.toString().charAt(1));
             }
-            {   //  TODO: disambiguating moves
-                // check for identical piece
-                // check identical peices possible moves
-                    // if move exists, must disambiguate
-                //  add file of departure (if they differ)
-                //  or - add rank of departure (if files are same)
-                //  or (if the player has three or more identical pieces able to reach the same square (1+ promotions))
-                    //  both file and rank
+            {   //  disambiguating moves
+                if (!((this.p instanceof Pawn) || (this.p instanceof King))){
+                    boolean requiresDisambiguation, sameFile, sameRank = false;
+                    for ()
+                }
+                boolean sameFile = false;
+                boolean sameRank = false;
+                boolean sameMoveExists = false;
+                for (IPiece t : this.teamPieces){
+                    if (t.getClass() == this.p.getClass() ){
+                        if (t.getPossibleMoves(this.board, null).contains(this.target)) {  //  TODO: THIS WILL BREAK WITH PAWNS
+                            sameMoveExists = true;
+                            if (t.getCoord().getX() == this.origin.getX()){
+                                sameFile = true;
+                            }
+                            if (t.getCoord().getY() == this.origin.getY()){
+                                sameRank = true;
+                            }
+                        }
+                    }
+                }
+                if (sameMoveExists){
+                    System.out.println("DB" +this.p);
+                    if (!sameFile){
+                        sb.append((char) (97 + this.origin.getX()));
+                    } else if (sameFile && !sameRank){
+                        sb.append(this.origin.getY()+1);
+                    } else {
+                        sb.append((char) (97 + this.origin.getX()));
+                        sb.append(this.origin.getY() + 1);
+                    }
+                }
             }
             if (this.isCapture){
                 if (this.p instanceof Pawn){
@@ -85,7 +116,7 @@ public class Move {
             }
             {   //  Coordinate of destination square
                 sb.append((char) (97 + this.target.getX()));
-                sb.append(this.target.getY());
+                sb.append(this.target.getY()+1);
             }
             if (this.isPromotion){
                 sb.append("=");
@@ -105,8 +136,23 @@ public class Move {
         return sb.toString();
     }
 
-    private void classifyMove(IPiece[][] board){
-        this.isCapture = board[target.getX()][target.getY()] != null && this.p.getIsBlack() != board[target.getX()][target.getY()].getIsBlack();
+    private void buildPieceList(){
+        this.teamPieces = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                IPiece curr = this.board[i][j];
+                if(curr != null) {
+                    if (curr.getIsBlack() == this.p.getIsBlack() && curr.getClass() == this.p.getClass()){
+                        this.teamPieces.add(curr);
+                    }
+                }
+            }
+        }
+        this.teamPieces.remove(this.p);
+    }
+
+    private void classifyMove(){
+        this.isCapture = this.board[target.getX()][target.getY()] != null && this.p.getIsBlack() != this.board[target.getX()][target.getY()].getIsBlack();
         this.isCastle = this.p instanceof King && Math.abs(origin.getX() - target.getX()) == 2;
         this.isPromotion = this.p instanceof Pawn && target.getY() == (this.p.getIsBlack() ? 0 : 7);
     }
