@@ -69,6 +69,9 @@ public class Move {
                 sb.append(this.p.toString().charAt(1));
             }
             {   //  TODO: disambiguating moves
+                // check for identical piece
+                // check identical peices possible moves
+                    // if move exists, must disambiguate
                 //  add file of departure (if they differ)
                 //  or - add rank of departure (if files are same)
                 //  or (if the player has three or more identical pieces able to reach the same square (1+ promotions))
