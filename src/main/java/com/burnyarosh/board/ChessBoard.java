@@ -72,7 +72,7 @@ public class ChessBoard {
             Coord origin = new Coord(originX, originY);
             Coord target = new Coord(targetX, targetY);
             if (this.isValidMove(origin, target)) {
-                this.updateMoveList(board, origin, target);
+                this.updateMoveList(origin, target, promotion);
                 this.performMove(origin, target);
                 this.executePromotion(target, promotion);
                 this.nextTurn();
@@ -452,9 +452,10 @@ public class ChessBoard {
     /**
      * Updates the Move List with the most recent move
      */
-    private void updateMoveList(IPiece[][] board, Coord origin, Coord target) {
-        Move temp = new Move(board, origin, target);
-        this.moves.add(new Move(board, origin, target));
+    private void updateMoveList(Coord origin, Coord target, char promotion) {
+        Move temp = new Move(this.getBoard(), this.moves, origin, target);
+        temp.setPromotionPiece(promotion);
+        this.moves.add(temp);
     }
 
     private void updatePreviousMove(){
