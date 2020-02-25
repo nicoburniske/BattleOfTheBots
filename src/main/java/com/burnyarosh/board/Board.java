@@ -2,8 +2,9 @@ package com.burnyarosh.board;
 
 import com.burnyarosh.board.common.Coord;
 import com.burnyarosh.board.common.Move;
-import com.burnyarosh.board.piece.IPiece;
+import com.burnyarosh.board.piece.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Board {
@@ -12,15 +13,15 @@ public class Board {
     private List<IPiece> blackPieces;
     private List<Move> history;
 
-    public enum MoveType
-    {
-        STANDARD, CASTLE, PROMOTION, ENPASSANT;
-    }
-
     //  TODO: UNFINISHED METHOD
     public Board(){
-
+        this.whitePieces = new ArrayList<>();
+        this.blackPieces = new ArrayList<>();
+        this.history = new ArrayList<>();
+        this.board =  this.generateNewBoard();
     }
+
+    // TODO: either getBoard or copy();
 
     public IPiece[][] getBoardArray(){
         IPiece[][] newBoard = new IPiece[8][8];
@@ -33,20 +34,30 @@ public class Board {
         return newBoard;
     }
 
-    //  TODO: UNFINISHED METHOD
     public List<IPiece> getPieces(Chess.Color c){
+        List<IPiece> temp = new ArrayList<>();
         if (c == Chess.Color.BLACK){
-            // TODO: MAKE A COPY OF this.blackPieces;
+            for (IPiece p : this.blackPieces){
+                temp.add(p.copy());
+            }
         } else if (c == Chess.Color.WHITE){
-            // TODO: MAKE A COPY OF this.blackPieces;
+            for (IPiece p : this.whitePieces){
+                temp.add(p.copy());
+            }
         }
-        return null;
+        return temp;
     }
 
-    //  TODO: UNFINISHED METHOD
     public List<Move> getMoveHistory(){
-        //  TODO: MAKE A COPY OF THE MOVE HISTORY
-        return null;
+        List<Move> temp = new ArrayList<>();
+        for (Move m : this.history){
+            temp.add(m.copy());
+        }
+        return temp;
+    }
+
+    public IPiece getPieceAtCoord(Coord c){
+        return this.board[c.getX()][c.getY()].copy();
     }
 
     // in Game aka ChessBoard, have validate or classifyMove()
@@ -54,18 +65,25 @@ public class Board {
     // check for enPassant
 
     //  TODO: UNFINISHED METHOD
-    public void executeMove(MoveType t, Coord origin, Coord target, char promotion){
+    public void executeMove(Coord origin, Coord target, char promotion){
         Move temp = new Move(this.getBoardArray(), this.getMoveHistory(), origin, target);
 
         IPiece p = this.board[origin.getX()][origin.getY()];
-        if (t == MoveType.CASTLE){
-            //executeCastle code here
-        } else if (t == MoveType.ENPASSANT){
-            //en passant code here (from perform move)
+        boolean isPromotion = false;
+        switch (Move.classifyMove(this, origin, target)){
+            case CASTLE:
+                //  execute castle code here
+                break;
+            case EN_PASSANT:
+                // en_passant code here (from performMove())
+                break;
+            case PROMOTION:
+                isPromotion = true;
+                break;
         }
-        // final make move things here
-        if (t == MoveType.PROMOTION){
-            // executePromotion code here
+        //  final make move things here
+        if (isPromotion){
+            //  executePromotion code here
         }
         // TODO: CLASSIFY temp FOR EACH SPECIALTY PERFORMED
         this.history.add(temp);
@@ -112,8 +130,26 @@ public class Board {
         return sb.toString();
     }
 
+    private IPiece[][] generateNewBoard() {
+        return new IPiece[][] {
+                {this.addPiece(new Rook(0, 0, false)), this.addPiece(new Pawn(0, 1, false)), null, null, null, null, this.addPiece(new Pawn(0, 6, true)), this.addPiece(new Rook(0, 7, true))},
+                {this.addPiece(new Knight(1, 0, false)), this.addPiece(new Pawn(1, 1, false)), null, null, null, null, this.addPiece(new Pawn(1, 6, true)), this.addPiece(new Knight(1, 7, true))},
+                {this.addPiece(new Bishop(2, 0, false)), this.addPiece(new Pawn(2, 1, false)), null, null, null, null, this.addPiece(new Pawn(2, 6, true)), this.addPiece(new Bishop(2, 7, true))},
+                {this.addPiece(new Queen(3, 0, false)), this.addPiece(new Pawn(3, 1, false)), null, null, null, null, this.addPiece(new Pawn(3, 6, true)), this.addPiece(new Queen(3, 7, true))},
+                {this.addPiece(new King(4, 0, false)), this.addPiece(new Pawn(4, 1, false)), null, null, null, null, this.addPiece(new Pawn(4, 6, true)), this.addPiece(new King(4, 7, true))},
+                {this.addPiece(new Bishop(5, 0, false)), this.addPiece(new Pawn(5, 1, false)), null, null, null, null, this.addPiece(new Pawn(5, 6, true)), this.addPiece(new Bishop(5, 7, true))},
+                {this.addPiece(new Knight(6, 0, false)), this.addPiece(new Pawn(6, 1, false)), null, null, null, null, this.addPiece(new Pawn(6, 6, true)), this.addPiece(new Knight(6, 7, true))},
+                {this.addPiece(new Rook(7, 0, false)), this.addPiece(new Pawn(7, 1, false)), null, null, null, null, this.addPiece(new Pawn(7, 6, true)), this.addPiece(new Rook(7, 7, true))}
+        };
+    }
 
-    //  addPiece
+    //  TODO: PENDING REVIEW
+    private IPiece addPiece(IPiece p) {
+        if (p == null) throw new IllegalArgumentException("Piece cannot be null");
+        (p.getIsBlack() ? this.blackPieces : this.whitePieces).add(p);
+        return p;
+    }
+
     //  removePiece
 
 }
