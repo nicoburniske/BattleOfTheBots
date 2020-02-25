@@ -38,7 +38,6 @@ public class GameVerticle extends AbstractVerticle {
         entryPoint.handler(this::handleSetup);
         // new move
         String newMoveAddress = String.format(GAME_MOVE_ADDRESS.getAddressString(), super.deploymentID());
-        System.out.println("GAME ADDRESS" + newMoveAddress);
         playerTurn = vertx.eventBus().consumer(newMoveAddress);
         playerTurn.handler(this::handleNewMove);
         promise.complete();
@@ -79,7 +78,7 @@ public class GameVerticle extends AbstractVerticle {
         this.randomColor();
         this.sendGameUpdate();
         // unregisters consumer so that no more players can be added. Think about adding possibility for spectators.
-        playerTurn.unregister();
+        entryPoint.unregister();
     }
 
 
