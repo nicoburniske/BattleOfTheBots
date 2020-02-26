@@ -13,7 +13,6 @@ public class Board {
     private List<IPiece> blackPieces;
     private List<Move> history;
 
-    //  TODO: UNFINISHED METHOD
     public Board(){
         this.whitePieces = new ArrayList<>();
         this.blackPieces = new ArrayList<>();
