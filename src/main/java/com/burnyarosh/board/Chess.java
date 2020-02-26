@@ -29,9 +29,7 @@ public class Chess {
         }};
     }
 
-    //  TODO: UNFINISHED
     public Chess(Board b, Color turn){
-        // TODO: "Board is not regulation size exception"
         this.b = b.copy();
         this.turn = turn;
         this.defaultValues = new HashMap<>() {{
@@ -106,14 +104,14 @@ public class Chess {
     }
 
     private boolean isGameOver(){
-        return this.isMate();
+        return isMate(this.b, this.turn);
     }
 
-    private boolean isMate(){
-        if (isInCheck(this.b, this.turn)){
-            for (IPiece p : this.b.getPieces(this.turn)){
-                for (Coord c : p.getPossibleMoves(this.b.getBoardArrayCopy(), this.b.getMoveHistory())){
-                    if (tryMove(this.b, this.turn, p.getCoord(), c)){
+    private static boolean isMate(Board b, Color turn){
+        if (isInCheck(b, turn)){
+            for (IPiece p : b.getPieces(turn)){
+                for (Coord c : p.getPossibleMoves(b.getBoardArrayCopy(), b.getMoveHistory())){
+                    if (tryMove(b, turn, p.getCoord(), c)){
                         return false;
                     }
                 }
