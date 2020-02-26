@@ -5,9 +5,7 @@ import com.burnyarosh.board.common.Move;
 import com.burnyarosh.board.piece.*;
 import io.vertx.core.json.JsonObject;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Chess {
     private Board b;
@@ -16,6 +14,7 @@ public class Chess {
 
     public enum Color{
         WHITE, BLACK
+
     }
 
     public Chess(){
@@ -105,18 +104,27 @@ public class Chess {
         return null;
     }
 
-    //  TODO: UNFINISHED
     private boolean isValidPieceValueMap(Map<Class, Double> values){
-        return false;
+        if (values == null) return false;
+        Set<Class> s = new HashSet<>((Arrays.asList(King.class, Queen.class, Rook.class, Bishop.class, Knight.class, Pawn.class)));
+        return values.keySet().containsAll(s);
     }
 
-    //  TODO: UNFINISHED
     private boolean isGameOver(){
-        return false;
+        return this.isMate();
     }
 
-    //  TODO: UNFINISHED
-    private boolean isCheckmate(){
+    private boolean isMate(){
+        if (this.isInCheck()){
+            for (IPiece p : this.b.getPieces(this.turn)){
+                for (Coord c : p.getPossibleMoves(this.b.getBoardArrayCopy(), this.b.getMoveHistory())){
+                    if (this.tryMove(p.getCoord(), c)){
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
         return false;
     }
 
@@ -125,44 +133,87 @@ public class Chess {
         return false;
     }
 
-    //  TODO: UNFINISHED
+    //  TODO: PENDING REVIEW
     private boolean isValidEnPassant(Coord origin, Coord target){
+        if (this.b.getPieceAtCoord(origin) instanceof Pawn && Math.abs(origin.getY() - target.getY()) == 1 && Math.abs(origin.getX() - target.getX()) == 1 && this.b.getPieceAtCoord(target) == null){
+            if (origin.getY() == (this.b.getPieceAtCoord(origin).getIsBlack() ? 3 : 4)){
+                if (this.b.getMoveHistory().size() > 3){        //  TODO: VERRIFY THIS
+                    return (this.b.getMoveHistory().get(this.b.getMoveHistory().size() - 2).getPiece() instanceof Pawn) && (this.b.getPieceAtCoord(new Coord(target.getX(), origin.getY())).getMoveCount() == 1);
+                }
+            }
+        }
         return false;
     }
 
-    //  TODO: UNFINISHED
     private boolean isInCheck(){
+        for (IPiece p : this.b.getPieces(this.turn)){
+            if (p.toString().charAt(1) == 'K'){
+                return this.isInDanger(p.getCoord());
+            }
+        }
+        return true;
+    }
+
+    protected boolean isInDangerBetween(Coord a, Coord b){
+        for ( Coord coord : b.calculatePointsBetweenInclusiveEnd((a))) {
+            if (this.isInDanger(coord)) return true;
+        }
         return false;
     }
 
-    //  TODO: UNFINISHED
-    // TODO: change param names
-    protected boolean isInDangerBetween(Coord target, Coord origin){
-        return false;
-    }
-
-    //  TODO: UNFINISHED
     private boolean isInDanger(Coord target){
+        for (IPiece p : this.b.getPieces(this.turn)){
+            if (this.isValidMovePiece(p.getCoord(), target)) return true;
+        }
         return false;
     }
 
-    //  TODO: UNFINISHED
+    //  TODO: PENDING REVIEW , also rename maybe
     private boolean isValidMovePiece(Coord origin, Coord target){
-        return false;
+        return this.b.getPieceAtCoord(origin).isValidMove(this.b.getBoardArrayCopy(), origin, target);
     }
 
-    //  TODO: UNFINISHED
     private boolean isValidMoveBoolean(Coord origin, Coord target){
-        return false;
+        try {
+            return this.isValidMove(origin, target);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     //  TODO: UNFINISHED
+    //TODO: if isInCheck and the resulting move does not remove the player from being in check, then it is an invalid move
+    // use constructor that takes in a 2d board to make a new chessBoard (feed it this.getBoard(), and this.isWhiteTurn()) to have a copy of the board.
+    // perform the move on this board and if the king is still in check (for the player that moved, than the move is invalid.
     private boolean isValidMove(Coord origin, Coord target){
-        return false;
+        if (!origin.isInsideBoard() || !target.isInsideBoard()) {
+            throw new IllegalArgumentException("Coordinate outside of board");
+        } else {
+            IPiece from = this.b.getPieceAtCoord(origin);
+            IPiece to = this.b.getPieceAtCoord(target);
+            if (from == null) {
+                throw new IllegalArgumentException("Must move a piece");
+            } else if (origin.equals(target)) {
+                throw new IllegalArgumentException("Cannot move to same space");
+            } else if (from.getIsBlack() && this.turn == Color.BLACK || !from.getIsBlack() /*&& !this.whiteTurn*/) {    //   TODO: THIS IS A WEIRD CONDITIONAL
+                throw new IllegalArgumentException("Other player's move");
+            } else if (to != null && (from.getIsBlack() && to.getIsBlack() || !(from.getIsBlack() || to.getIsBlack()))) {
+                throw new IllegalArgumentException("Cannot move to square occupied by piece of same color");
+            } else if (!from.isValidMove(this.b.getBoardArrayCopy(), origin, target) && !this.isValidEnPassant(origin, target)) {
+                throw new IllegalArgumentException("Invalid move");
+            } else if (this.isInCheck() && !this.tryMove(origin, target)) {
+                throw new IllegalStateException("Move results with King in check");
+            }
+            return true;
+        }
     }
 
-    //  TODO: UNFINISHED
-    private void nextTurn(){}
-
+    private void nextTurn(){
+        if (this.turn == Color.WHITE){
+            this.turn = Color.BLACK;
+        } else {
+            this.turn = Color.WHITE;
+        }
+    }
 
 }

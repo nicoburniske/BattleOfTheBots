@@ -23,7 +23,7 @@ public class Board {
 
     // TODO: either getBoard or copy();
 
-    public IPiece[][] getBoardArray(){
+    public IPiece[][] getBoardArrayCopy(){
         IPiece[][] newBoard = new IPiece[8][8];
         for (IPiece p : this.whitePieces) {
             newBoard[p.getCoord().getX()][p.getCoord().getY()] = p.copy();
@@ -66,7 +66,7 @@ public class Board {
 
     //  TODO: UNFINISHED METHOD
     public void executeMove(Coord origin, Coord target, char promotion){
-        Move temp = new Move(this.getBoardArray(), this.getMoveHistory(), origin, target);
+        Move temp = new Move(this.getBoardArrayCopy(), this.getMoveHistory(), origin, target);
 
         IPiece p = this.board[origin.getX()][origin.getY()];
         boolean isPromotion = false;
