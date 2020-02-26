@@ -21,8 +21,14 @@ public class Board {
         this.board =  this.generateNewBoard();
     }
 
-    // TODO: either getBoard or copy();
+    private Board(IPiece[][] board, List<IPiece> whitePieces, List<IPiece> blackPieces, List<Move> history){
+        this.board = board;
+        this.whitePieces = whitePieces;
+        this.blackPieces = blackPieces;
+        this.history = history;
+    }
 
+    //  TODO: REVIEW VERY IMPORTANT
     public IPiece[][] getBoardArrayCopy(){
         IPiece[][] newBoard = new IPiece[8][8];
         for (IPiece p : this.whitePieces) {
@@ -130,6 +136,10 @@ public class Board {
         return sb.toString();
     }
 
+    public Board copy(){
+        return new Board(this.board, this.whitePieces, this.blackPieces, this.history);
+    }
+
     private IPiece[][] generateNewBoard() {
         return new IPiece[][] {
                 {this.addPiece(new Rook(0, 0, false)), this.addPiece(new Pawn(0, 1, false)), null, null, null, null, this.addPiece(new Pawn(0, 6, true)), this.addPiece(new Rook(0, 7, true))},
@@ -143,7 +153,6 @@ public class Board {
         };
     }
 
-    //  TODO: PENDING REVIEW
     private IPiece addPiece(IPiece p) {
         if (p == null) throw new IllegalArgumentException("Piece cannot be null");
         (p.getIsBlack() ? this.blackPieces : this.whitePieces).add(p);
