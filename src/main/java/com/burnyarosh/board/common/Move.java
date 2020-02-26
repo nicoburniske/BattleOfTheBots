@@ -189,33 +189,8 @@ public class Move {
 
     private void classifyMove(){
         this.isCapture = this.board[target.getX()][target.getY()] != null && this.p.getIsBlack() != this.board[target.getX()][target.getY()].getIsBlack();
-        this.isCastle = this.p instanceof King && Math.abs(origin.getX() - target.getX()) == 2;
-        this.isPromotion = this.p instanceof Pawn && target.getY() == (this.p.getIsBlack() ? 0 : 7);
     }
 
-    //  TODO: UNFINISHED MAKE THIS PRIVATE AND WHATEVER MODIFY THE MOVE CLASS TO BE FINAL
-    public static Special classifyMove(Board b, Coord origin, Coord target) {
-        if (b.getPieceAtCoord(origin) instanceof King && Math.abs(origin.getX() - target.getX()) == 2 && !Chess.isInDangerBetween(b, (b.getPieceAtCoord(origin).getIsBlack() ? Chess.Color.BLACK : Chess.Color.WHITE), origin, target)) {
-            int direction = target.getX() - origin.getX();
-            int fromCastleX = direction > 0 ? 7 : 0;
-            int toCastleX = direction > 0 ? 5 : 3;
-            if (Chess.isValidMoveBoolean(b, (b.getPieceAtCoord(origin).getIsBlack() ? Chess.Color.BLACK : Chess.Color.WHITE), new Coord(fromCastleX, target.getY()), new Coord(toCastleX, target.getY()))) {
-                return Special.CASTLE;
-            }
-        }
-        if (b.getPieceAtCoord(origin) instanceof Pawn && Math.abs(origin.getY() - target.getY()) == 1 && Math.abs(origin.getX() - target.getX()) == 1 && b.getPieceAtCoord(origin) == null){
-            List<Move> temp_history = b.getMoveHistory();
-            if (origin.getY() == (b.getPieceAtCoord(origin).getIsBlack() ? 3 : 4) //  Condition #1
-            && temp_history.size() > 3  //  avoid OutOfBoundsException  (en passant impossible under 4 moves)
-            && temp_history.get(temp_history.size() - 2).getPiece() instanceof Pawn && (b.getPieceAtCoord(new Coord(target.getX(), origin.getY()))).getMoveCount() == 1){ //Conditions 2, 3, and 4
-                return Special.EN_PASSANT;
-            }
-        }
-        if (b.getPieceAtCoord(origin) instanceof Pawn && target.getY() == (b.getPieceAtCoord(origin).getIsBlack() ? 0 : 7)){
-            return Special.PROMOTION;
-        }
-        return Special.NONE;
-    }
 
     public Special getMoveType(){
         return this.type;

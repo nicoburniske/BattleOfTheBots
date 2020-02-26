@@ -107,11 +107,11 @@ public class Chess {
         return isMate(this.b, this.turn);
     }
 
-    private static boolean isMate(Board b, Color turn){
+    public static boolean isMate(Board b, Color turn){
         if (isInCheck(b, turn)){
             for (IPiece p : b.getPieces(turn)){
-                for (Coord c : p.getPossibleMoves(b.getBoardArrayCopy(), b.getMoveHistory())){
-                    if (tryMove(b, turn, p.getCoord(), c)){
+                for (Coord c : p.getPossibleMoves(b.getBoardArray(), b.getMoveHistory())){
+                    if (!isInCheck(Board.tryMove(b, p.getCoord(), c), turn)){
                         return false;
                     }
                 }
@@ -121,12 +121,13 @@ public class Chess {
         return false;
     }
 
+    /*
     private static boolean tryMove(Board b, Color turn, Coord origin, Coord target){
         Board temp = b.copy();
         temp.executeMove(origin, target, 'Q');  //  TODO: SHOULD I ADD METHOD PARAM FOR PROMOTION KEY
         return !isInCheck(temp, turn);
     }
-
+    */
     //  TODO: PENDING REVIEW - (HAS CURRENT LOGIC, COULD BE IMPROVED)
     private static boolean isValidEnPassant(Board b, Coord origin, Coord target){
         if (b.getPieceAtCoord(origin) instanceof Pawn && Math.abs(origin.getY() - target.getY()) == 1 && Math.abs(origin.getX() - target.getX()) == 1 && b.getPieceAtCoord(target) == null){
@@ -139,7 +140,7 @@ public class Chess {
         return false;
     }
 
-    private static boolean isInCheck(Board b, Color turn){
+    public static boolean isInCheck(Board b, Color turn){
         for (IPiece p : b.getPieces(turn)){
             if (p.toString().charAt(1) == 'K'){
                 return isInDanger(b, turn, p.getCoord());
@@ -163,7 +164,7 @@ public class Chess {
     }
 
     private static boolean isValidMovePiece(Board b, Coord origin, Coord target){
-        return b.getPieceAtCoord(origin).isValidMove(b.getBoardArrayCopy(), origin, target);
+        return b.getPieceAtCoord(origin).isValidMove(b.getBoardArray(), origin, target);
     }
 
     public static boolean isValidMoveBoolean(Board b, Color turn, Coord origin, Coord target){
@@ -192,9 +193,9 @@ public class Chess {
                 throw new IllegalArgumentException("Other player's move");
             } else if (to != null && (from.getIsBlack() && to.getIsBlack() || !(from.getIsBlack() || to.getIsBlack()))) {
                 throw new IllegalArgumentException("Cannot move to square occupied by piece of same color");
-            } else if (!from.isValidMove(b.getBoardArrayCopy(), origin, target) && !isValidEnPassant(b, origin, target)) {
+            } else if (!from.isValidMove(b.getBoardArray(), origin, target) && !isValidEnPassant(b, origin, target)) {
                 throw new IllegalArgumentException("Invalid move");
-            } else if (isInCheck(b, turn) && !tryMove(b, turn, origin, target)) {
+            } else if (isInCheck(b, turn) && isInCheck(Board.tryMove(b, origin, target), turn)) {
                 throw new IllegalStateException("Move results with King in check");
             }
             return true;
