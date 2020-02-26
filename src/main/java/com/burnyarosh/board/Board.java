@@ -70,7 +70,6 @@ public class Board {
     // check for CASTLE
     // check for enPassant
 
-    //  TODO: UNFINISHED METHOD
     public void executeMove(Coord origin, Coord target, char promotion){
         Move temp = new Move(this.getBoardArrayCopy(), this.getMoveHistory(), origin, target);
 
@@ -78,20 +77,37 @@ public class Board {
         boolean isPromotion = false;
         switch (Move.classifyMove(this, origin, target)){
             case CASTLE:
-                //  execute castle code here
+                int direction = target.getX() - origin.getX();
+                IPiece castle = this.board[direction > 0 ? 7 : 0][target.getY()];
+                castle.makeMove(new Coord(direction > 0 ? 5 : 3, target.getY()));
+                this.board[direction > 0 ? 7 : 0][target.getY()] = null;
+                this.board[direction > 0 ? 5 : 3][target.getY()] = castle;
                 break;
             case EN_PASSANT:
-                // en_passant code here (from performMove())
+                this.removePiece(this.board[target.getX()][origin.getY()]);
+                this.board[target.getX()][origin.getY()] = null;
                 break;
             case PROMOTION:
                 isPromotion = true;
                 break;
         }
-        //  final make move things here
+        p.makeMove(target);
+        this.removePiece(this.board[target.getX()][target.getY()]);
+        this.board[target.getX()][target.getY()] = p;
+        this.board[origin.getX()][origin.getY()] = null;
         if (isPromotion){
-            //  executePromotion code here
+            if (promotion == 'Q'){
+                IPiece tmp = this.board[target.getX()][target.getY()].promote(false);
+                this.removePiece(this.board[target.getX()][target.getY()]);
+                this.addPiece(tmp);
+                this.board[target.getX()][target.getY()] = tmp;
+            } else if (promotion == 'N'){
+                IPiece tmp = this.board[target.getX()][target.getY()].promote(true);
+                this.removePiece(this.board[target.getX()][target.getY()]);
+                this.addPiece(tmp);
+                this.board[target.getX()][target.getY()] = tmp;
+            }
         }
-        // TODO: CLASSIFY temp FOR EACH SPECIALTY PERFORMED
         this.history.add(temp);
     }
 
@@ -159,6 +175,9 @@ public class Board {
         return p;
     }
 
-    //  removePiece
-
+    private void removePiece(IPiece p) {
+        if (p != null) {
+            (p.getIsBlack() ? this.blackPieces : this.whitePieces).remove(p);
+        }
+    }
 }
