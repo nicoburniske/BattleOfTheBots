@@ -2,6 +2,7 @@ package com.burnyarosh.board;
 
 import com.burnyarosh.board.common.Coord;
 import com.burnyarosh.board.common.Move;
+import com.burnyarosh.board.common.NewMove;
 import com.burnyarosh.board.piece.*;
 
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ public class Board {
     private IPiece[][] board;
     private List<IPiece> whitePieces;
     private List<IPiece> blackPieces;
-    private List<Move> history;
+    private List<NewMove> history;
 
     public Board(){
         this.whitePieces = new ArrayList<>();
@@ -20,7 +21,7 @@ public class Board {
         this.board =  this.generateNewBoard();
     }
 
-    private Board(IPiece[][] board, List<IPiece> whitePieces, List<IPiece> blackPieces, List<Move> history){
+    private Board(IPiece[][] board, List<IPiece> whitePieces, List<IPiece> blackPieces, List<NewMove> history){
         this.board = board;
         this.whitePieces = whitePieces;
         this.blackPieces = blackPieces;
@@ -28,6 +29,7 @@ public class Board {
     }
 
     //  TODO: REVIEW VERY IMPORTANT
+    /*
     public IPiece[][] getBoardArrayCopy(){
         IPiece[][] newBoard = new IPiece[8][8];
         for (IPiece p : this.whitePieces) {
@@ -38,6 +40,12 @@ public class Board {
         }
         return newBoard;
     }
+    */
+
+    public IPiece[][] getBoardArray(){
+        return this.board;
+    }
+
 
     public List<IPiece> getPieces(Chess.Color c){
         List<IPiece> temp = new ArrayList<>();
@@ -53,12 +61,8 @@ public class Board {
         return temp;
     }
 
-    public List<Move> getMoveHistory(){
-        List<Move> temp = new ArrayList<>();
-        for (Move m : this.history){
-            temp.add(m.copy());
-        }
-        return temp;
+    public List<NewMove> getMoveHistory(){
+        return this.history;
     }
 
     public IPiece getPieceAtCoord(Coord c){
@@ -70,11 +74,11 @@ public class Board {
     // check for enPassant
 
     public void executeMove(Coord origin, Coord target, char promotion){
-        Move temp = new Move(this.getBoardArrayCopy(), this.getMoveHistory(), origin, target);
+        NewMove temp = new NewMove(this.copy(), origin, target, promotion);
 
         IPiece p = this.board[origin.getX()][origin.getY()];
         boolean isPromotion = false;
-        switch (Move.classifyMove(this, origin, target)){
+        switch (temp.getType()){
             case CASTLE:
                 int direction = target.getX() - origin.getX();
                 IPiece castle = this.board[direction > 0 ? 7 : 0][target.getY()];
@@ -108,6 +112,29 @@ public class Board {
             }
         }
         this.history.add(temp);
+    }
+
+    public static Board tryMove(Board b, Coord origin, Coord target){
+        Board temp = b.copy();
+        IPiece p = temp.getPieceAtCoord(origin);
+        switch (NewMove.classifyMove(temp, origin, target)){
+            case CASTLE:
+                int direction = target.getX() - origin.getX();
+                IPiece castle = temp.getBoardArray()[direction > 0 ? 7 : 0][target.getY()];
+                castle.makeMove(new Coord(direction > 0 ? 5 : 3, target.getY()));
+                temp.getBoardArray()[direction > 0 ? 7 : 0][target.getY()] = null;
+                temp.getBoardArray()[direction > 0 ? 5 : 3][target.getY()] = castle;
+                break;
+            case EN_PASSANT:
+                temp.removePiece(temp.getBoardArray()[target.getX()][origin.getY()]);
+                temp.getBoardArray()[target.getX()][origin.getY()] = null;
+                break;
+        }
+        p.makeMove(target);
+        temp.removePiece(temp.getBoardArray()[target.getX()][target.getY()]);
+        temp.getBoardArray()[target.getX()][target.getY()] = p;
+        temp.getBoardArray()[origin.getX()][origin.getY()] = null;
+        return temp;
     }
 
     public String toString(){
