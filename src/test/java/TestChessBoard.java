@@ -1,12 +1,11 @@
 import com.burnyarosh.board.Chess;
-import com.burnyarosh.board.ChessBoard;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 public class TestChessBoard {
-    Chess board1;
+    private Chess board1;
 
     @Before
     public void initExamples() {
@@ -168,7 +167,6 @@ public class TestChessBoard {
             //TODO: make check for isGameOver() (is checkmate or stalemate)
         }
     }
-
 
     @Test
     public void testMoveQueenThroughPawn() {
