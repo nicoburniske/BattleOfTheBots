@@ -1,3 +1,4 @@
+/*
 package com.burnyarosh.board.common;
 
 import com.burnyarosh.board.Board;
@@ -8,7 +9,7 @@ import java.util.List;
 
 import static com.burnyarosh.board.Board.tryMove;
 
-public final class NewMove {
+public final class Move {
 
     private final IPiece p;
     private final Chess.Color c;
@@ -29,7 +30,7 @@ public final class NewMove {
         PROMOTION
     }
 
-    public NewMove(Board b, Coord origin, Coord target, char promotion){
+    public Move(Board b, Coord origin, Coord target, char promotion){
 
         this.p = b.getPieceAtCoord(origin);
         this.c =  b.getPieceAtCoord(origin).getIsBlack() ? Chess.Color.BLACK : Chess.Color.WHITE;
@@ -140,5 +141,5 @@ public final class NewMove {
         return sb.toString();
     }
 
-
 }
+*/

@@ -13,7 +13,14 @@ public class Chess {
     private Map<Class, Double> defaultValues;
 
     public enum Color{
-        WHITE, BLACK
+        WHITE, BLACK;
+
+        public Color other(){
+            if (this.equals(WHITE)){
+                return BLACK;
+            }
+            return WHITE;
+        }
     }
 
     public Chess(){
@@ -52,7 +59,6 @@ public class Chess {
             if (isValidMove(this.b, this.turn, origin, target)){
                 this.b.executeMove(origin, target, promotion);
                 this.nextTurn();
-                //this.updatePreviousMove();
                 return true;
             } else {
                 return false;
@@ -62,6 +68,10 @@ public class Chess {
 
     public boolean play(int originX, int originY, int targetX, int targetY){
         return this.play(originX, originY, targetX, targetY, 'Q');
+    }
+
+    public Board getBoard(){
+        return this.b;
     }
 
     public Color getTurn(){
@@ -157,7 +167,7 @@ public class Chess {
     }
 
     private static boolean isInDanger(Board b, Color turn, Coord target){
-        for (IPiece p : b.getPieces(turn)){
+        for (IPiece p : b.getPieces(turn.other())){
             if (isValidMovePiece(b, p.getCoord(), target)) return true;
         }
         return false;

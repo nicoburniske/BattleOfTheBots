@@ -262,7 +262,7 @@ public class ChessBoard {
         } else if ( this.isValidEnPassant(origin, target)){
             this.removePiece(this.board[target.getX()][origin.getY()]);
             this.board[target.getX()][origin.getY()] = null;
-            this.moves.get(this.moves.size()-1).setEnPassant();
+            //this.moves.get(this.moves.size()-1).setEnPassant();
         }
         movedPiece.makeMove(target);
         this.removePiece(this.board[target.getX()][target.getY()]);
@@ -453,16 +453,16 @@ public class ChessBoard {
      * Updates the Move List with the most recent move
      */
     private void updateMoveList(Coord origin, Coord target, char promotion) {
-        Move temp = new Move(this.getBoard(), this.moves, origin, target);
-        temp.setPromotionPiece(promotion);
-        this.moves.add(temp);
+        //Move temp = new Move(this.getBoard(), this.moves, origin, target);
+        //temp.setPromotionPiece(promotion);
+        //this.moves.add(temp);
     }
 
     private void updatePreviousMove(){
         if (isInCheck()){
-            this.moves.get(this.moves.size()-1).setIsCheck();
+            //this.moves.get(this.moves.size()-1).setIsCheck();
             if (isCheckmate()){
-                this.moves.get(this.moves.size()-1).setIsCheckmate();
+                //this.moves.get(this.moves.size()-1).setIsCheckmate();
             }
         }
     }
