@@ -1,12 +1,11 @@
 import com.burnyarosh.board.Chess;
-import com.burnyarosh.board.ChessBoard;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 public class TestMove {
-    Chess board1;
+    private Chess board1;
 
     @Before
     public void init() {
@@ -112,7 +111,6 @@ public class TestMove {
     }
 
     private static String moveAndExecute(Chess c, int originX, int originY, int targetX, int targetY){
-        //String an = new Move(b.getBoard(), new Coord(originX,originY), new Coord(targetX,targetY)).toString();
         c.play(originX, originY, targetX, targetY);
         return c.getBoard().getMoveHistory().get(c.getBoard().getMoveHistory().size()-1).toString();
     }

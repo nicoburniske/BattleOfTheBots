@@ -14,8 +14,6 @@ public final class Move {
     private final Coord target;
     private final String an;
     private final Type t;
-
-    //	flags
     private final boolean isCapture;
     private final boolean isCheck;
     private final boolean isMate;
