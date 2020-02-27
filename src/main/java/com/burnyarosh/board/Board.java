@@ -2,7 +2,7 @@ package com.burnyarosh.board;
 
 import com.burnyarosh.board.common.Coord;
 import com.burnyarosh.board.common.Move;
-import com.burnyarosh.board.common.NewMove;
+
 import com.burnyarosh.board.piece.*;
 
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ public class Board {
     private IPiece[][] board;
     private List<IPiece> whitePieces;
     private List<IPiece> blackPieces;
-    private List<NewMove> history;
+    private List<Move> history;
 
     public Board(){
         this.whitePieces = new ArrayList<>();
@@ -21,15 +21,13 @@ public class Board {
         this.board =  this.generateNewBoard();
     }
 
-    private Board(IPiece[][] board, List<IPiece> whitePieces, List<IPiece> blackPieces, List<NewMove> history){
+    private Board(IPiece[][] board, List<IPiece> whitePieces, List<IPiece> blackPieces, List<Move> history){
         this.board = board;
         this.whitePieces = whitePieces;
         this.blackPieces = blackPieces;
         this.history = history;
     }
 
-    //  TODO: REVIEW VERY IMPORTANT
-    /*
     public IPiece[][] getBoardArrayCopy(){
         IPiece[][] newBoard = new IPiece[8][8];
         for (IPiece p : this.whitePieces) {
@@ -40,12 +38,10 @@ public class Board {
         }
         return newBoard;
     }
-    */
 
     public IPiece[][] getBoardArray(){
         return this.board;
     }
-
 
     public List<IPiece> getPieces(Chess.Color c){
         List<IPiece> temp = new ArrayList<>();
@@ -61,20 +57,17 @@ public class Board {
         return temp;
     }
 
-    public List<NewMove> getMoveHistory(){
+    public List<Move> getMoveHistory(){
         return this.history;
     }
 
     public IPiece getPieceAtCoord(Coord c){
+        if (this.board[c.getX()][c.getY()] == null) return null;
         return this.board[c.getX()][c.getY()].copy();
     }
 
-    // in Game aka ChessBoard, have validate or classifyMove()
-    // check for CASTLE
-    // check for enPassant
-
     public void executeMove(Coord origin, Coord target, char promotion){
-        NewMove temp = new NewMove(this.copy(), origin, target, promotion);
+        Move temp = new Move(this.copy(), origin, target, promotion);
 
         IPiece p = this.board[origin.getX()][origin.getY()];
         boolean isPromotion = false;
@@ -117,7 +110,7 @@ public class Board {
     public static Board tryMove(Board b, Coord origin, Coord target){
         Board temp = b.copy();
         IPiece p = temp.getPieceAtCoord(origin);
-        switch (NewMove.classifyMove(temp, origin, target)){
+        switch (Move.classifyMove(temp, origin, target)){
             case CASTLE:
                 int direction = target.getX() - origin.getX();
                 IPiece castle = temp.getBoardArray()[direction > 0 ? 7 : 0][target.getY()];
@@ -179,7 +172,7 @@ public class Board {
     }
 
     public Board copy(){
-        return new Board(this.board, this.whitePieces, this.blackPieces, this.history);
+        return new Board(this.getBoardArrayCopy(), this.getPieces(Chess.Color.WHITE), this.getPieces(Chess.Color.BLACK), this.history);
     }
 
     private IPiece[][] generateNewBoard() {

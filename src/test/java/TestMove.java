@@ -1,3 +1,4 @@
+import com.burnyarosh.board.Chess;
 import com.burnyarosh.board.ChessBoard;
 import org.junit.Before;
 import org.junit.Test;
@@ -5,11 +6,11 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class TestMove {
-    ChessBoard board1;
+    Chess board1;
 
     @Before
     public void init() {
-        board1 = new ChessBoard();
+        board1 = new Chess();
     }
 
     @Test
@@ -110,9 +111,9 @@ public class TestMove {
         assertEquals("Q8xb5#",moveAndExecute(board1,4,7,1,4));
     }
 
-    private static String moveAndExecute(ChessBoard b, int originX, int originY, int targetX, int targetY){
+    private static String moveAndExecute(Chess c, int originX, int originY, int targetX, int targetY){
         //String an = new Move(b.getBoard(), new Coord(originX,originY), new Coord(targetX,targetY)).toString();
-        b.playGame(originX, originY, targetX, targetY);
-        return b.getHistory().get(b.getHistory().size()-1).toString();
+        c.play(originX, originY, targetX, targetY);
+        return c.getBoard().getMoveHistory().get(c.getBoard().getMoveHistory().size()-1).toString();
     }
 }
