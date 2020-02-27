@@ -26,15 +26,14 @@ public class Board {
 
     /**
      *
-     * @param board
      * @param whitePieces
      * @param blackPieces
      * @param history
      */
-    private Board(IPiece[][] board, List<IPiece> whitePieces, List<IPiece> blackPieces, List<Move> history){
-        this.board = board;
+    private Board(List<IPiece> whitePieces, List<IPiece> blackPieces, List<Move> history){
         this.whitePieces = whitePieces;
         this.blackPieces = blackPieces;
+        this.board = initializeBoardArray();
         this.history = history;
     }
 
@@ -136,16 +135,6 @@ public class Board {
         temp.removePiece(temp.getBoardArray()[target.getX()][target.getY()]);
         temp.getBoardArray()[target.getX()][target.getY()] = p;
         temp.getBoardArray()[origin.getX()][origin.getY()] = null;
-        temp.blackPieces = new ArrayList<>();
-        temp.whitePieces = new ArrayList<>();
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                IPiece curr = temp.getBoardArray()[i][j];
-                if(curr != null) {
-                    (curr.getIsBlack() ? temp.blackPieces : temp.whitePieces).add(curr);
-                }
-            }
-        }
         return temp;
     }
 
@@ -199,7 +188,7 @@ public class Board {
      * @return
      */
     public Board copy(){
-        return new Board(this.getBoardArrayCopy(), this.getPiecesCopy(Chess.Color.WHITE), this.getPiecesCopy(Chess.Color.BLACK), this.history);
+        return new Board(this.getPiecesCopy(Chess.Color.WHITE), this.getPiecesCopy(Chess.Color.BLACK), this.history);
     }
 
     /**
@@ -273,4 +262,16 @@ public class Board {
             (p.getIsBlack() ? this.blackPieces : this.whitePieces).remove(p);
         }
     }
+
+    private IPiece[][] initializeBoardArray(){
+        IPiece[][] newBoard = new IPiece[8][8];
+        for (IPiece w : this.whitePieces){
+            newBoard[w.getCoord().getX()][w.getCoord().getY()] = w;
+        }
+        for (IPiece b : this.blackPieces){
+            newBoard[b.getCoord().getX()][b.getCoord().getY()] = b;
+        }
+        return newBoard;
+    }
+
 }
