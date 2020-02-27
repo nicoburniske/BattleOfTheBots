@@ -5,12 +5,18 @@ import com.burnyarosh.board.piece.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *
+ */
 public class Board {
     private IPiece[][] board;
     private List<IPiece> whitePieces;
     private List<IPiece> blackPieces;
     private List<Move> history;
 
+    /**
+     *
+     */
     public Board(){
         this.whitePieces = new ArrayList<>();
         this.blackPieces = new ArrayList<>();
@@ -18,6 +24,13 @@ public class Board {
         this.board =  this.generateNewBoard();
     }
 
+    /**
+     *
+     * @param board
+     * @param whitePieces
+     * @param blackPieces
+     * @param history
+     */
     private Board(IPiece[][] board, List<IPiece> whitePieces, List<IPiece> blackPieces, List<Move> history){
         this.board = board;
         this.whitePieces = whitePieces;
@@ -25,18 +38,37 @@ public class Board {
         this.history = history;
     }
 
+    /**
+     *
+     * @param c
+     * @return
+     */
     public List<IPiece> getPieces(Chess.Color c){
         return (c == Chess.Color.WHITE ? this.whitePieces : this.blackPieces);
     }
 
+    /**
+     *
+     * @return
+     */
     public IPiece[][] getBoardArray(){
         return this.board;
     }
 
+    /**
+     *
+     * @return
+     */
     public List<Move> getMoveHistory(){
         return this.history;
     }
 
+    /**
+     *
+     * @param origin
+     * @param target
+     * @param promotion
+     */
     public void executeMove(Coord origin, Coord target, char promotion){
         Move temp = new Move(this.copy(), origin, target, promotion);
         IPiece p = this.board[origin.getX()][origin.getY()];
@@ -77,6 +109,13 @@ public class Board {
         this.history.add(temp);
     }
 
+    /**
+     *
+     * @param b
+     * @param origin
+     * @param target
+     * @return
+     */
     public static Board tryMove(Board b, Coord origin, Coord target){
         Board temp = b.copy();
         IPiece p = temp.getBoardArray()[origin.getX()][origin.getY()];
@@ -110,6 +149,10 @@ public class Board {
         return temp;
     }
 
+    /**
+     *
+     * @return
+     */
     public String toString(){
         StringBuilder sb = new StringBuilder();
         {   //  HEADER
@@ -151,10 +194,19 @@ public class Board {
         return sb.toString();
     }
 
+    /**
+     *
+     * @return
+     */
     public Board copy(){
         return new Board(this.getBoardArrayCopy(), this.getPiecesCopy(Chess.Color.WHITE), this.getPiecesCopy(Chess.Color.BLACK), this.history);
     }
 
+    /**
+     *
+     * @param c
+     * @return
+     */
     public List<IPiece> getPiecesCopy(Chess.Color c){
         List<IPiece> temp = new ArrayList<>();
         if (c == Chess.Color.BLACK){
@@ -169,6 +221,10 @@ public class Board {
         return temp;
     }
 
+    /**
+     *
+     * @return
+     */
     public IPiece[][] getBoardArrayCopy(){
         IPiece[][] newBoard = new IPiece[8][8];
         for (IPiece p : this.whitePieces) {
@@ -180,6 +236,10 @@ public class Board {
         return newBoard;
     }
 
+    /**
+     *
+     * @return
+     */
     private IPiece[][] generateNewBoard() {
         return new IPiece[][] {
                 {this.addPiece(new Rook(0, 0, false)), this.addPiece(new Pawn(0, 1, false)), null, null, null, null, this.addPiece(new Pawn(0, 6, true)), this.addPiece(new Rook(0, 7, true))},
@@ -193,12 +253,21 @@ public class Board {
         };
     }
 
+    /**
+     *
+     * @param p
+     * @return
+     */
     private IPiece addPiece(IPiece p) {
         if (p == null) throw new IllegalArgumentException("Piece cannot be null");
         (p.getIsBlack() ? this.blackPieces : this.whitePieces).add(p);
         return p;
     }
 
+    /**
+     *
+     * @param p
+     */
     private void removePiece(IPiece p) {
         if (p != null) {
             (p.getIsBlack() ? this.blackPieces : this.whitePieces).remove(p);
