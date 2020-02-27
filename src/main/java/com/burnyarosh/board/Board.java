@@ -11,7 +11,7 @@ import java.util.List;
 /**
  *  Object representing a chessboard
  * @author - Peter Yarosh
- * @version - v0.2
+ * @version - incomplete
  */
 public class Board {
     private IPiece[][] board;
