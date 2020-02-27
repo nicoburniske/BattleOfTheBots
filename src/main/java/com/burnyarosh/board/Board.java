@@ -10,6 +10,8 @@ import java.util.List;
 
 /**
  *  Object representing a chessboard
+ * @author - Peter Yarosh
+ * @version - v0.2
  */
 public class Board {
     private IPiece[][] board;
@@ -66,10 +68,10 @@ public class Board {
     }
 
     /**
-     *
-     * @param origin
-     * @param target
-     * @param promotion
+     * Fully executes a move from the given origin coordinate to the given target coordinate
+     * @param origin - move origin Coord object
+     * @param target - move target Coord object
+     * @param promotion - char of IPiece to be promoted to
      */
     public void executeMove(Coord origin, Coord target, char promotion){
         Move tmp_move = new Move(this.copy(), origin, target, promotion);
