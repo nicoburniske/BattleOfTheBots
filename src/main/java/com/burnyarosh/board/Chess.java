@@ -6,7 +6,10 @@ import io.vertx.core.json.JsonObject;
 import java.util.*;
 
 /**
- *
+ *  Object representing a Chess game
+ * @author - Peter Yarosh
+ * @author - Nick Burniske
+ * @version - incomplete
  */
 public class Chess {
     private Board board;
