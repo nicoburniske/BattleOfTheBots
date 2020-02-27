@@ -2,6 +2,9 @@ package com.burnyarosh.board;
 import com.burnyarosh.board.common.Coord;
 import com.burnyarosh.board.common.Move;
 import com.burnyarosh.board.piece.*;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -181,6 +184,25 @@ public class Board {
             sb.append("════╝");
         }
         return sb.toString();
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public JsonObject toJson() {
+        JsonObject ret = new JsonObject();
+        JsonArray JA_whitePieces = new JsonArray();
+        for (IPiece w : this.whitePieces) {
+            JA_whitePieces.add(w.toJson());
+        }
+        JsonArray JA_blackPieces = new JsonArray();
+        for (IPiece b : this.blackPieces) {
+            JA_blackPieces.add(b.toJson());
+        }
+        ret.put("white", JA_whitePieces);
+        ret.put("black", JA_blackPieces);
+        return ret;
     }
 
     /**
