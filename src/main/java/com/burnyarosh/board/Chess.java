@@ -1,14 +1,12 @@
 package com.burnyarosh.board;
 
 import com.burnyarosh.board.common.Coord;
-import com.burnyarosh.board.common.Move;
 import com.burnyarosh.board.piece.*;
 import io.vertx.core.json.JsonObject;
-
 import java.util.*;
 
 public class Chess {
-    private Board b;
+    private Board board;
     private Color turn;
     private Map<Class, Double> defaultValues;
 
@@ -24,7 +22,7 @@ public class Chess {
     }
 
     public Chess(){
-        this.b = new Board();
+        this.board = new Board();
         this.turn = Color.WHITE;
         this.defaultValues = new HashMap<>() {{
             put(King.class, 1000.0);
@@ -37,7 +35,7 @@ public class Chess {
     }
 
     public Chess(Board b, Color turn){
-        this.b = b.copy();
+        this.board = b.copy();
         this.turn = turn;
         this.defaultValues = new HashMap<>() {{
             put(King.class, 1000.0);
@@ -56,8 +54,8 @@ public class Chess {
         } else {
             Coord origin = new Coord(originX, originY);
             Coord target = new Coord(targetX, targetY);
-            if (isValidMove(this.b, this.turn, origin, target)){
-                this.b.executeMove(origin, target, promotion);
+            if (isValidMove(this.board, this.turn, origin, target)){
+                this.board.executeMove(origin, target, promotion);
                 this.nextTurn();
                 return true;
             } else {
@@ -71,7 +69,7 @@ public class Chess {
     }
 
     public Board getBoard(){
-        return this.b;
+        return this.board;
     }
 
     public Color getTurn(){
@@ -85,10 +83,10 @@ public class Chess {
     public double getScore(Map<Class, Double> values){
         if (!this.isValidPieceValueMap(values)) throw new IllegalArgumentException("Invalid values map");
         double score = 0;
-        for (IPiece b : this.b.getPieces(Color.BLACK)) {
+        for (IPiece b : this.board.getPieces(Color.BLACK)) {
             score -= values.get(b.getClass());
         }
-        for (IPiece w : this.b.getPieces(Color.WHITE)) {
+        for (IPiece w : this.board.getPieces(Color.WHITE)) {
             score += values.get(w.getClass());
         }
         // limits return to only contain one decimal point.
@@ -114,7 +112,7 @@ public class Chess {
     }
 
     private boolean isGameOver(){
-        return isMate(this.b, this.turn);
+        return isMate(this.board, this.turn);
     }
 
     public static boolean isMate(Board b, Color turn){
@@ -131,19 +129,12 @@ public class Chess {
         return false;
     }
 
-    /*
-    private static boolean tryMove(Board b, Color turn, Coord origin, Coord target){
-        Board temp = b.copy();
-        temp.executeMove(origin, target, 'Q');  //  TODO: SHOULD I ADD METHOD PARAM FOR PROMOTION KEY
-        return !isInCheck(temp, turn);
-    }
-    */
     //  TODO: PENDING REVIEW - (HAS CURRENT LOGIC, COULD BE IMPROVED)
     private static boolean isValidEnPassant(Board b, Coord origin, Coord target){
-        if (b.getPieceAtCoord(origin) instanceof Pawn && Math.abs(origin.getY() - target.getY()) == 1 && Math.abs(origin.getX() - target.getX()) == 1 && b.getPieceAtCoord(target) == null){
-            if (origin.getY() == (b.getPieceAtCoord(origin).getIsBlack() ? 3 : 4)){
+        if (b.getBoardArray()[origin.getX()][origin.getY()] instanceof Pawn && Math.abs(origin.getY() - target.getY()) == 1 && Math.abs(origin.getX() - target.getX()) == 1 && b.getBoardArray()[target.getX()][target.getY()] == null){
+            if (origin.getY() == (b.getBoardArray()[origin.getX()][origin.getY()].getIsBlack() ? 3 : 4)){
                 if (b.getMoveHistory().size() > 3){        //  TODO: VERRIFY THIS
-                    return (b.getMoveHistory().get(b.getMoveHistory().size() - 2).getPiece() instanceof Pawn) && (b.getPieceAtCoord(new Coord(target.getX(), origin.getY())).getMoveCount() == 1);
+                    return (b.getMoveHistory().get(b.getMoveHistory().size() - 2).getPiece() instanceof Pawn) && (b.getBoardArray()[target.getX()][origin.getY()].getMoveCount() == 1);
                 }
             }
         }
@@ -174,7 +165,7 @@ public class Chess {
     }
 
     private static boolean isValidMovePiece(Board b, Coord origin, Coord target){
-        return b.getPieceAtCoord(origin).isValidMove(b.getBoardArray(), origin, target);
+        return b.getBoardArray()[origin.getX()][origin.getY()].isValidMove(b.getBoardArray(), origin, target);
     }
 
     public static boolean isValidMoveBoolean(Board b, Color turn, Coord origin, Coord target){
@@ -185,7 +176,6 @@ public class Chess {
         }
     }
 
-
     //TODO: if isInCheck and the resulting move does not remove the player from being in check, then it is an invalid move
     // use constructor that takes in a 2d board to make a new chessBoard (feed it this.getBoard(), and this.isWhiteTurn()) to have a copy of the board.
     // perform the move on this board and if the king is still in check (for the player that moved, than the move is invalid.
@@ -193,8 +183,8 @@ public class Chess {
         if (!origin.isInsideBoard() || !target.isInsideBoard()) {
             throw new IllegalArgumentException("Coordinate outside of board");
         } else {
-            IPiece from = b.getPieceAtCoord(origin);
-            IPiece to = b.getPieceAtCoord(target);
+            IPiece from = b.getBoardArray()[origin.getX()][origin.getY()];
+            IPiece to = b.getBoardArray()[target.getX()][target.getY()];
             if (from == null) {
                 throw new IllegalArgumentException("Must move a piece");
             } else if (origin.equals(target)) {

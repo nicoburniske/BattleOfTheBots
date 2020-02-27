@@ -20,6 +20,7 @@ public class TestPieces {
     @Before
     public void init() {
         board1 = new ChessBoard();
+        System.out.println("TESTS ARE ALL BROKEN NEED TO BE UPDATED TO NEW STRUCTURE");
     }
 
     //  GENERAL PAWN MOVES

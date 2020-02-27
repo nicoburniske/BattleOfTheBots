@@ -1,10 +1,7 @@
 package com.burnyarosh.board;
-
 import com.burnyarosh.board.common.Coord;
 import com.burnyarosh.board.common.Move;
-
 import com.burnyarosh.board.piece.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,47 +25,20 @@ public class Board {
         this.history = history;
     }
 
-    public IPiece[][] getBoardArrayCopy(){
-        IPiece[][] newBoard = new IPiece[8][8];
-        for (IPiece p : this.whitePieces) {
-            newBoard[p.getCoord().getX()][p.getCoord().getY()] = p.copy();
-        }
-        for (IPiece p : this.blackPieces) {
-            newBoard[p.getCoord().getX()][p.getCoord().getY()] = p.copy();
-        }
-        return newBoard;
+    public List<IPiece> getPieces(Chess.Color c){
+        return (c == Chess.Color.WHITE ? this.whitePieces : this.blackPieces);
     }
 
     public IPiece[][] getBoardArray(){
         return this.board;
     }
 
-    public List<IPiece> getPieces(Chess.Color c){
-        List<IPiece> temp = new ArrayList<>();
-        if (c == Chess.Color.BLACK){
-            for (IPiece p : this.blackPieces){
-                temp.add(p.copy());
-            }
-        } else if (c == Chess.Color.WHITE){
-            for (IPiece p : this.whitePieces){
-                temp.add(p.copy());
-            }
-        }
-        return temp;
-    }
-
     public List<Move> getMoveHistory(){
         return this.history;
     }
 
-    public IPiece getPieceAtCoord(Coord c){
-        if (this.board[c.getX()][c.getY()] == null) return null;
-        return this.board[c.getX()][c.getY()].copy();
-    }
-
     public void executeMove(Coord origin, Coord target, char promotion){
         Move temp = new Move(this.copy(), origin, target, promotion);
-
         IPiece p = this.board[origin.getX()][origin.getY()];
         boolean isPromotion = false;
         switch (temp.getType()){
@@ -109,7 +79,7 @@ public class Board {
 
     public static Board tryMove(Board b, Coord origin, Coord target){
         Board temp = b.copy();
-        IPiece p = temp.getPieceAtCoord(origin);
+        IPiece p = temp.getBoardArray()[origin.getX()][origin.getY()];
         switch (Move.classifyMove(temp, origin, target)){
             case CASTLE:
                 int direction = target.getX() - origin.getX();
@@ -127,6 +97,16 @@ public class Board {
         temp.removePiece(temp.getBoardArray()[target.getX()][target.getY()]);
         temp.getBoardArray()[target.getX()][target.getY()] = p;
         temp.getBoardArray()[origin.getX()][origin.getY()] = null;
+        temp.blackPieces = new ArrayList<>();
+        temp.whitePieces = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                IPiece curr = temp.getBoardArray()[i][j];
+                if(curr != null) {
+                    (curr.getIsBlack() ? temp.blackPieces : temp.whitePieces).add(curr);
+                }
+            }
+        }
         return temp;
     }
 
@@ -172,7 +152,32 @@ public class Board {
     }
 
     public Board copy(){
-        return new Board(this.getBoardArrayCopy(), this.getPieces(Chess.Color.WHITE), this.getPieces(Chess.Color.BLACK), this.history);
+        return new Board(this.getBoardArrayCopy(), this.getPiecesCopy(Chess.Color.WHITE), this.getPiecesCopy(Chess.Color.BLACK), this.history);
+    }
+
+    public List<IPiece> getPiecesCopy(Chess.Color c){
+        List<IPiece> temp = new ArrayList<>();
+        if (c == Chess.Color.BLACK){
+            for (IPiece p : this.blackPieces){
+                temp.add(p.copy());
+            }
+        } else if (c == Chess.Color.WHITE){
+            for (IPiece p : this.whitePieces){
+                temp.add(p.copy());
+            }
+        }
+        return temp;
+    }
+
+    public IPiece[][] getBoardArrayCopy(){
+        IPiece[][] newBoard = new IPiece[8][8];
+        for (IPiece p : this.whitePieces) {
+            newBoard[p.getCoord().getX()][p.getCoord().getY()] = p.copy();
+        }
+        for (IPiece p : this.blackPieces) {
+            newBoard[p.getCoord().getX()][p.getCoord().getY()] = p.copy();
+        }
+        return newBoard;
     }
 
     private IPiece[][] generateNewBoard() {
