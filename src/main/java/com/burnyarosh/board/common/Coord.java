@@ -80,10 +80,10 @@ public class Coord {
         return this.x == coord.getX() && this.y == coord.getY();
     }
     private String getRank(){
-        return ""+(this.y + 1);
+        return String.valueOf(this.y + 1);
     }
 
     private String getFile() {
-        return ""+(char) (97 + this.x);
+        return String.valueOf((char) (97 + this.x));
     }
 }
