@@ -6,7 +6,7 @@ import io.vertx.core.json.JsonObject;
 import java.util.*;
 
 /**
- * 
+ *
  */
 public class Chess {
     private Board board;
