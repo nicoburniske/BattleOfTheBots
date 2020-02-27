@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ *  Object representing a chessboard
  */
 public class Board {
     private IPiece[][] board;
@@ -18,7 +18,7 @@ public class Board {
     private List<Move> history;
 
     /**
-     *
+     *  Default Board constructor
      */
     public Board(){
         this.whitePieces = new ArrayList<>();
@@ -28,16 +28,16 @@ public class Board {
     }
 
     /**
-     *
-     * @param whitePieces
-     * @param blackPieces
-     * @param history
+     *  Private Board constructor (for Board.copy() only)
+     * @param white_pieces - List of White IPieces
+     * @param black_pieces - List of Black IPieces
+     * @param move_history - List of Move (Previous Move history)
      */
-    private Board(List<IPiece> whitePieces, List<IPiece> blackPieces, List<Move> history){
-        this.whitePieces = whitePieces;
-        this.blackPieces = blackPieces;
+    private Board(List<IPiece> white_pieces, List<IPiece> black_pieces, List<Move> move_history){
+        this.whitePieces = white_pieces;
+        this.blackPieces = black_pieces;
         this.board = initializeBoardArray();
-        this.history = history;
+        this.history = move_history;
     }
 
     /**
@@ -50,8 +50,8 @@ public class Board {
     }
 
     /**
-     *
-     * @return
+     *  Gets the two-dimensional IPiece board array
+     * @return - (IPiece[][]) 2D IPiece array
      */
     public IPiece[][] getBoardArray(){
         return this.board;
@@ -72,10 +72,10 @@ public class Board {
      * @param promotion
      */
     public void executeMove(Coord origin, Coord target, char promotion){
-        Move temp = new Move(this.copy(), origin, target, promotion);
+        Move tmp_move = new Move(this.copy(), origin, target, promotion);
         IPiece p = this.board[origin.getX()][origin.getY()];
         boolean isPromotion = false;
-        switch (temp.getType()){
+        switch (tmp_move.getType()){
             case CASTLE:
                 int direction = target.getX() - origin.getX();
                 IPiece castle = this.board[direction > 0 ? 7 : 0][target.getY()];
@@ -96,19 +96,12 @@ public class Board {
         this.board[target.getX()][target.getY()] = p;
         this.board[origin.getX()][origin.getY()] = null;
         if (isPromotion){
-            if (promotion == 'Q'){
-                IPiece tmp = this.board[target.getX()][target.getY()].promote(false);
-                this.removePiece(this.board[target.getX()][target.getY()]);
-                this.addPiece(tmp);
-                this.board[target.getX()][target.getY()] = tmp;
-            } else if (promotion == 'N'){
-                IPiece tmp = this.board[target.getX()][target.getY()].promote(true);
-                this.removePiece(this.board[target.getX()][target.getY()]);
-                this.addPiece(tmp);
-                this.board[target.getX()][target.getY()] = tmp;
-            }
+            IPiece tmp_piece = this.board[target.getX()][target.getY()].promote(!(promotion == 'Q'));
+            this.removePiece(this.board[target.getX()][target.getY()]);
+            this.addPiece(tmp_piece);
+            this.board[target.getX()][target.getY()] = tmp_piece;
         }
-        this.history.add(temp);
+        this.history.add(tmp_move);
     }
 
     /**
@@ -142,8 +135,8 @@ public class Board {
     }
 
     /**
-     *
-     * @return
+     * Provides a String representation of the game-state
+     * @return - String of Chessboard
      */
     public String toString(){
         StringBuilder sb = new StringBuilder();
@@ -187,7 +180,7 @@ public class Board {
     }
 
     /**
-     * 
+     *
      * @return
      */
     public JsonObject toJson() {
@@ -214,7 +207,7 @@ public class Board {
     }
 
     /**
-     *
+     *  //  TODO: REMOVE THIS OR MAKE PRIVATE
      * @param c
      * @return
      */
@@ -233,23 +226,8 @@ public class Board {
     }
 
     /**
-     *
-     * @return
-     */
-    public IPiece[][] getBoardArrayCopy(){
-        IPiece[][] newBoard = new IPiece[8][8];
-        for (IPiece p : this.whitePieces) {
-            newBoard[p.getCoord().getX()][p.getCoord().getY()] = p.copy();
-        }
-        for (IPiece p : this.blackPieces) {
-            newBoard[p.getCoord().getX()][p.getCoord().getY()] = p.copy();
-        }
-        return newBoard;
-    }
-
-    /**
-     *
-     * @return
+     *  Generates a new default IPiece[][] board with all pieces in their starting positions
+     * @return - default IPiece[][] board
      */
     private IPiece[][] generateNewBoard() {
         return new IPiece[][] {
@@ -265,9 +243,9 @@ public class Board {
     }
 
     /**
-     *
-     * @param p
-     * @return
+     * Adds an IPiece to appropriate piece list (depends on the color/team of the IPiece parameter).
+     * @param p - IPiece to be added
+     * @return - added IPiece
      */
     private IPiece addPiece(IPiece p) {
         if (p == null) throw new IllegalArgumentException("Piece cannot be null");
@@ -276,8 +254,9 @@ public class Board {
     }
 
     /**
-     *
-     * @param p
+     *  Removes the given piece from the appropriate list of pieces (depends on the color/team of the IPiece parameter).
+     *  If p is null, nothing will happen.
+     * @param p - IPiece to be removed from appropriate piece list.
      */
     private void removePiece(IPiece p) {
         if (p != null) {
@@ -285,6 +264,10 @@ public class Board {
         }
     }
 
+    /**
+     *
+     * @return
+     */
     private IPiece[][] initializeBoardArray(){
         IPiece[][] newBoard = new IPiece[8][8];
         for (IPiece w : this.whitePieces){
