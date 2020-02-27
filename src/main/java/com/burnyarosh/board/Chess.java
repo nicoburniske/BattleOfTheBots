@@ -5,6 +5,9 @@ import com.burnyarosh.board.piece.*;
 import io.vertx.core.json.JsonObject;
 import java.util.*;
 
+/**
+ * 
+ */
 public class Chess {
     private Board board;
     private Color turn;
@@ -21,6 +24,9 @@ public class Chess {
         }
     }
 
+    /**
+     *
+     */
     public Chess(){
         this.board = new Board();
         this.turn = Color.WHITE;
@@ -34,6 +40,11 @@ public class Chess {
         }};
     }
 
+    /**
+     *
+     * @param b
+     * @param turn
+     */
     public Chess(Board b, Color turn){
         this.board = b.copy();
         this.turn = turn;
@@ -47,7 +58,15 @@ public class Chess {
         }};
     }
 
-    //  TODO: UNFINISHED
+    /**
+     * TODO: UNFINISHED
+     * @param originX
+     * @param originY
+     * @param targetX
+     * @param targetY
+     * @param promotion
+     * @return
+     */
     public boolean play(int originX, int originY, int targetX, int targetY, char promotion){
         if (this.isGameOver()){
             return false;
@@ -64,22 +83,47 @@ public class Chess {
         }
     }
 
+    /**
+     *
+     * @param originX
+     * @param originY
+     * @param targetX
+     * @param targetY
+     * @return
+     */
     public boolean play(int originX, int originY, int targetX, int targetY){
         return this.play(originX, originY, targetX, targetY, 'Q');
     }
 
+    /**
+     *
+     * @return
+     */
     public Board getBoard(){
         return this.board;
     }
 
+    /**
+     *
+     * @return
+     */
     public Color getTurn(){
         return this.turn;
     }
 
+    /**
+     *
+     * @return
+     */
     public double getScore(){
         return this.getScore(this.defaultValues);
     }
 
+    /**
+     *
+     * @param values
+     * @return
+     */
     public double getScore(Map<Class, Double> values){
         if (!this.isValidPieceValueMap(values)) throw new IllegalArgumentException("Invalid values map");
         double score = 0;
@@ -93,28 +137,49 @@ public class Chess {
         return (double) Math.round(score * 100) / 100;
     }
 
-    //  TODO: UNFINISHED
+    /**
+     * TODO: UNFINISHED
+     * @return
+     */
     public String toString(){
         //  TODO: FIGURE OUT WHAT TO PUT HERE
         return null;
     }
 
-    //  TODO: UNFINISHED
+    /**
+     * TODO: UNFINISHED
+     * @return
+     */
     public JsonObject toJson(){
         //  TODO: FIGURE OUT THIS
         return null;
     }
 
+    /**
+     *
+     * @param values
+     * @return
+     */
     private boolean isValidPieceValueMap(Map<Class, Double> values){
         if (values == null) return false;
         Set<Class> s = new HashSet<>((Arrays.asList(King.class, Queen.class, Rook.class, Bishop.class, Knight.class, Pawn.class)));
         return values.keySet().containsAll(s);
     }
 
+    /**
+     *
+     * @return
+     */
     private boolean isGameOver(){
         return isMate(this.board, this.turn);
     }
 
+    /**
+     *
+     * @param b
+     * @param turn
+     * @return
+     */
     public static boolean isMate(Board b, Color turn){
         if (isInCheck(b, turn)){
             for (IPiece p : b.getPieces(turn)){
@@ -129,7 +194,13 @@ public class Chess {
         return false;
     }
 
-    //  TODO: PENDING REVIEW - (HAS CURRENT LOGIC, COULD BE IMPROVED)
+    /**
+     * TODO: PENDING REVIEW - (HAS CURRENT LOGIC, COULD BE IMPROVED)
+     * @param b
+     * @param origin
+     * @param target
+     * @return
+     */
     private static boolean isValidEnPassant(Board b, Coord origin, Coord target){
         if (b.getBoardArray()[origin.getX()][origin.getY()] instanceof Pawn && Math.abs(origin.getY() - target.getY()) == 1 && Math.abs(origin.getX() - target.getX()) == 1 && b.getBoardArray()[target.getX()][target.getY()] == null){
             if (origin.getY() == (b.getBoardArray()[origin.getX()][origin.getY()].getIsBlack() ? 3 : 4)){
@@ -141,6 +212,12 @@ public class Chess {
         return false;
     }
 
+    /**
+     *
+     * @param b
+     * @param turn
+     * @return
+     */
     public static boolean isInCheck(Board b, Color turn){
         for (IPiece p : b.getPieces(turn)){
             if (p.toString().charAt(1) == 'K'){
@@ -150,6 +227,14 @@ public class Chess {
         return true;
     }
 
+    /**
+     *
+     * @param b
+     * @param turn
+     * @param start
+     * @param end
+     * @return
+     */
     public static boolean isInDangerBetween(Board b, Color turn, Coord start, Coord end){
         for ( Coord c : start.calculatePointsBetweenInclusiveEnd((end))) {
             if (isInDanger(b, turn, c)) return true;
@@ -157,6 +242,13 @@ public class Chess {
         return false;
     }
 
+    /**
+     *
+     * @param b
+     * @param turn
+     * @param target
+     * @return
+     */
     private static boolean isInDanger(Board b, Color turn, Coord target){
         for (IPiece p : b.getPieces(turn.other())){
             if (isValidMovePiece(b, p.getCoord(), target)) return true;
@@ -164,10 +256,25 @@ public class Chess {
         return false;
     }
 
+    /**
+     *
+     * @param b
+     * @param origin
+     * @param target
+     * @return
+     */
     private static boolean isValidMovePiece(Board b, Coord origin, Coord target){
         return b.getBoardArray()[origin.getX()][origin.getY()].isValidMove(b.getBoardArray(), origin, target);
     }
 
+    /**
+     *
+     * @param b
+     * @param turn
+     * @param origin
+     * @param target
+     * @return
+     */
     public static boolean isValidMoveBoolean(Board b, Color turn, Coord origin, Coord target){
         try {
             return isValidMove(b, turn, origin, target);
@@ -176,9 +283,14 @@ public class Chess {
         }
     }
 
-    //TODO: if isInCheck and the resulting move does not remove the player from being in check, then it is an invalid move
-    // use constructor that takes in a 2d board to make a new chessBoard (feed it this.getBoard(), and this.isWhiteTurn()) to have a copy of the board.
-    // perform the move on this board and if the king is still in check (for the player that moved, than the move is invalid.
+    /**
+     *
+     * @param b
+     * @param turn
+     * @param origin
+     * @param target
+     * @return
+     */
     private static boolean isValidMove(Board b, Color turn, Coord origin, Coord target){
         if (!origin.isInsideBoard() || !target.isInsideBoard()) {
             throw new IllegalArgumentException("Coordinate outside of board");
@@ -202,6 +314,9 @@ public class Chess {
         }
     }
 
+    /**
+     *
+     */
     private void nextTurn(){
         if (this.turn == Color.WHITE){
             this.turn = Color.BLACK;

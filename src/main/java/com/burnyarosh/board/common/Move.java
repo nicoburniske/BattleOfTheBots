@@ -3,9 +3,11 @@ package com.burnyarosh.board.common;
 import com.burnyarosh.board.Board;
 import com.burnyarosh.board.Chess;
 import com.burnyarosh.board.piece.*;
-
 import java.util.List;
 
+/**
+ *
+ */
 public final class Move {
 
     private final IPiece p;
@@ -18,6 +20,9 @@ public final class Move {
     private final boolean isCheck;
     private final boolean isMate;
 
+    /**
+     *
+     */
     public enum Type{
         STANDARD,
         CASTLE,
@@ -25,6 +30,13 @@ public final class Move {
         PROMOTION
     }
 
+    /**
+     *
+     * @param b
+     * @param origin
+     * @param target
+     * @param promotion
+     */
     public Move(Board b, Coord origin, Coord target, char promotion){
 
         this.p = b.getBoardArray()[origin.getX()][origin.getY()];
@@ -39,18 +51,37 @@ public final class Move {
         this.an = toAlgebraicNotation(b, promotion);
     }
 
+    /**
+     *
+     * @return
+     */
     public Type getType(){
         return this.t;
     }
 
+    /**
+     *
+     * @return
+     */
     public IPiece getPiece(){
         return this.p;
     }
 
+    /**
+     *
+     * @return
+     */
     public String toString(){
         return this.an;
     }
 
+    /**
+     *
+     * @param b
+     * @param origin
+     * @param target
+     * @return
+     */
     public static Type classifyMove(Board b, Coord origin, Coord target){
         if (b.getBoardArray()[origin.getX()][origin.getY()] instanceof King && Math.abs(origin.getX() - target.getX()) == 2 && !Chess.isInDangerBetween(b, (b.getBoardArray()[origin.getX()][origin.getY()].getIsBlack() ? Chess.Color.BLACK : Chess.Color.WHITE), origin, target)) {
             int direction = target.getX() - origin.getX();
@@ -72,6 +103,12 @@ public final class Move {
         return Type.STANDARD;
     }
 
+    /**
+     *
+     * @param b
+     * @param promo
+     * @return
+     */
     private String toAlgebraicNotation(Board b, char promo){
         //  SPECIAL CONDITION: CASTLE
         if (this.t == Type.CASTLE){
