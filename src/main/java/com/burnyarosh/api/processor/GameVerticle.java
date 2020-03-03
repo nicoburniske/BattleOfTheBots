@@ -3,7 +3,7 @@ package com.burnyarosh.api.processor;
 import com.burnyarosh.api.dto.common.CoordDTO;
 import com.burnyarosh.api.dto.in.PlayerTurnDTO;
 import com.burnyarosh.api.dto.internal.PlayerUpdateDTO;
-import com.burnyarosh.board.ChessBoard;
+import com.burnyarosh.board.Chess;
 import com.burnyarosh.api.dto.out.SuccessDTO;
 import com.burnyarosh.api.dto.entity.Player;
 import io.vertx.core.AbstractVerticle;
@@ -23,7 +23,7 @@ public class GameVerticle extends AbstractVerticle {
     private static final String ERROR_PLAYER_NOT_IN_GAME = "Error: Player not in game";
     private String lobbyID;
     private Player[] players;
-    private ChessBoard board;
+    private Chess chess;
     private int whitePlayer; // which player is white. corresponds to array index.
     private MessageConsumer<JsonObject> entryPoint;
     private MessageConsumer<PlayerTurnDTO> playerTurn;
@@ -51,7 +51,7 @@ public class GameVerticle extends AbstractVerticle {
             try {
                 CoordDTO origin = dto.getOrigin();
                 CoordDTO target = dto.getTarget();
-                this.board.playGame(origin.getX(), origin.getY(), target.getX(), target.getY());
+                this.chess.play(origin.getX(), origin.getY(), target.getX(), target.getY());
                 message.reply(new SuccessDTO());
                 this.sendGameUpdate();
             } catch (Exception e) {
@@ -93,7 +93,7 @@ public class GameVerticle extends AbstractVerticle {
     }
 
     private void sendGameUpdate() {
-        JsonObject chessJson = this.board.toJson();
+        JsonObject chessJson = this.chess.toJson();
         for (Player p : players) {
             JsonObject update = new JsonObject();
             update.mergeIn(chessJson);
@@ -113,7 +113,7 @@ public class GameVerticle extends AbstractVerticle {
     }
 
     private void newGame() {
-        this.board = new ChessBoard();
+        this.chess = new Chess();
     }
 
     private void randomColor() {
@@ -145,8 +145,8 @@ public class GameVerticle extends AbstractVerticle {
     }
 
     private boolean isPlayerTurn(int player) {
-        return this.whitePlayer == player && this.board.isWhiteTurn()
-                || this.whitePlayer != player && !this.board.isWhiteTurn();
+        return this.whitePlayer == player && this.chess.getTurn() == Chess.Color.WHITE
+                || this.whitePlayer != player && this.chess.getTurn() == Chess.Color.BLACK;
     }
 
     private String jsonGetStringValue(JsonObject json, String key) {
