@@ -48,7 +48,7 @@ public class GameLobbyVerticle extends AbstractVerticle {
     private Map<String, String> verticleDeploymentByGUID = new HashMap<>();
 
     @Override
-    public void start(Promise<Void> promise) throws Exception {
+    public void start(Promise<Void> promise) {
         MessageConsumer<NewPlayerDTO> newPlayer = vertx.eventBus().consumer(NEW_PLAYER_ADDRESS.getAddressString());
         newPlayer.handler(this::newPlayer);
 
