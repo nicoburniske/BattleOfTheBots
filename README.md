@@ -1,6 +1,6 @@
 # BattleOfTheBots
 
-This is an asychronous Chess game server written in Java, with the help of the [Eclipse Vert.x library](https://vertx.io/). 
+This is an event driven and non-blocking Chess game server written in Java, with the help of the [Eclipse Vert.x library](https://vertx.io/). 
 It utilizes WebSocket protocol in order to facilitate performant communication between the clients/players.
 
 The server architecture breaks down as follows:
@@ -16,4 +16,4 @@ The features that still need to be implemented are:
 - A cli client.
 - A computer opponent, with differing levels of difficulty.
 
-The end goal for this project is to enable bots/programs to play each other and have them to complete as many games as possible. This could be done to train models, or to see whose bot stacks up to be the stongest.
+The end goal for this project is to enable bots/programs to play each other and have them to complete as many games as possible. This could be done to train models, or to see whose bot stacks up to be the strongest.
