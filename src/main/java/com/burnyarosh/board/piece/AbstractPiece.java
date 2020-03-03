@@ -65,7 +65,8 @@ public abstract class AbstractPiece implements IPiece {
 
     public JsonObject toJson() {
         JsonObject ret = new JsonObject();
-        ret.put(this.toString(), this.c.toJson());
+        ret.put("piece", this.toString());
+        ret.put("pos", this.c.toChessString());
         return ret;
     }
 
@@ -136,16 +137,16 @@ public abstract class AbstractPiece implements IPiece {
         List<Coord> moves = new ArrayList<>();
         for (int i = 1; i < 8; i++){
             if (!upBlocked){
-                upBlocked = this.addValidMove(board, new Coord(this.c.getX(), i).addCoords(this.c), moves);
+                upBlocked = this.addValidMove(board, new Coord(0, i).addCoords(this.c), moves);
             }
             if (!rightBlocked){
-                rightBlocked = this.addValidMove(board, new Coord(i, this.c.getY()).addCoords(this.c), moves);
+                rightBlocked = this.addValidMove(board, new Coord(i, 0).addCoords(this.c), moves);
             }
             if (!downBlocked){
-                downBlocked = this.addValidMove(board, new Coord(this.c.getX(), -i).addCoords(this.c), moves);
+                downBlocked = this.addValidMove(board, new Coord(0, -i).addCoords(this.c), moves);
             }
             if (!leftBlocked){
-                leftBlocked = this.addValidMove(board, new Coord(-i, this.c.getY()).addCoords(this.c), moves);
+                leftBlocked = this.addValidMove(board, new Coord(-i, 0).addCoords(this.c), moves);
             }
             if (upBlocked && rightBlocked && downBlocked && leftBlocked){
                 break;
