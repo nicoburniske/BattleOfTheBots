@@ -4,9 +4,10 @@ import com.burnyarosh.api.dto.common.CoordDTO;
 import com.burnyarosh.api.processor.utils.Mapper;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 public class PlayerTurnDTOTest {
     JsonObject playerTurnJson;
@@ -28,8 +29,10 @@ public class PlayerTurnDTOTest {
         turn1.setTarget(targ);
 
         turn2 = Mapper.getJsonAsClass(playerTurnJson, PlayerTurnDTO.class);
-        System.out.println(turn2.toJsonString());
-        System.out.println(turn1.toJsonString());
+        assertEquals(turn1.toJsonString(), turn2.toJsonString());
+        JsonObject json = new JsonObject().put("akey", "avalue");
+        String s = "thisis.%s.anaddress";
+        System.out.println(String.format(s, "woopsit"));
     }
 
 }

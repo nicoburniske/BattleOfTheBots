@@ -6,6 +6,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -42,13 +43,28 @@ public class Board {
         this.history = move_history;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Board board1 = (Board) o;
+
+        return Arrays.deepEquals(board, board1.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(board);
+    }
+
     /**
      *
      * @param c
      * @return
      */
-    public List<IPiece> getPieces(Chess.Color c){
-        return (c == Chess.Color.WHITE ? this.whitePieces : this.blackPieces);
+    public List<IPiece> getPieces(Chess.PlayerColor c){
+        return (c == Chess.PlayerColor.WHITE ? this.whitePieces : this.blackPieces);
     }
 
     /**
@@ -205,7 +221,7 @@ public class Board {
      * @return
      */
     public Board copy(){
-        return new Board(this.getPiecesCopy(Chess.Color.WHITE), this.getPiecesCopy(Chess.Color.BLACK), this.history);
+        return new Board(this.getPiecesCopy(Chess.PlayerColor.WHITE), this.getPiecesCopy(Chess.PlayerColor.BLACK), this.history);
     }
 
     /**
@@ -213,18 +229,10 @@ public class Board {
      * @param c
      * @return
      */
-    public List<IPiece> getPiecesCopy(Chess.Color c){
-        List<IPiece> temp = new ArrayList<>();
-        if (c == Chess.Color.BLACK){
-            for (IPiece p : this.blackPieces){
-                temp.add(p.copy());
-            }
-        } else if (c == Chess.Color.WHITE){
-            for (IPiece p : this.whitePieces){
-                temp.add(p.copy());
-            }
-        }
-        return temp;
+    public List<IPiece> getPiecesCopy(Chess.PlayerColor c){
+        List<IPiece> toReturn = new ArrayList<>();
+        ((c == Chess.PlayerColor.WHITE) ? this.whitePieces : this.blackPieces).forEach( p -> toReturn.add(p.copy()));
+        return toReturn;
     }
 
     /**

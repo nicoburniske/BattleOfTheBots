@@ -1,13 +1,17 @@
 import com.burnyarosh.board.Chess;
-import org.junit.Before;
-import org.junit.Test;
+import com.burnyarosh.board.common.Move;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 
 public class TestChessBoard {
     private Chess board1;
 
-    @Before
+    @BeforeEach
     public void initExamples() {
         board1 = new Chess();
     }
@@ -264,4 +268,42 @@ public class TestChessBoard {
         board1.play(5, 7, 6, 6);
     }
 
+    @Test
+    public void testAllPossibleMoves() {
+        // Test the moves available for white as a starting position.
+        List<Move> moves = board1.getAllPossibleMoves();
+        assertEquals(20, moves.size());
+
+        // Make a move e4
+        board1.play(4, 1, 4, 3);
+        moves = board1.getAllPossibleMoves();
+        // 4 knight moves, and 16 pawn moves
+        assertEquals(20, moves.size());
+
+        // black moves d4
+        board1.play(4, 6, 4, 4);
+        moves = board1.getAllPossibleMoves();
+        // 14 possible pawn moves, 5 knight moves, 5 bishop moves, 4 queen moves, 1 king move.
+        assertEquals(29, moves.size());
+
+        // white moves f5 (king's gambit)
+        board1.play(5, 1, 5, 3);
+        System.out.println(this.board1.getBoard());
+        moves = board1.getAllPossibleMoves();
+        // black has 15 possible pawn moves, 5 knight moves, 5 bishop moves, 4 queen moves, 1 king move.
+        assertEquals(30, moves.size());
+
+        // black accepts king's gambit
+        board1.play(4,4 ,5,3);
+        moves = board1.getAllPossibleMoves();
+        // white has 13 pawn moves, 5 knight moves, 5 bishop moves, 4 queen moves, 2 king moves
+        assertEquals(29, moves.size());
+
+        // BIZARRE MOVE, testing en passe
+        board1.play(6, 1, 6,3);
+        moves = board1.getAllPossibleMoves();
+        System.out.println(moves.size());
+        moves.forEach(move -> System.out.print(move + ", "));
+        System.out.println(this.board1.getBoard());
+    }
 }

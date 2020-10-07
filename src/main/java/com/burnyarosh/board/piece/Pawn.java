@@ -70,12 +70,14 @@ public class Pawn extends AbstractPiece {
             Coord temp = c.addCoords(super.getCoord());
             if (temp.isInsideBoard()){
                 if (super.getIsFirstMove()){
-                    if (this.isFirstMoveValid(super.getCoord(), temp,(super.getIsBlack() ? -1 : 1), board[temp.getX()][temp.getY()])){
+                    if (this.isFirstMoveValid(super.getCoord(), temp,(super.getIsBlack() ? -1 : 1), board[temp.getX()][temp.getY()])
+                            && board[temp.getX()][temp.getY()] == null){
                         moves.add(temp);
                     }
                 } else {
                     if (this.isValidPawnMove(super.getCoord(), temp,(super.getIsBlack() ? -1 : 1), board[temp.getX()][temp.getY()])
-                            || isValidEnPassant(super.getCoord(), temp, board, move_history)){
+                            && board[temp.getX()][temp.getY()] == null || isValidEnPassant(super.getCoord(), temp, board, move_history)){
+                        // TODO: need to account for being able to capture pieces.
                         moves.add(temp);
                     }
                 }
@@ -119,7 +121,13 @@ public class Pawn extends AbstractPiece {
         if ( board[origin.getX()][origin.getY()] instanceof Pawn && Math.abs(origin.getY() - target.getY()) == 1 && Math.abs(origin.getX() - target.getX()) == 1 && board[target.getX()][target.getY()] == null){ // std conditiona
             if ( (origin.getY() == (super.getIsBlack() ? 3 : 4)) ) {    //  Condition #1
                 if (move_history.size() > 3) { //  avoid OutOfBoundsException  (en passant impossible under 4 moves)
-                    return (move_history.get(move_history.size() - 2).getPiece() instanceof Pawn) && (board[target.getX()][origin.getY()].getMoveCount() == 1); //Conditions 2, 3, and 4
+                    Move lastMove = move_history.get(move_history.size() - 1);
+                    IPiece piece = board[target.getX()][origin.getY()];
+                    // TODO: ensure that this is correct. added condition to see if pawn is the pawn that was last moved
+                    return (lastMove.getPiece() instanceof Pawn)
+                            && (piece != null)
+                            && lastMove.getTarget().equals(piece.getCoord())
+                            && (board[target.getX()][origin.getY()].getMoveCount() == 1); //Conditions 2, 3, and 4
                 }
             }
         }

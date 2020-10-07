@@ -11,7 +11,7 @@ import java.util.List;
 public final class Move {
 
     private final IPiece p;
-    private final Chess.Color c;
+    private final Chess.PlayerColor c;
     private final Coord origin;
     private final Coord target;
     private final String an;
@@ -30,6 +30,10 @@ public final class Move {
         PROMOTION
     }
 
+    public Move(Board b, Coord origin, Coord target) {
+       this(b, origin, target, 'Q');
+    }
+
     /**
      *
      * @param b
@@ -38,9 +42,8 @@ public final class Move {
      * @param promotion
      */
     public Move(Board b, Coord origin, Coord target, char promotion){
-
         this.p = b.getBoardArray()[origin.getX()][origin.getY()];
-        this.c =  (this.p.getIsBlack() ? Chess.Color.BLACK : Chess.Color.WHITE);
+        this.c =  (this.p.getIsBlack() ? Chess.PlayerColor.BLACK : Chess.PlayerColor.WHITE);
         this.target = target;
         this.origin = origin;
         this.t = classifyMove(b, origin, target);
@@ -51,6 +54,13 @@ public final class Move {
         this.an = toAlgebraicNotation(b, promotion);
     }
 
+    public Coord getTarget() {
+        return this.target;
+    }
+
+    public Coord getOrigin() {
+        return this.origin;
+    }
     /**
      *
      * @return
@@ -83,11 +93,11 @@ public final class Move {
      * @return
      */
     public static Type classifyMove(Board b, Coord origin, Coord target){
-        if (b.getBoardArray()[origin.getX()][origin.getY()] instanceof King && Math.abs(origin.getX() - target.getX()) == 2 && !Chess.isInDangerBetween(b, (b.getBoardArray()[origin.getX()][origin.getY()].getIsBlack() ? Chess.Color.BLACK : Chess.Color.WHITE), origin, target)) {
+        if (b.getBoardArray()[origin.getX()][origin.getY()] instanceof King && Math.abs(origin.getX() - target.getX()) == 2 && !Chess.isInDangerBetween(b, (b.getBoardArray()[origin.getX()][origin.getY()].getIsBlack() ? Chess.PlayerColor.BLACK : Chess.PlayerColor.WHITE), origin, target)) {
             int direction = target.getX() - origin.getX();
             int fromCastleX = direction > 0 ? 7 : 0;
             int toCastleX = direction > 0 ? 5 : 3;
-            if (Chess.isValidMoveBoolean(b, (b.getBoardArray()[origin.getX()][origin.getY()].getIsBlack() ? Chess.Color.BLACK : Chess.Color.WHITE), new Coord(fromCastleX, target.getY()), new Coord(toCastleX, target.getY()))) {
+            if (Chess.isValidMoveBoolean(b, (b.getBoardArray()[origin.getX()][origin.getY()].getIsBlack() ? Chess.PlayerColor.BLACK : Chess.PlayerColor.WHITE), new Coord(fromCastleX, target.getY()), new Coord(toCastleX, target.getY()))) {
                 return Type.CASTLE;
             }
         } else if (b.getBoardArray()[origin.getX()][origin.getY()] instanceof Pawn && Math.abs(origin.getY() - target.getY()) == 1 && Math.abs(origin.getX() - target.getX()) == 1 && b.getBoardArray()[target.getX()][target.getY()] == null){

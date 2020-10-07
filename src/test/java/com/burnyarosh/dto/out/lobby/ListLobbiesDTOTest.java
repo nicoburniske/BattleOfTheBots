@@ -5,7 +5,7 @@ import com.burnyarosh.api.dto.out.lobby.LobbyDTO;
 import com.burnyarosh.api.dto.entity.Entity;
 import com.burnyarosh.api.dto.entity.Game;
 import com.burnyarosh.api.dto.entity.Player;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 

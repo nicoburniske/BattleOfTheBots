@@ -5,11 +5,13 @@ import com.burnyarosh.api.dto.in.NewPlayerDTO;
 import com.burnyarosh.api.exception.socket.JsonMappingException;
 import com.burnyarosh.api.processor.utils.Mapper;
 import io.vertx.core.json.JsonObject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AbstractRequestDTOTest {
 
@@ -17,7 +19,7 @@ public class AbstractRequestDTOTest {
     NewPlayerDTO validNewPlayerObject;
     JsonObject joinNewLobbyInvalidJson;
 
-    @Before
+    @BeforeEach
     public void init() {
         this.validNewPlayerJson =  new JsonObject();
         this.validNewPlayerJson.put("username", "a_username");
@@ -36,14 +38,14 @@ public class AbstractRequestDTOTest {
         NewPlayerDTO dto = Mapper.getJsonAsClass(validNewPlayerJson, NewPlayerDTO.class);
         assertTrue(dto.equals(validNewPlayerObject));
     }
-    @Test (expected = JsonMappingException.class)
+    @Test
     public void invalidRequest() {
-        NewPlayerDTO dto = Mapper.getJsonAsClass(invalidNewPlayerJson, NewPlayerDTO.class);
+       Assertions.assertThrows(JsonMappingException.class,  () -> Mapper.getJsonAsClass(invalidNewPlayerJson, NewPlayerDTO.class));
     }
     @Test
     public void invalidRequest2() {
         JoinLobbyDTO dto = Mapper.getJsonAsClass(joinNewLobbyInvalidJson, JoinLobbyDTO.class);
         assertTrue(dto.getGameGUID() == null);
         assertFalse(dto.isValidRequest());
-    }
+        }
 }

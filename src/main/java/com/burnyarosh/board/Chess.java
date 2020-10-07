@@ -1,9 +1,11 @@
 package com.burnyarosh.board;
 
 import com.burnyarosh.board.common.Coord;
+import com.burnyarosh.board.common.Move;
 import com.burnyarosh.board.piece.*;
 import io.vertx.core.json.JsonObject;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  *  Object representing a Chess game
@@ -13,13 +15,13 @@ import java.util.*;
  */
 public class Chess {
     private Board board;
-    private Color turn;
+    private PlayerColor turn;
     private Map<Class, Double> defaultValues;
 
-    public enum Color{
+    public enum PlayerColor {
         WHITE, BLACK;
 
-        public Color other(){
+        public PlayerColor other(){
             if (this.equals(WHITE)){
                 return BLACK;
             }
@@ -32,7 +34,7 @@ public class Chess {
      */
     public Chess(){
         this.board = new Board();
-        this.turn = Color.WHITE;
+        this.turn = PlayerColor.WHITE;
         this.defaultValues = new HashMap<>() {{
             put(King.class, 1000.0);
             put(Queen.class, 9.0);
@@ -48,7 +50,7 @@ public class Chess {
      * @param b
      * @param turn
      */
-    public Chess(Board b, Color turn){
+    public Chess(Board b, PlayerColor turn){
         this.board = b.copy();
         this.turn = turn;
         this.defaultValues = new HashMap<>() {{
@@ -61,6 +63,13 @@ public class Chess {
         }};
     }
 
+    public boolean play(Move move) {
+        return this.play(move.getOrigin(), move.getTarget(), 'Q');
+    }
+
+    public boolean play(Move move, char promotion) {
+        return this.play(move.getOrigin(), move.getTarget(), promotion);
+    }
     /**
      * TODO: UNFINISHED
      * @param originX
@@ -71,19 +80,9 @@ public class Chess {
      * @return
      */
     public boolean play(int originX, int originY, int targetX, int targetY, char promotion){
-        if (this.isGameOver()){
-            return false;
-        } else {
-            Coord origin = new Coord(originX, originY);
-            Coord target = new Coord(targetX, targetY);
-            if (isValidMove(this.board, this.turn, origin, target)){
-                this.board.executeMove(origin, target, promotion);
-                this.nextTurn();
-                return true;
-            } else {
-                return false;
-            }
-        }
+        Coord origin = new Coord(originX, originY);
+        Coord target = new Coord(targetX, targetY);
+        return this.play(origin, target, promotion);
     }
 
     /**
@@ -98,6 +97,26 @@ public class Chess {
         return this.play(originX, originY, targetX, targetY, 'Q');
     }
 
+    public boolean play(Coord origin, Coord target, char promotion) {
+        if (this.isGameOver()){
+            return false;
+        } else {
+            if (isValidMove(this.board, this.turn, origin, target)){
+                this.board.executeMove(origin, target, promotion);
+                this.nextTurn();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    public Chess testMove(Move move) {
+        Chess newGame = new Chess(Board.tryMove(this.board, move.getOrigin(), move.getTarget()), this.turn);
+        // newGame.play(move);
+        return newGame;
+    }
+
     /**
      *
      * @return
@@ -110,7 +129,7 @@ public class Chess {
      *
      * @return
      */
-    public Color getTurn(){
+    public PlayerColor getTurn(){
         return this.turn;
     }
 
@@ -123,17 +142,17 @@ public class Chess {
     }
 
     /**
-     *
+     * Calculates material difference between players
      * @param values
      * @return
      */
     public double getScore(Map<Class, Double> values){
         if (!this.isValidPieceValueMap(values)) throw new IllegalArgumentException("Invalid values map");
         double score = 0;
-        for (IPiece b : this.board.getPieces(Color.BLACK)) {
+        for (IPiece b : this.board.getPieces(PlayerColor.BLACK)) {
             score -= values.get(b.getClass());
         }
-        for (IPiece w : this.board.getPieces(Color.WHITE)) {
+        for (IPiece w : this.board.getPieces(PlayerColor.WHITE)) {
             score += values.get(w.getClass());
         }
         // limits return to only contain one decimal point.
@@ -173,8 +192,8 @@ public class Chess {
      *
      * @return
      */
-    private boolean isGameOver(){
-        return isMate(this.board, this.turn);
+    public boolean isGameOver(){
+        return this.getAllPossibleMoves().size() == 0;
     }
 
     /**
@@ -183,7 +202,7 @@ public class Chess {
      * @param turn
      * @return
      */
-    public static boolean isMate(Board b, Color turn){
+    public static boolean isMate(Board b, PlayerColor turn){
         if (isInCheck(b, turn)){
             for (IPiece p : b.getPieces(turn)){
                 for (Coord c : p.getPossibleMoves(b.getBoardArray(), b.getMoveHistory())){
@@ -221,13 +240,32 @@ public class Chess {
      * @param turn
      * @return
      */
-    public static boolean isInCheck(Board b, Color turn){
+    public static boolean isInCheck(Board b, PlayerColor turn){
         for (IPiece p : b.getPieces(turn)){
             if (p.toString().charAt(1) == 'K'){
                 return isInDanger(b, turn, p.getCoord());
             }
         }
         return true;
+    }
+
+    public List<Move> getAllPossibleMoves() {
+       return this.getAllPossibleMoves(this.turn);
+    }
+    /**
+     * Obtains a list of all the possible moves that can be made for the given player.
+     * @return
+     */
+    public List<Move> getAllPossibleMoves(PlayerColor color) {
+         List<IPiece> pieces = (color == PlayerColor.WHITE) ? this.board.getPieces(PlayerColor.WHITE) :  this.board.getPieces(PlayerColor.BLACK);
+         List<Move> result = new ArrayList<>();
+         pieces.forEach(p -> {
+             Coord currentCoord = p.getCoord();
+             List<Coord> possibleCoords = p.getPossibleMoves(this.board.getBoardArray(), this.board.getMoveHistory());
+             // TODO: take all possible promotions into account?
+             result.addAll(possibleCoords.stream().map(c -> new Move(this.board, currentCoord, c, 'Q')).collect(Collectors.toList()));
+         });
+         return result;
     }
 
     /**
@@ -238,7 +276,7 @@ public class Chess {
      * @param end
      * @return
      */
-    public static boolean isInDangerBetween(Board b, Color turn, Coord start, Coord end){
+    public static boolean isInDangerBetween(Board b, PlayerColor turn, Coord start, Coord end){
         for ( Coord c : start.calculatePointsBetweenInclusiveEnd((end))) {
             if (isInDanger(b, turn, c)) return true;
         }
@@ -252,7 +290,7 @@ public class Chess {
      * @param target
      * @return
      */
-    private static boolean isInDanger(Board b, Color turn, Coord target){
+    private static boolean isInDanger(Board b, PlayerColor turn, Coord target){
         for (IPiece p : b.getPieces(turn.other())){
             if (isValidMovePiece(b, p.getCoord(), target)) return true;
         }
@@ -278,7 +316,7 @@ public class Chess {
      * @param target
      * @return
      */
-    public static boolean isValidMoveBoolean(Board b, Color turn, Coord origin, Coord target){
+    public static boolean isValidMoveBoolean(Board b, PlayerColor turn, Coord origin, Coord target){
         try {
             return isValidMove(b, turn, origin, target);
         } catch (Exception e) {
@@ -294,7 +332,7 @@ public class Chess {
      * @param target
      * @return
      */
-    private static boolean isValidMove(Board b, Color turn, Coord origin, Coord target){
+    private static boolean isValidMove(Board b, PlayerColor turn, Coord origin, Coord target){
         if (!origin.isInsideBoard() || !target.isInsideBoard()) {
             throw new IllegalArgumentException("Coordinate outside of board");
         } else {
@@ -304,7 +342,7 @@ public class Chess {
                 throw new IllegalArgumentException("Must move a piece");
             } else if (origin.equals(target)) {
                 throw new IllegalArgumentException("Cannot move to same space");
-            } else if (from.getIsBlack() && turn == Color.WHITE || !from.getIsBlack() && turn == Color.BLACK) {
+            } else if (from.getIsBlack() && turn == PlayerColor.WHITE || !from.getIsBlack() && turn == PlayerColor.BLACK) {
                 throw new IllegalArgumentException("Other player's move");
             } else if (to != null && (from.getIsBlack() && to.getIsBlack() || !(from.getIsBlack() || to.getIsBlack()))) {
                 throw new IllegalArgumentException("Cannot move to square occupied by piece of same color");
@@ -321,10 +359,10 @@ public class Chess {
      *
      */
     private void nextTurn(){
-        if (this.turn == Color.WHITE){
-            this.turn = Color.BLACK;
+        if (this.turn == PlayerColor.WHITE){
+            this.turn = PlayerColor.BLACK;
         } else {
-            this.turn = Color.WHITE;
+            this.turn = PlayerColor.WHITE;
         }
     }
 

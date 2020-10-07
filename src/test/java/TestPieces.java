@@ -1,13 +1,12 @@
 import com.burnyarosh.board.Chess;
 import com.burnyarosh.board.common.Coord;
 import com.burnyarosh.board.piece.Queen;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static com.burnyarosh.board.Chess.Color.BLACK;
-import static com.burnyarosh.board.Chess.Color.WHITE;
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
+import static com.burnyarosh.board.Chess.PlayerColor.BLACK;
+import static com.burnyarosh.board.Chess.PlayerColor.WHITE;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestPieces {
     private Chess board1;
@@ -18,7 +17,7 @@ public class TestPieces {
     //IPiece queenBlack, queenWhite;
     //IPiece kingBlack, kingWhite;
 
-    @Before
+    @BeforeEach
     public void init() {
         board1 = new Chess();
     }

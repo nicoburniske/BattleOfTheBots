@@ -1,13 +1,13 @@
 import com.burnyarosh.board.Chess;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestMove {
     private Chess board1;
 
-    @Before
+    @BeforeEach
     public void init() {
         board1 = new Chess();
     }
@@ -110,7 +110,7 @@ public class TestMove {
         assertEquals("Q8xb5#",moveAndExecute(board1,4,7,1,4));
     }
 
-    private static String moveAndExecute(Chess c, int originX, int originY, int targetX, int targetY){
+    private String moveAndExecute(Chess c, int originX, int originY, int targetX, int targetY){
         c.play(originX, originY, targetX, targetY);
         return c.getBoard().getMoveHistory().get(c.getBoard().getMoveHistory().size()-1).toString();
     }

@@ -145,8 +145,8 @@ public class GameVerticle extends AbstractVerticle {
     }
 
     private boolean isPlayerTurn(int player) {
-        return this.whitePlayer == player && this.chess.getTurn() == Chess.Color.WHITE
-                || this.whitePlayer != player && this.chess.getTurn() == Chess.Color.BLACK;
+        return this.whitePlayer == player && this.chess.getTurn() == Chess.PlayerColor.WHITE
+                || this.whitePlayer != player && this.chess.getTurn() == Chess.PlayerColor.BLACK;
     }
 
     private String jsonGetStringValue(JsonObject json, String key) {
